@@ -1,5 +1,5 @@
 import { use, useEffect, useRef, useState } from "react";
-import { Map, NavigationControl, GeolocateControl, Marker } from "react-map-gl";
+import { Map, NavigationControl, GeolocateControl, Marker} from "react-map-gl";
 import type { MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "react-image-crop/dist/ReactCrop.css";
@@ -14,6 +14,7 @@ import * as api from "./projectAPI";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
+import SniperScope from "../ui/sniperScope";
 
 interface SplitViewProps {
   isCoordList?: boolean;
@@ -67,13 +68,29 @@ export default function SplitView({
   //georeferencing types
   type GeoCoordinates = [number, number];
 
+
   const [waitingForImageMarker, setWaitingForImageMarker] = useState(false);
   const [waitingForMapMarker, setWaitingForMapMarker] = useState(false);
 
+  // const [activeMapMarkerIndex, setActiveMapMarkerIndex] = useState<number | null>(null);
+  // const [activeImageMarkerIndex, setActiveImageMarkerIndex] = useState<number | null>(null);
+
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(null);
+  const [tempImageMarker, setTempImageMarker] = useState<[number, number] | null>(null);
+
   const addMapMarker = (geoCoordinates: GeoCoordinates) => {
     if (waitingForImageMarker) return;
-
     //add the marker to the mapMarkers state, used to render the markers on the map
+    setTempMapMarker(geoCoordinates);
+    // // reset drag start for the image, makes for better accuracy of drag distance when placing the next marker
+    // setDragStart({ x: 0, y: 0 });
+    // tells the component to wait for the next marker to be placed
+    setWaitingForImageMarker(true);
+    setWaitingForMapMarker(false);
+  };
+
+  const updateMapMarkerList = (geoCoordinates: GeoCoordinates) => {
     setMapMarkers([...mapMarkers, { geoCoordinates }]);
 
     //update the georefMarkerPairs state which is used to make the API call
@@ -97,13 +114,35 @@ export default function SplitView({
             : pair
         );
       }
-    });
-    // // reset drag start for the image, makes for better accuracy of drag distance when placing the next marker
-    // setDragStart({ x: 0, y: 0 });
-    // tells the component to wait for the next marker to be placed
-    setWaitingForImageMarker(true);
-    setWaitingForMapMarker(false);
+      
+    })
   };
+
+  const updateImageMarkerList = (pixelCoordinates: [number, number]) => {
+    //add the marker to the imageMarkers state
+    setImageMarkers(imageMarkers => [...imageMarkers, {pixelCoordinates}]);
+
+    //update the georefMarkerPairs state which is used to make the API call
+    setGeorefMarkerPairs((pairs) => {
+      const lastPair = pairs[pairs.length - 1];
+      if (
+        pairs.length === 0 ||
+        (lastPair.pixelCoords[0] !== 0 &&
+          lastPair.pixelCoords[1] !== 0 &&
+          lastPair.latLong[0] !== 0 &&
+          lastPair.latLong[1] !== 0)
+      ) {
+        // Add a new pair if the array is empty or the last pair is complete
+        return [...pairs, { latLong: [0, 0], pixelCoordinates}];
+      } else {
+        // Update the last pair if it's incomplete
+        return pairs.map((pair, index) =>
+          index === pairs.length - 1 ? { ...pair, pixelCoordinates} : pair
+        );
+      }
+    });
+  }
+
 
   //image states
   const [transform, setTransform] = useState({ x: 0, y: 0 });
@@ -148,28 +187,7 @@ export default function SplitView({
       return;
     }
 
-    //add the marker to the imageMarkers state
-    setImageMarkers([...imageMarkers, { pixelCoordinates: [x, y] }]);
-
-    //update the georefMarkerPairs state which is used to make the API call
-    setGeorefMarkerPairs((pairs) => {
-      const lastPair = pairs[pairs.length - 1];
-      if (
-        pairs.length === 0 ||
-        (lastPair.pixelCoords[0] !== 0 &&
-          lastPair.pixelCoords[1] !== 0 &&
-          lastPair.latLong[0] !== 0 &&
-          lastPair.latLong[1] !== 0)
-      ) {
-        // Add a new pair if the array is empty or the last pair is complete
-        return [...pairs, { latLong: [0, 0], pixelCoords: [x, y] }];
-      } else {
-        // Update the last pair if it's incomplete
-        return pairs.map((pair, index) =>
-          index === pairs.length - 1 ? { ...pair, pixelCoords: [x, y] } : pair
-        );
-      }
-    });
+    updateImageMarkerList([x, y]);
 
     setWaitingForMapMarker(true);
     setWaitingForImageMarker(false);
@@ -218,7 +236,8 @@ export default function SplitView({
       lastPair.pixelCoords[1] !== 0;
 
     
-const hasEnoughEntries =
+    const hasEnoughEntries =
+      // Check if there are at least 3 pairs and all pairs are valid
       georefMarkerPairs.length >= 3 &&
       georefMarkerPairs.every(pair => pair.latLong.every(val => val !== 0) &&
       pair.pixelCoords.every(val => val !== 0));
@@ -249,7 +268,7 @@ const hasEnoughEntries =
 
         if (hasEnoughEntries) {
           setHelpMessage(
-            "All pairs added! The map has been georeferenced"
+            "All pairs added! The map has been georeferenced, go to overlayview to see your georeferenced map"
           );
           handleGeoref();
         }
@@ -269,6 +288,56 @@ const hasEnoughEntries =
         console.error("Error:", error.message);
       });
   };
+
+ const confirmPlacement = () => {
+
+  if(tempMapMarker){
+    setMapMarkers([...mapMarkers, { geoCoordinates: tempMapMarker }]);
+    
+    updateMapMarkerList(tempMapMarker);
+    setTempMapMarker(null);
+    setWaitingForImageMarker(true);
+    setWaitingForMapMarker(false);
+  }
+  if(tempImageMarker){
+    setImageMarkers([...imageMarkers, { pixelCoordinates: tempImageMarker }]);
+    setTempImageMarker(null);
+    setWaitingForMapMarker(true);
+    setWaitingForImageMarker(false);
+ }
+}
+
+const cancelPlacement = () => {
+  if(waitingForMapMarker){
+    setWaitingForMapMarker(false);
+  }
+  if(waitingForImageMarker){
+    setWaitingForImageMarker(false);
+  }
+
+  setTempMapMarker(null);
+  setTempImageMarker(null);
+  
+}
+
+  // useEffect(() => {
+  //   if(activeMapMarkerIndex) {
+  //     setActiveImageMarkerIndex(null);
+  //   }
+  //   if(activeImageMarkerIndex) {
+  //     setActiveMapMarkerIndex(null);
+  //   }
+  // }
+  // ,[activeMapMarkerIndex, activeImageMarkerIndex])
+
+  // const handleMapMarkerClick = (index: any) => {
+  //   setActiveMapMarkerIndex(index);
+  // }
+
+  // const handleImageMarkerClick = (index: any) => {
+  //   setActiveImageMarkerIndex(index);
+  // }
+
 
   return (
     <div className="h-screen">
@@ -340,6 +409,12 @@ const hasEnoughEntries =
                 />
               </Marker>
             ))}
+            {tempMapMarker && ( 
+            <Marker longitude={tempMapMarker[1]} latitude={tempMapMarker[0]}>
+              
+              <SniperScope onConfirm={confirmPlacement} onCancel={cancelPlacement} />
+            </Marker>
+            )}
           </Map>
         </Allotment.Pane>
         <Allotment.Pane minSize={200} className="bg-gray-100">
@@ -374,6 +449,7 @@ const hasEnoughEntries =
                   ),
                 }}
               >
+                
                 <Image
                   src="/map-pin.svg"
                   alt="map-pin"
@@ -383,6 +459,22 @@ const hasEnoughEntries =
                 />
               </div>
             ))}
+            {tempImageMarker && (
+              <div
+                style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -85%)", // Center the marker
+                  ...adjustMarkerPositions(
+                    tempImageMarker,
+                    transform,
+                    zoomLevel,
+                    imageSize
+                  ),
+                }}
+              >
+                <SniperScope onConfirm={confirmPlacement} onCancel={cancelPlacement} />
+              </div>
+            )}
           </div>
           {isCoordList && (
             <CoordinateList georefMarkerPairs={georefMarkerPairs} />
