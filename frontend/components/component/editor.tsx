@@ -117,7 +117,13 @@ export default function Editor() {
   // Add a new function to handle the click event of the Feedback button
   const handleFeedbackClick = () => {
     setFormModalOpen(true);
-};
+  };
+
+  // Remove all placed markers
+  const resetMarkerRequest = () => {
+    // TODO: Implement the logic to reset all placed markers
+    return;
+  };
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -214,6 +220,8 @@ export default function Editor() {
             <ImageEdit
               editBool={isCrop}
               onCrop={handleCrop}
+              resetMarkerRequest={resetMarkerRequest}
+              placedMarkerAmount={1} // Todo: Use the actual number of placed markers
             />
           </div>
         </div>
