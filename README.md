@@ -80,7 +80,7 @@ You are now done with the automatic startup, and will see more terminals appear,
 
    pip install -r requirements.txt
 
-   uvicorn main:app --reload
+   python main.py --port 8000
    ```
 
 > **Note:** Open a new terminal to progress, remember to activate the conda enviroment in this terminal too.
