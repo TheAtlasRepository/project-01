@@ -1,6 +1,8 @@
 # Image/PDF 2 Map
 
->> **TODO:** Add project description.
+ <!-- [Try Image2Map here!](https://image2map.co) -->
+
+Image2Map simplifies geospatial data handling by offering an intuitive web platform that enables seamless georeferencing of digital images and PDF files. Georeferencing is the process of aligning spatial data (images or maps) to geographic coordinates. Image2Map simplifies this by allowing users to upload images/PDF's and pinpoint specific locations on the image, thereby embedding geospatial metadata into the files. This transformation turns your files into geographically accurate representations, ideal for applications in urban planning, environmental analysis, historical research etc.
 
 ## Project requirements & development server setup
 
