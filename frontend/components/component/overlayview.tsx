@@ -81,31 +81,6 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
             </div>
           </div>
         </MapToolbar>
-
-        {/*<div className="flex justify-center">
-          <div className="bg-gray-100 dark:bg-gray-900 text-sm text-primary dark:text-gray-200 shadow-md rounded-xl p-2 m-2 mx-10 fixed top-20 z-50">
-            <div className="flex flex-col items-start min-w-52">
-              <div className="flex flex-row justify-start">
-                <div>
-                  Image Overlay Opacity: 
-                </div>
-                <div className="ml-1">
-                  <b>{opacity}%</b>
-                </div>
-              </div>
-              
-              <div className="mt-2 w-full">
-                <Slider
-                  defaultValue={[100]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={handleOpacity}
-                />
-              </div>
-            </div>
-          </div>
-  </div>*/}
        
         <Map
           style={{ width: "100%", height: "100%" }}
@@ -114,10 +89,6 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
           minZoom={5}
           maxZoom={19}
         >
-          {/*<div className="absolute top-0 left-0 m-4">
-            <MapStyleToggle onStyleChange={handleStyleChange} />
-  </div>*/}
-
           <GeolocateControl position="bottom-right" />
           <NavigationControl position="bottom-right" />
           <div className="absolute top-20">
