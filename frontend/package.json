@@ -30,6 +30,7 @@
     "pdfjs-dist": "^4.0.379",
     "react": "^18",
     "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.6",
     "react-icons": "^5.0.1",
     "react-image-crop": "^11.0.5",
     "react-map-gl": "^7.1.7",

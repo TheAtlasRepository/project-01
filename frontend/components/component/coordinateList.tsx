@@ -1,3 +1,13 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Draggable from "react-draggable";
+
 interface CoordinateListProps {
   georefMarkerPairs: GeorefMarkerPair[];
 }
@@ -12,28 +22,28 @@ const CoordinateList: React.FC<CoordinateListProps> = ({
   if (!georefMarkerPairs.length) return null;
 
   return (
-    <div className="absolute bottom-0 right-0">
-      <table className="table-auto w-full text-sm text-left">
-        <thead>
-          <tr>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Map X</th>
-            <th>Map Y</th>
-          </tr>
-        </thead>
-        <tbody>
+    <Draggable>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Longitude</TableHead>
+            <TableHead>Latitude</TableHead>
+            <TableHead>Map X</TableHead>
+            <TableHead>Map Y</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {georefMarkerPairs.map((pair, index) => (
-            <tr key={index}>
-              <td>{pair.latLong[0]}</td>
-              <td>{pair.latLong[1]}</td>
-              <td>{pair.pixelCoords[0]}</td>
-              <td>{pair.pixelCoords[1]}</td>
-            </tr>
+            <TableRow key={index}>
+              <TableCell>{pair.latLong[0]}</TableCell>
+              <TableCell>{pair.latLong[1]}</TableCell>
+              <TableCell>{pair.pixelCoords[0]}</TableCell>
+              <TableCell>{pair.pixelCoords[1]}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </Draggable>
   );
 };
 
