@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import SplitView from "./split-view";
 import ImageEdit from "./imageEdit";
-import {
-  OpenBook,
-  TargetIcon,
-  WindowsIcon,
-  SelectionIcon,
-} from "@/components/ui/icons";
-import UserDownload from "./userDownload";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
-import FormModal from "@/components/ui/FormModal";
+import EditorToolbar from "@/components/ui/EditorToolbar";
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -23,7 +15,7 @@ export default function Editor() {
   const [isCrop, setIsCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
   const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
-  const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
+
 
   //function to add a new project
   const addProject = (name: string) => {
@@ -114,91 +106,39 @@ export default function Editor() {
     setIsCoordList((prevIsCoordList) => !prevIsCoordList); // Toggle the value of isCoordTable
   };
 
-  // Add a new function to handle the click event of the Feedback button
-  const handleFeedbackClick = () => {
-    setFormModalOpen(true);
-  };
-
   // Remove all placed markers
   const resetMarkerRequest = () => {
     // TODO: Implement the logic to reset all placed markers
     return;
   };
 
+  // Handle download requests
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = localStorage.getItem("tiffUrl")!;
+    link.download = "georeferenced.tiff";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
   return (
     <div className="flex flex-col h-screen bg-white">
-      <div className="flex items-center justify-between p-4 background-dark shadow-md">
-        <div className="items-center text-white">
-          <input
-            type="text"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            className="text-xl font-semibold bg-transparent border-none outline-none"
-            placeholder="Project name" // Add placeholder attribute
-          />
-          {isAutoSaved && (
-            <span className="text-sm text-gray-500">Auto saved</span>
-          )}
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button
-            className={`${
-              isSideBySide ? "bg-blue-500" : "bg-gray-700"
-            } hover:bg-blue-800 dark:hover:bg-blue-800`}
-            variant="toggle"
-            onClick={handleToggleSideBySide} // Add onClick event handler
-          >
-            <OpenBook className="text-white" />
-            Side by side
-          </Button>
-          <Button
-            className="bg-gray-200 dark:bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800"
-            variant="secondary"
-            onClick={handleToggleOverlay}
-          >
-            <WindowsIcon className="text-gray-500" />
-            Overlay
-          </Button>
-          <Button
-            className={`${
-              isCoordList ? "bg-blue-500" : "bg-gray-700"
-            } hover:bg-blue-800 dark:hover:bg-blue-800`}
-            variant="toggle"
-            onClick={handleToggleCoordTable}
-          >
-            <TargetIcon className="text-gray-500" />
-            <span>Coordinates</span>
-          </Button>
-          <Button
-            className={`${
-              isCrop ? "bg-blue-500" : "bg-gray-700"
-            } hover:bg-blue-800 dark:hover:bg-blue-800`}
-            variant="toggle"
-            onClick={handleToggleCrop} // Add onClick event handler
-          >
-            <SelectionIcon className="text-white" />
-            Crop
-          </Button>
-        </div>
+      <EditorToolbar 
+        handleToggleSideBySide={handleToggleSideBySide}
+        handleToggleOverlay={handleToggleOverlay}
+        handleToggleCoordTable={handleToggleCoordTable}
+        handleToggleCrop={handleToggleCrop}
+        handleDownload={handleDownload}
+        isAutoSaved={isAutoSaved}
+        isSideBySide={isSideBySide}
+        isCoordList={isCoordList}
+        isCrop={isCrop}
+        projectName={projectName}
+        projectId={projectId}
+        setProjectName={setProjectName}
+      />
 
-        <div className="flex items-center space-x-4">
-          <UserDownload
-            projectId={projectId}>
-          </UserDownload>
-
-          {/* Feedback form */}
-          <Button className="bg-blue-500 hover:bg-blue-800" onClick={handleFeedbackClick}>Feedback</Button>
-          {isFormModalOpen && <FormModal onClose={() => setFormModalOpen(false)} />}
-
-          {/*<Button
-            className="bg-gray-200 dark:bg-gray-700 dark:hover:bg-blue-800 dark:text-white"
-            onClick={handleSave}
-          >
-            Continue
-          </Button>*/}
-        </div>
-        
-      </div>
       {isOverlay ? (
       // Assuming OverlayView is the component you want to show when isOverlay is true
       <OverlayView
