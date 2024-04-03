@@ -4,6 +4,7 @@ import { Slider } from "@/components/ui/slider"
 import MapStyleToggle from "./mapStyleToggle";
 import { GeolocateControl, NavigationControl } from "react-map-gl";
 import GeocoderControl from "./geocoder-control";
+import MapToolbar from "@/components/ui/MapToolbar";
 
 interface MapOverlayProps {
   projectId: number;
@@ -55,53 +56,95 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
   }, [projectId, imageSrc]);
 
   return (
-    <div className="w-full h-full">
-      <Map
-        style={{ width: "100%", height: "100%" }}
-        mapStyle={mapStyle}
-        mapboxAccessToken={mapboxToken}
-        minZoom={5}
-        maxZoom={19}
-      >
-        <div className="absolute top-0 left-0 m-4">
+    <div className="w-full h-full flex flex-col">
+      <div className="w-full flex-1">
+        <MapToolbar>
           <MapStyleToggle onStyleChange={handleStyleChange} />
-        </div>
 
-        <div className="flex justify-center mt-5">
-          <div className="fixed z-50 w-1/5">
-            <Slider
-              defaultValue={[100]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={handleOpacity}/>
-          </div>
-        </div>
-        <GeolocateControl position="bottom-right" />
-        <NavigationControl position="bottom-right" />
-        <div className="absolute top-20">
-              <GeocoderControl
-              mapboxAccessToken={mapboxToken}
-              position="bottom-left"
+          <div className="flex flex-col items-start min-w-52">
+            <div className="flex flex-row justify-start">
+              <div>
+                Image Overlay Opacity: 
+              </div>
+              <div className="ml-1">
+                <b>{opacity}%</b>
+              </div>
+            </div>
+            <div className="mt-2 w-full">
+              <Slider
+                defaultValue={[100]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={handleOpacity}
               />
             </div>
-        {dataUrl && (
-          <Source
-            id="georeferenced-image-source"
-            type="raster"
-            tiles={[`${BASE_URL}/project/${projectId}/tiles/{z}/{x}/{y}.png`]}
-            tileSize={256}
-          >
-            <Layer
-              id="georeferenced-image-layer"
-              source="georeferenced-image-source"
+          </div>
+        </MapToolbar>
+
+        {/*<div className="flex justify-center">
+          <div className="bg-gray-100 dark:bg-gray-900 text-sm text-primary dark:text-gray-200 shadow-md rounded-xl p-2 m-2 mx-10 fixed top-20 z-50">
+            <div className="flex flex-col items-start min-w-52">
+              <div className="flex flex-row justify-start">
+                <div>
+                  Image Overlay Opacity: 
+                </div>
+                <div className="ml-1">
+                  <b>{opacity}%</b>
+                </div>
+              </div>
+              
+              <div className="mt-2 w-full">
+                <Slider
+                  defaultValue={[100]}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onValueChange={handleOpacity}
+                />
+              </div>
+            </div>
+          </div>
+  </div>*/}
+       
+        <Map
+          style={{ width: "100%", height: "100%" }}
+          mapStyle={mapStyle}
+          mapboxAccessToken={mapboxToken}
+          minZoom={5}
+          maxZoom={19}
+        >
+          {/*<div className="absolute top-0 left-0 m-4">
+            <MapStyleToggle onStyleChange={handleStyleChange} />
+  </div>*/}
+
+          <GeolocateControl position="bottom-right" />
+          <NavigationControl position="bottom-right" />
+          <div className="absolute top-20">
+                <GeocoderControl
+                mapboxAccessToken={mapboxToken}
+                position="bottom-left"
+                />
+              </div>
+          {dataUrl && (
+            <Source
+              id="georeferenced-image-source"
               type="raster"
-              paint={{ "raster-opacity": opacity / 100 }}
-            />
-          </Source>
-        )}
-      </Map>
+              tiles={[`${BASE_URL}/project/${projectId}/tiles/{z}/{x}/{y}.png`]}
+              tileSize={256}
+            >
+              <Layer
+                id="georeferenced-image-layer"
+                source="georeferenced-image-source"
+                type="raster"
+                paint={{ "raster-opacity": opacity / 100 }}
+              />
+            </Source>
+          )}
+        </Map>
+      </div>
     </div>
+    
   );
 };
 

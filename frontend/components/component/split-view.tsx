@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import { Toaster, toast } from 'sonner'
+import MapToolbar from "@/components/ui/MapToolbar";
 
 interface SplitViewProps {
   isCoordList?: boolean;
@@ -246,6 +247,10 @@ export default function SplitView({ isCoordList, projectId }: SplitViewProps) {
 
   return (
     <div className="h-screen">
+      <MapToolbar>
+        <MapStyleToggle onStyleChange={handleStyleChange} />
+      </MapToolbar>
+
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">
@@ -298,9 +303,6 @@ export default function SplitView({ isCoordList, projectId }: SplitViewProps) {
               addMapMarker([lat, lng]);
             }}
           >
-            <div className="absolute top-0 left-0 m-4">
-              <MapStyleToggle onStyleChange={handleStyleChange} />
-            </div>
 
             <GeolocateControl position="bottom-right" />
             <NavigationControl position="bottom-right" />
