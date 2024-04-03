@@ -4,8 +4,15 @@ from img2mapAPI.routers import *
 from dotenv import load_dotenv, get_key
 import os
 
-#getting the environment variables for the app
+#setting the default environment to development
 ENVIRONMENT = 'development'
+origins = [
+    "http://localhost", #for local testing
+    "http://localhost:8080", # for vue dev server
+    "http://localhost:3000", # for react dev server
+]
+
+#getting the environment variables for the application
 if load_dotenv('./.env'):
     print("Environment variables loaded")
     #get the origins from the environment variables
@@ -34,8 +41,6 @@ else:
     else:
         print("Error getting environment from environment variables, using default value")
 
-
-
 app = FastAPI(
     title="Img2Map API",
     description="API for converting and georeferencing images",
@@ -45,13 +50,6 @@ app = FastAPI(
 )
 
 router = APIRouter()
-
-
-origins = [
-    "http://localhost", #for local testing
-    "http://localhost:8080", # for vue dev server
-    "http://localhost:3000", # for react dev server
-]
 
 app.add_middleware(
     CORSMiddleware,
