@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "img2mapAPI"
+version = "0.10.0-dev"
+requires-python = ">=3.6"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "rasterio",
+    "python-multipart",
+    "pdf2image",
+    "rio-tiler",
+    "python-dotenv",
+    "poppler-utils",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: FastAPI"
+]
+
+[project.scripts]
+img2mapAPI = "Img2mapAPI:main"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+

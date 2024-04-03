@@ -60,10 +60,6 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
         style={{ width: "100%", height: "100%" }}
         mapStyle={mapStyle}
         mapboxAccessToken={mapboxToken}
-        initialViewState={{
-          latitude: 50,
-          longitude: 10,
-        }}
         minZoom={5}
         maxZoom={19}
       >

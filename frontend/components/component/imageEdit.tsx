@@ -2,16 +2,26 @@ import ReactCrop, { Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import CropModal from "@/components/ui/CropModal";
 import axios from 'axios';
 
-export default function ImageEdit({ editBool, onCrop }: { editBool: boolean, onCrop: () => void }) {
+type ImageEditProps = {
+    editBool: boolean;
+    onCrop: () => void;
+    resetMarkerRequest: () => void;
+    placedMarkerAmount?: number;
+};
+
+export default function ImageEdit({ editBool, onCrop, resetMarkerRequest, placedMarkerAmount }: ImageEditProps) {
     const [crop, setCrop] = useState<Crop>(); 
     const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
     const [applyButtonText, setApplyButtonText] = useState('Apply Crop');
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
     // When the user requests to apply the crop
     const handleApplyCrop = async () => {
+        setIsCropModalOpen(false);
         setApplyButtonText('Applying...');
         setButtonsDisabled(true);
 
@@ -126,6 +136,16 @@ export default function ImageEdit({ editBool, onCrop }: { editBool: boolean, onC
         onCrop();
     };
 
+    // Shows the crop modal if there are placed markers, otherwise just applies the crop
+    const applyCropOrShowModal = () => {
+        if (placedMarkerAmount && placedMarkerAmount > 0) {
+            setIsCropModalOpen(true);
+            return;
+        }
+        
+        handleApplyCrop();
+    };
+
     return (
         <>
             {editBool ? (
@@ -151,11 +171,12 @@ export default function ImageEdit({ editBool, onCrop }: { editBool: boolean, onC
                         </Button>
                         <Button
                             className="btn ml-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 dark:text-white"
-                            onClick={handleApplyCrop}
+                            onClick={applyCropOrShowModal}
                             disabled={buttonsDisabled}
                         >
                             {applyButtonText}
                         </Button>
+                        {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => handleApplyCrop()}/>}
                     </div>
                 </div>
             ) : (
