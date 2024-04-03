@@ -25,9 +25,11 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
     <div>
       <div className="flex justify-between items-center py-3 px-4 background-dark lg:mb-10 z-20 relative">
         {/* Service name / Logo */}
-        <div className="flex items-center px-5">
-          <Logo />
-        </div>
+        <a href="http://localhost:3000/">
+            <div className="flex items-center px-5">
+             <Logo />
+            </div>
+        </a>
 
         {/* Desktop menu */}
         <div className="hidden md:flex lg:items-center">
@@ -44,9 +46,6 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
               <Link href="/Privacy">Your Data</Link>  
             </button>
 
-            <button className={`btn-nav ${activePage === 'Text & CSV To Map' ? 'btn-nav-active' : ''}`}>
-              <Link href="/Text2Map">Text & CSV To Map</Link>  
-            </button>
           </div>
         </div>
 
