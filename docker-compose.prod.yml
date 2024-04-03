@@ -11,6 +11,9 @@ services:
     container_name: Img2Map-API
     env_file:
       - ./backend/.env
+    environment:
+      - PORT=8000
+      - ENVIRONMENT=production
     build:
       context: ./backend
       dockerfile: ./docker/prod.Dockerfile
