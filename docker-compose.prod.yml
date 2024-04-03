@@ -9,9 +9,11 @@ services:
   img2map-api:
     #Uvicorn server running python FastAPI
     container_name: Img2Map-API
+    env_file:
+      - ./backend/.env
     build:
       context: ./backend
-      dockerfile: /docker/prod.Dockerfile
+      dockerfile: ./docker/prod.Dockerfile
     expose:
       - "8000:8000"
     networks:
@@ -21,7 +23,7 @@ services:
     container_name: Img2Map-Website
     build:
       context: ./frontend
-      dockerfile: /docker/prod.Dockerfile
+      dockerfile: ./docker/prod.Dockerfile
     ports:
       - "80:3000"
     environment:

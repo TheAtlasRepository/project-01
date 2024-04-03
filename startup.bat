@@ -61,7 +61,7 @@ if %errorlevel% equ 0 (
 echo Conda environment %envname% is now active.
 
 rem Start frontend and backend in seperate cmd windows
-start cmd /k "cd %repopath%\backend && pip install --quiet -r requirements.txt && pip install -e . -U && uvicorn main:app --reload"
+start cmd /k "cd %repopath%\backend && pip install --quiet -r requirements.txt && pip install -e . -U && python main.py --port 8000"
 start cmd /k "cd %repopath%\frontend && yarn install -s && yarn dev"
 
 rem Check if server is running every second if not successfull after 20 seconds exit, if successfull open browser

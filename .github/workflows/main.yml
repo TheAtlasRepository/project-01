@@ -1,0 +1,65 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    tags:
+      - 'v.[0-9]+.[0-9]+.[0-9]'
+      - '!v.[0-9]+.[0-9]+.[0-9]+**'
+jobs:
+  Build-and-deploy-backend-API-heroku:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      #backend steps
+      - name: create backend .env file
+        #Backend .env
+        run: |
+          echo "HOST_PORT=8000" > backend/.env
+          echo "CORS_ORIGINS='http://localhost,${{ vars.CORS_ORIGINS }}'" >> backend/.env
+      
+      #TODO: add tests step
+      #build backend docker image
+      - name: BackendAPI - Build, Push and Release a Docker container to Heroku.
+        uses: gonuit/heroku-docker-deploy@v1.3.3
+        with:
+          #Heroku configuration
+          email: ${{ secrets.HEROKU_EMAIL }} # The email address associated with your Heroku account.
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_API_APP_NAME }}
+          process_type: web # For more information look at https://devcenter.heroku.com/articles/process-model
+          #Docker configuration
+          dockerfile_directory: ./backend # Dockerfile directory.
+          dockerfile_name: ./docker/prod.Dockerfile # Dockerfile name.
+          docker_options: "--no-cache" # Additional options of docker build command.
+
+  Build-and-deploy-WEB-heroku:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      #frontend steps
+      - name: create frontend .env file
+        #Frontend .env
+        run: |
+          echo "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${{secrets.MAPBOX_ACCESS_TOKEN}}" > frontend/.env
+          echo "NEXT_PUBLIC_BACKEND_URL=${{secrets.BACKEND_API_URL}}" >> frontend/.env
+          echo "NEXT_PUBLIC_PDF_URLS=${{vars.NEXT_PUBLIC_PDF_URLS}}" >> frontend/.env
+
+      #TODO: add tests step
+      - name: Frontend - Build, Push and Release a Docker container to Heroku.
+        uses: gonuit/heroku-docker-deploy@v1.3.3
+        with:
+          #Heroku configuration
+          email: ${{ secrets.HEROKU_EMAIL }} # The email address associated with your Heroku account.
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_WEB_APP_NAME }}
+          process_type: web # For more information look at https://devcenter.heroku.com/articles/process-model
+          #Docker configuration
+          dockerfile_directory: ./frontend # Dockerfile directory.
+          dockerfile_name: ./docker/prod.Dockerfile # Dockerfile name.
+          docker_options: "--no-cache" # Additional options of docker build command. 

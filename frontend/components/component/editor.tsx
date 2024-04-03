@@ -11,6 +11,7 @@ import {
 import UserDownload from "./userDownload";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
+import FormModal from "@/components/ui/FormModal";
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -22,6 +23,7 @@ export default function Editor() {
   const [isCrop, setIsCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
   const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
+  const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
 
   //function to add a new project
   const addProject = (name: string) => {
@@ -112,6 +114,17 @@ export default function Editor() {
     setIsCoordList((prevIsCoordList) => !prevIsCoordList); // Toggle the value of isCoordTable
   };
 
+  // Add a new function to handle the click event of the Feedback button
+  const handleFeedbackClick = () => {
+    setFormModalOpen(true);
+  };
+
+  // Remove all placed markers
+  const resetMarkerRequest = () => {
+    // TODO: Implement the logic to reset all placed markers
+    return;
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white">
       <div className="flex items-center justify-between p-4 background-dark shadow-md">
@@ -167,15 +180,24 @@ export default function Editor() {
             Crop
           </Button>
         </div>
-        <UserDownload
-          projectId={projectId}>
-        </UserDownload>
-        <Button
-          className="bg-gray-200 dark:bg-gray-700 dark:hover:bg-blue-800 dark:text-white"
-          onClick={handleSave}
-        >
-          Continue
-        </Button>
+
+        <div className="flex items-center space-x-4">
+          <UserDownload
+            projectId={projectId}>
+          </UserDownload>
+
+          {/* Feedback form */}
+          <Button className="bg-blue-500 hover:bg-blue-800" onClick={handleFeedbackClick}>Feedback</Button>
+          {isFormModalOpen && <FormModal onClose={() => setFormModalOpen(false)} />}
+
+          {/*<Button
+            className="bg-gray-200 dark:bg-gray-700 dark:hover:bg-blue-800 dark:text-white"
+            onClick={handleSave}
+          >
+            Continue
+          </Button>*/}
+        </div>
+        
       </div>
       {isOverlay ? (
       // Assuming OverlayView is the component you want to show when isOverlay is true
@@ -198,6 +220,8 @@ export default function Editor() {
             <ImageEdit
               editBool={isCrop}
               onCrop={handleCrop}
+              resetMarkerRequest={resetMarkerRequest}
+              placedMarkerAmount={1} // Todo: Use the actual number of placed markers
             />
           </div>
         </div>

@@ -31,8 +31,10 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
     setMapStyle(style);
   };
 
+  // Base URL for the backend API from .env
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   // Converts the georeferenced image to a data URL
-  const baseURL = "http://localhost:8000";
   useEffect(() => {
     // Fetch the image as a blob url
     fetch(imageSrc)
@@ -58,10 +60,6 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
         style={{ width: "100%", height: "100%" }}
         mapStyle={mapStyle}
         mapboxAccessToken={mapboxToken}
-        initialViewState={{
-          latitude: 50,
-          longitude: 10,
-        }}
         minZoom={5}
         maxZoom={19}
       >
@@ -91,7 +89,7 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
           <Source
             id="georeferenced-image-source"
             type="raster"
-            tiles={[`${baseURL}/project/${projectId}/tiles/{z}/{x}/{y}.png`]}
+            tiles={[`${BASE_URL}/project/${projectId}/tiles/{z}/{x}/{y}.png`]}
             tileSize={256}
           >
             <Layer

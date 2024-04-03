@@ -16,6 +16,9 @@ const Conversion: React.FC<ConversionProps> = ({ fileType, fileUrl, pageNumber, 
   const hasMadeApiCall = useRef(false);
   const [isLargeFile, setLargeFile] = useState<boolean>(false);
 
+  // Base URL for the backend API from .env
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 
   // Convert Image or PDF to PNG after component has been rendered on the client side.
   useEffect(() => {
@@ -56,10 +59,10 @@ const Conversion: React.FC<ConversionProps> = ({ fileType, fileUrl, pageNumber, 
               handleFileConversion(null, null, blob);
             } else if (fileType === "application/pdf") {
               // Make API call for PDF file
-              handleFileConversion(`http://localhost:8000/converter/pdf2png?page_number=${pageNumber || 1}`, formData);
+              handleFileConversion(`${BASE_URL}/converter/pdf2png?page_number=${pageNumber || 1}`, formData);
             } else if (fileType.startsWith("image/")) {
               // Make a different API call for other image files
-              handleFileConversion("http://localhost:8000/converter/image2png", formData);
+              handleFileConversion(`${BASE_URL}/converter/image2png`, formData);
             } else {
               goToUpload("The file you uploaded is not supported.");
             }
