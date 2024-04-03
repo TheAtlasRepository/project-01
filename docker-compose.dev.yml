@@ -25,6 +25,8 @@ services:
   img2map-api:
     #Uvicorn server running python FastAPI
     container_name: Img2Map-API
+    env_file:
+      - fileName: ./backend/.env.local
     build:
       context: ./backend
       dockerfile: /docker/dev.Dockerfile

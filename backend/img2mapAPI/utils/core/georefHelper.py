@@ -95,6 +95,7 @@ def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defa
     transform = from_gcps(gcps) #create the transform
     dataset.transform = transform #set the transform
     dataset.crs = CRS.from_string(crs) #set the crs
+    dataset.gcps = gcps #set the gcps
 
     #define overview levels
     #is needed for generating the map tiles
@@ -138,6 +139,7 @@ def reGeoreferencedImageTiff(innFilePath, points: PointList, crs: str = defaultC
     transform = from_gcps(gcps) #create the transform
     dataset.transform = transform #set the transform
     dataset.crs = CRS.from_string(crs) #set the crs
+    dataset.gcps = gcps #set the gcps
 
     #define overview levels
     #is needed for generating the map tiles

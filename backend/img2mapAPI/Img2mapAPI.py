@@ -2,22 +2,10 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from img2mapAPI.routers import *
 from dotenv import load_dotenv, get_key
+import os
 
-
-app = FastAPI(
-    title="Img2Map API",
-    description="API for converting and georeferencing images",
-)
-
-router = APIRouter()
-
-
-origins = [
-    "http://localhost", #for local testing
-    "http://localhost:8080", # for vue dev server
-    "http://localhost:3000", # for react dev server
-]
-#if environment variables are loaded, get the origins from the environment variables
+#getting the environment variables for the app
+ENVIRONMENT = 'development'
 if load_dotenv('./.env'):
     print("Environment variables loaded")
     #get the origins from the environment variables
@@ -28,6 +16,42 @@ if load_dotenv('./.env'):
     except:
         print("Error getting CORS_ORIGINS from environment variables")
         pass
+    #get the environment
+    try:
+        #first try to get the environment from the environment variables, if fails try to get from os.environ
+        ENVIRONMENT = get_key('./.env',key_to_get='ENVIRONMENT')
+    except:
+        try:
+            ENVIRONMENT = os.environ['ENVIRONMENT']
+        except:
+            print("Error getting environment from environment variables")
+            pass
+        pass
+else:
+    if 'ENVIRONMENT' in os.environ:
+        ENVIRONMENT = os.environ['ENVIRONMENT']
+        print("Environment variables not loaded")
+    else:
+        print("Error getting environment from environment variables, using default value")
+
+
+
+app = FastAPI(
+    title="Img2Map API",
+    description="API for converting and georeferencing images",
+    #disable the docs and redoc routes in production
+    docs_url="/docs" if ENVIRONMENT == 'development' else None,
+    redoc_url="/redoc" if ENVIRONMENT == 'development' else None,
+)
+
+router = APIRouter()
+
+
+origins = [
+    "http://localhost", #for local testing
+    "http://localhost:8080", # for vue dev server
+    "http://localhost:3000", # for react dev server
+]
 
 app.add_middleware(
     CORSMiddleware,
