@@ -11,11 +11,14 @@ export default function About() {
       <div className="flex justify-center p-2 py-5 pt-10">
         <div className="flex flex-col md:w-5/6 lg:w-3/4 xl:w-1/2 justify-between">
             <h1 className="text-5xl font-bold text-primary mb-5 px-6 dark:text-gray-300">
-                About<br />
+                Welcome to Image2Map!<br />
             </h1>
           <div className="w-100 p-6 card dark:bg-gray-800">
             <p className="text-lg text-secondary dark:text-gray-300">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque in dapibus neque. Vestibulum vitae nibh vel nibh faucibus elementum gravida eget augue. Cras fringilla iaculis interdum. Vivamus eu pellentesque felis, a blandit nibh. Suspendisse hendrerit varius maximus. Cras ullamcorper commodo tortor. Curabitur feugiat dignissim urna, et ultrices dui vulputate et. Aliquam in ligula urna. Maecenas vel vulputate justo, eget cursus nunc. Integer pellentesque, lorem et vehicula faucibus, sapien enim gravida ex, et sagittis ligula ipsum eu urna. Phasellus cursus justo eget lacus pretium, id fringilla ligula pretium. Donec suscipit, libero non ornare vehicula, est erat porta sapien, eget congue sem nisi vel orci. Nunc sollicitudin fermentum ante, ac porttitor lacus commodo id. Vestibulum congue dui est, sed laoreet velit ultricies quis.
+            Image2Map is a simple to use web application designed to enable users to georeference images and PDF files with ease.
+            Aimed at addressing the lack of an easy-to-use online tool for georeferencing within the GIS landscape, our solution does away with the need for archaic 
+            desktop software for georeferencing. 
+          
             </p>
           </div>
         </div>
@@ -24,11 +27,12 @@ export default function About() {
       <div className="flex justify-center p-2 py-5">
         <div className="flex flex-col md:w-5/6 lg:w-3/4 xl:w-1/2 justify-between">
             <h2 className="text-3xl font-bold text-primary mb-5 px-6 dark:text-gray-300">
-                A subheading<br />
+                Who are we?<br />
             </h2>
           <div className="w-100 p-6 card dark:bg-gray-800">
             <p className="text-lg text-secondary dark:text-gray-300">
-                Curabitur id posuere ante, eu dapibus dui. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Quisque quam quam, molestie eget ante non, fringilla pharetra enim. Donec id turpis ac dolor tempus scelerisque. Pellentesque venenatis metus vitae tellus gravida, laoreet imperdiet orci euismod. Sed nunc eros, hendrerit eget rhoncus a, mattis non ligula. In hac habitasse platea dictumst. Curabitur elementum dictum mi, sit amet iaculis odio semper a. Quisque neque lacus, faucibus nec tempor sed, venenatis quis mi. Aenean consectetur a ligula sit amet laoreet. Pellentesque a suscipit orci. Vestibulum cursus id nulla non pretium. Etiam posuere elit eget feugiat volutpat. Duis nec interdum turpis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Suspendisse potenti.
+            Our team consists of five students enrolled in the Bachelor's program in IT and Information Systems at the University of Agder. 
+            The Image2Map application serves as our bachelor's degree project.
             </p>
           </div>
         </div>
@@ -37,11 +41,13 @@ export default function About() {
       <div className="flex justify-center p-2 py-5">
         <div className="flex flex-col md:w-5/6 lg:w-3/4 xl:w-1/2 justify-between">
             <h2 className="text-3xl font-bold text-primary mb-5 px-6 dark:text-gray-300">
-                A subheading<br />
+                Why Image2Map?<br />
             </h2>
           <div className="w-100 p-6 card dark:bg-gray-800">
             <p className="text-lg text-secondary dark:text-gray-300">
-                Ut suscipit lorem vel sodales sodales. Vivamus dapibus at odio vel finibus. Curabitur non tempor orci. In fermentum purus at odio malesuada, at lobortis mauris ullamcorper. Donec varius sit amet ligula at sollicitudin. Nam auctor dolor in eros aliquet, sit amet condimentum nulla consequat. Praesent rutrum turpis nisl, ac vulputate erat congue quis. Maecenas placerat convallis nunc, quis aliquam diam blandit nec. Proin lobortis at urna quis dignissim. Curabitur at quam est. Nullam augue ligula, ultrices elementum lectus eget, tincidunt euismod enim. Donec pretium, tortor sed feugiat luctus, orci tortor imperdiet felis, vel faucibus velit arcu ac neque.
+            We got the exciting opportunity to work with <a href="https://atlas.co/" className='underline' >Atlas</a> for our bachelor's project
+            to develop a web based solution that would simplify the process of georeferencing. The team 
+            at Atlas has provided us with valuable feedback and guidance throughout the development process. 
             </p>
           </div>
         </div>
