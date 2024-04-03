@@ -21,6 +21,8 @@ Image2Map simplifies geospatial data handling by offering an intuitive web platf
 #### Docker build
 
 First you will have to create a `.env.local` file in the directory ./frontend, it should look like `.env.example`
+>
+Second you will have to create a `.env` file in the directory ./backend, it should look like `.env.example`
 
 To run you you will have to [Download Docker compose](https://docs.docker.com/compose/install/), recomend docker desktop.
 
