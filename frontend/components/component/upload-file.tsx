@@ -3,7 +3,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { UploadIconFolder } from "@/components/ui/icons";
-import { InfoCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons'
+import { InfoCircledIcon, ExclamationTriangleIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 type UploadFileProps = {
   clearStateRequest: () => void;
@@ -106,7 +112,19 @@ const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest
         >
           <UploadIconFolder className="mx-auto mb-6 text-blue-300 dark:text-blue-600" />
           <div className="text-lg font-medium text-gray-400 text-pretty">
-            Open, or drop your <b>image or PDF</b> here
+            Open, or drop your <b>image or PDF</b> here 
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span> <QuestionMarkCircledIcon className="h-4 w-4 ml-1"/></span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ideal images are maps, satellite photos, urban plans, etc.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+                        
           </div>
           {fileName && (
             <div className="text-lg font-medium text-gray-400 mt-4">
