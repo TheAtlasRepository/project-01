@@ -46,9 +46,6 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
               <Link href="/Privacy">Your Data</Link>  
             </button>
 
-            <button className={`btn-nav ${activePage === 'Text & CSV To Map' ? 'btn-nav-active' : ''}`}>
-              <Link href="/Text2Map">Text & CSV To Map</Link>  
-            </button>
           </div>
         </div>
 
