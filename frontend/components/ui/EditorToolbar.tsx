@@ -129,7 +129,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
             {/* Right Group */}
             <div className="flex items-center gap-4">
                 <Button className="bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800" onClick={handleFeedbackClick}>
-                    <TextDocumentIcon className='text-white mr-2' width={20} height={20}/>
+                    <FileTextIcon className='text-white mr-2' width={20} height={20}/>
                     Feedback
                 </Button>
                 {isFormModalOpen && <FormModal onClose={() => setFormModalOpen(false)} />}
