@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import SplitView from "./split-view";
-import ImageEdit from "./imageEdit";
+import CropImage from "./CropImage";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
-import EditorToolbar from "@/components/ui/EditorToolbar";
+import EditorToolbar, { ViewPage } from "@/components/ui/EditorToolbar";
+import { Split } from "lucide-react";
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -15,6 +16,7 @@ export default function Editor() {
   const [isCrop, setIsCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
   const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
+  const [activePage, setActivePage] = useState<ViewPage>('sideBySide');
 
 
   //function to add a new project
@@ -64,14 +66,6 @@ export default function Editor() {
     setIsAutoSaved(true);
   };
 
-  const handleToggleSideBySide = () => {
-    if (!isCrop) {
-      setIsSideBySide(!isSideBySide); // Toggle the value of isSideBySide
-      setIsOverlay(false); // Close the overlay view when side by side is activated
-      console.log(isSideBySide); // Log the value of isSideBySide
-    }
-  };
-
   const handleToggleCrop = () => {
     if (!isCrop) {
       setWasSideBySide(isSideBySide); // Save the current value of isSideBySide
@@ -91,15 +85,6 @@ export default function Editor() {
     setImageSrc(localStorage.getItem("pdfData")!);
     handleToggleCrop();
   };
-
-  const handleToggleOverlay = () => {
-    if (!isOverlay) {
-      setIsOverlay(!isOverlay); // Toggle the value of isOverlay
-      setIsSideBySide(false); // Close the side by side view when overlay is activated
-      setIsCrop(false); // Close the image edit view when overlay is activated
-      console.log(isOverlay);
-    }
-  }
 
   // Add the handleToggleCoordTable function
   const handleToggleCoordTable = () => {
@@ -124,49 +109,46 @@ export default function Editor() {
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      <EditorToolbar 
-        handleToggleSideBySide={handleToggleSideBySide}
-        handleToggleOverlay={handleToggleOverlay}
-        handleToggleCoordTable={handleToggleCoordTable}
-        handleToggleCrop={handleToggleCrop}
+      <EditorToolbar
+        activePage={activePage}
+        setActivePage={setActivePage}
         handleDownload={handleDownload}
         isAutoSaved={isAutoSaved}
-        isSideBySide={isSideBySide}
-        isCoordList={isCoordList}
-        isCrop={isCrop}
         projectName={projectName}
         projectId={projectId}
         setProjectName={setProjectName}
       />
 
-      {isOverlay ? (
-      // Assuming OverlayView is the component you want to show when isOverlay is true
-      <OverlayView
-      projectId={projectId}
-      />
-    ) : isSideBySide ? (
-      <SplitView
-        isCoordList={isCoordList}
-        projectId={projectId}
-      />
-    ) : (
-      <div
-        className={`flex flex-col items-center justify-center flex-1 ${
-          !isCrop ? "bg-gray-100 dark:bg-gray-900" : "bg-gray-400 dark:bg-gray-800"
-        }`}
-      >
-        <div className="flex items-center justify-center w-full">
-          <div className="w-1/2 flex justify-center items-center">
-            <ImageEdit
-              editBool={isCrop}
-              onCrop={handleCrop}
-              resetMarkerRequest={resetMarkerRequest}
-              placedMarkerAmount={1} // Todo: Use the actual number of placed markers
-            />
+      {activePage === 'sideBySide' ? (
+        console.log("Side by side view requested"),
+        <SplitView
+          projectId={projectId}
+        />
+      ) : activePage === 'overlay' ? (
+        console.log("Overlay view requested"),
+        <OverlayView
+          projectId={projectId}
+        />
+      ) : activePage === 'crop' ? (
+        console.log("Crop view requested"),
+        <div className="flex flex-col items-center justify-center flex-1 bg-gray-400 dark:bg-gray-800">
+          <div className="flex items-center justify-center w-full">
+            <div className="w-1/2 flex justify-center items-center">
+              <CropImage
+                onCrop={handleCrop}
+                resetMarkerRequest={resetMarkerRequest}
+                placedMarkerAmount={1} // Todo: Use the actual number of placed markers
+              />
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      ) : (
+        // Just in case something goes wrong, display the SplitView as a fallback
+        console.log("Error, displaying fallback view"),
+        <SplitView
+          projectId={projectId}
+        />
+      )}
     </div>
   );
 }

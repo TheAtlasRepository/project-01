@@ -25,11 +25,11 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
     <div>
       <div className="flex justify-between items-center py-3 px-4 background-dark lg:mb-10 z-20 relative">
         {/* Service name / Logo */}
-        <a href="http://localhost:3000/">
+        <Link href="/">
             <div className="flex items-center px-5">
              <Logo />
             </div>
-        </a>
+        </Link>  
 
         {/* Desktop menu */}
         <div className="hidden md:flex lg:items-center">

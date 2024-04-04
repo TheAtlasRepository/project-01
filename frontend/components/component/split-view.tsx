@@ -16,17 +16,17 @@ import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import { Toaster, toast } from 'sonner'
 import MapToolbar from "@/components/ui/MapToolbar";
+import { QuestionMarkCircledIcon } from '@radix-ui/react-icons'
 
 interface SplitViewProps {
-  isCoordList?: boolean;
   projectId: number;
 }
 
-export default function SplitView({ isCoordList, projectId }: SplitViewProps) {
+export default function SplitView({ projectId }: SplitViewProps) {
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [helpMessage, setHelpMessage] = useState<string | null>(
-    "Welcome to the georeferencing tool! Place a marker on the map or image to get started and dismiss this message. (The marker pair created should reflect the same point on the map and image.)"
+    "<b>Welcome to the georeferencing tool!</b><br>To dismiss this message, click on it or place a marker on the map or image to get started. <br><i>The marker pair created should reflect the same point on the map and image.</i>"
   );
 
   //mapbox states
@@ -102,6 +102,7 @@ export default function SplitView({ isCoordList, projectId }: SplitViewProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageMarkers, setImageMarkers] = useState<ImageMarker[]>([]);
   const [calculatedDragDistance, setCalculatedDragDistance] = useState(0);
+  const [isCoordList, setIsCoordList] = useState(false);
 
   const addImageMarker = (event: React.MouseEvent<HTMLDivElement>) => {
     console.log(waitingForMapMarker);
@@ -249,6 +250,24 @@ export default function SplitView({ isCoordList, projectId }: SplitViewProps) {
     <div className="h-screen">
       <MapToolbar>
         <MapStyleToggle onStyleChange={handleStyleChange} />
+
+        <div>
+          <Button
+            className={`${isCoordList ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+            onClick={() => setIsCoordList(!isCoordList)}
+          >
+            Coordinate List
+          </Button>
+        </div>
+
+        {helpMessage && (
+          <div className="max-w-sm flex flex-row cursor-pointer" onClick={() => setHelpMessage(null)}>
+            <div className="text-2xl mr-3">
+              <QuestionMarkCircledIcon height={48} width={48} color="#0e101b" />
+            </div>
+            <div dangerouslySetInnerHTML={{ __html: helpMessage }} />
+          </div>
+        )}
       </MapToolbar>
 
       <div className=""></div>
@@ -265,11 +284,7 @@ export default function SplitView({ isCoordList, projectId }: SplitViewProps) {
             Start Georeferencing
           </Button>
 
-          {helpMessage && (
-            <Alert variant={"default"} className="rounded-md p-2">
-              <AlertDescription>{helpMessage}</AlertDescription>
-            </Alert>
-          )}
+          
 
           {errorMessage && (
             <Alert
