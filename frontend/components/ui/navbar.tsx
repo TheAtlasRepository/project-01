@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from 'next/link';
 import Logo from './logo';
 import { HamburgerMenuIcon } from '@radix-ui/react-icons'
+import { Badge } from "@/components/ui/badge"
 
 interface NavbarProps {
     activePage: string;
@@ -28,6 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
         <a href="http://localhost:3000/">
             <div className="flex items-center px-5">
              <Logo />
+             <Badge variant="destructive" className='ml-3 mt-1'> BETA </Badge>
             </div>
         </a>
 
