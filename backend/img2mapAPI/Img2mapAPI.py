@@ -19,6 +19,12 @@ if load_dotenv('./.env'):
     try:
         origins = get_key('./.env',key_to_get='CORS_ORIGINS')
         origins = origins.split(',')
+        #checking for osenvirons cross origins and adding to the list of origins if it exists
+        if 'CORS_ORIGINS' in os.environ:
+            osenvirons = os.environ['CORS_ORIGINS'].split(',')
+            for origin in osenvirons:
+                if origin not in origins:
+                    origins.append(origin)
         print(f"Origins: {origins}")
     except:
         print("Error getting CORS_ORIGINS from environment variables")
@@ -38,15 +44,30 @@ else:
     if 'ENVIRONMENT' in os.environ:
         ENVIRONMENT = os.environ['ENVIRONMENT']
         print("Environment variables not loaded")
+        try:
+            origins = os.environ['CORS_ORIGINS'].split(',')
+            print(f"Origins: {origins}")
+        except:
+            print("Error getting CORS_ORIGINS from environment variables, using default value")
+            pass
     else:
         print("Error getting environment from environment variables, using default value")
+
+swagger_url = "/docs"
+doc_url = "/redoc"
+
+if ENVIRONMENT == 'development':
+    print("Running in development mode")
+else:
+    print("Running in production mode")
+    swagger_url = None
+    doc_url = None
 
 app = FastAPI(
     title="Img2Map API",
     description="API for converting and georeferencing images",
-    #disable the docs and redoc routes in production
-    docs_url="/docs" if ENVIRONMENT == 'development' else None,
-    redoc_url="/redoc" if ENVIRONMENT == 'development' else None,
+    docs_url=swagger_url,
+    redoc_url=doc_url,
 )
 
 router = APIRouter()

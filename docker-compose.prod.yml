@@ -14,6 +14,7 @@ services:
     environment:
       - PORT=8000
       - ENVIRONMENT=production
+      - CORS_ORIGINS=http://localhost:3000,next-app:3000,
     build:
       context: ./backend
       dockerfile: ./docker/prod.Dockerfile
@@ -31,10 +32,10 @@ services:
       - "80:3000"
     environment:
       - NODE_ENV=production
+      - NEXT_PUBLIC_BACKEND_URL=img2map-api:8000
     env_file:
       - ./frontend/.env
     networks:
       - img2map-network
-    depends_on:
-      - img2map-api #This will make sure that the API is up before the website is started
+
   
