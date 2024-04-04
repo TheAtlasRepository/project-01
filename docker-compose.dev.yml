@@ -17,7 +17,6 @@ services:
       - NODE_ENV=development
     env_file:
       - ./frontend/.env.local
-    restart: always
     networks:
       - img2map-network
     depends_on:
@@ -25,6 +24,7 @@ services:
   img2map-api:
     #Uvicorn server running python FastAPI
     container_name: Img2Map-API
+
     build:
       context: ./backend
       dockerfile: /docker/dev.Dockerfile
