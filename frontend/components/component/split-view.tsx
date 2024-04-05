@@ -325,6 +325,23 @@ export default function SplitView({
     }
   };
 
+  // const handleDragEnd = (newPosition: { x: number; y: number }) => {
+  //   //ondragend updates the tempImageMarker state with the new position
+  //   setTempImageMarker([newPosition.x, newPosition.y]);
+  // };
+
+  // const screenToimageCoords = (screenX: number, screenY: number) => {
+  //   const adjustedX = (screenX - transform.x) / zoomLevel;
+  //   const adjustedY = (screenY - transform.y) / zoomLevel;
+
+  //   return { x: adjustedX, y: adjustedY };
+  // };
+
+  // const handleSniperDragEnd = (position: { x: number; y: number }) => {
+  //   const { x, y } = screenToimageCoords(position.x, position.y);
+  //   setTempImageMarker([x, y]);
+  // };
+
   return (
     <div className="h-screen">
       <div className=""></div>
@@ -396,7 +413,15 @@ export default function SplitView({
               </Marker>
             ))}
             {tempMapMarker && (
-              <Marker longitude={tempMapMarker[1]} latitude={tempMapMarker[0]}>
+              <Marker
+                longitude={tempMapMarker[1]}
+                latitude={tempMapMarker[0]}
+                draggable={true}
+                onDragEnd={(event) => {
+                  const { lat, lng } = event.lngLat;
+                  setTempMapMarker([lat, lng]);
+                }}
+              >
                 <SniperScope
                   onConfirm={confirmPlacement}
                   onCancel={cancelPlacement}
@@ -462,6 +487,8 @@ export default function SplitView({
                 <SniperScope
                   onConfirm={confirmPlacement}
                   onCancel={cancelPlacement}
+                  draggable={true}
+                  // onDragEnd={handleSniperDragEnd}
                 />
               </div>
             )}
