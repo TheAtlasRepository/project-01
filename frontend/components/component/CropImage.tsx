@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import CropModal from "@/components/ui/CropModal";
 import axios from 'axios';
 
-type ImageEditProps = {
-    editBool: boolean;
+type CropImageProps = {
     onCrop: () => void;
     resetMarkerRequest: () => void;
     placedMarkerAmount?: number;
 };
 
-export default function ImageEdit({ editBool, onCrop, resetMarkerRequest, placedMarkerAmount }: ImageEditProps) {
+export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmount }: CropImageProps) {
     const [crop, setCrop] = useState<Crop>(); 
     const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
     const [applyButtonText, setApplyButtonText] = useState('Apply Crop');
@@ -147,41 +146,35 @@ export default function ImageEdit({ editBool, onCrop, resetMarkerRequest, placed
     };
 
     return (
-        <>
-            {editBool ? (
-                <div className="flex flex-col justify-items-center card p-10 shadow-lg dark:bg-gray-900">
-                    <div>
-                        <h1 className="text-2xl font-bold mb-4 text-primary dark:text-white">Crop Image</h1>
-                    </div>
-                    <div className='mx-auto'>
-                        <ReactCrop
-                            crop={crop}
-                            onChange={(newCrop) => setCrop(newCrop)}
-                        >
-                            <img src={imageSrc} alt="Image" />
-                        </ReactCrop>
-                    </div>
-                    <div className="flex flex-row justify-end">
-                        <Button
-                            className="btn bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
-                            onClick={handleCancelCrop}
-                            disabled={buttonsDisabled}
-                        >
-                            Cancel Crop
-                        </Button>
-                        <Button
-                            className="btn ml-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 dark:text-white"
-                            onClick={applyCropOrShowModal}
-                            disabled={buttonsDisabled}
-                        >
-                            {applyButtonText}
-                        </Button>
-                        {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => handleApplyCrop()}/>}
-                    </div>
-                </div>
-            ) : (
-                <img src={imageSrc} alt="Image" />
-            )}
-        </>
+        <div className="flex flex-col justify-items-center card p-10 shadow-lg dark:bg-gray-900">
+            <div>
+                <h1 className="text-2xl font-bold mb-4 text-primary dark:text-white">Crop Image</h1>
+            </div>
+            <div className='mx-auto'>
+                <ReactCrop
+                    crop={crop}
+                    onChange={(newCrop) => setCrop(newCrop)}
+                >
+                    <img src={imageSrc} alt="Image" />
+                </ReactCrop>
+            </div>
+            <div className="flex flex-row justify-end">
+                <Button
+                    className="btn bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700 dark:text-white"
+                    onClick={handleCancelCrop}
+                    disabled={buttonsDisabled}
+                >
+                    Cancel Crop
+                </Button>
+                <Button
+                    className="btn ml-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 dark:text-white"
+                    onClick={applyCropOrShowModal}
+                    disabled={buttonsDisabled}
+                >
+                    {applyButtonText}
+                </Button>
+                {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => handleApplyCrop()}/>}
+            </div>
+        </div>
     );
 }

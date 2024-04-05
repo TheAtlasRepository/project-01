@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import SplitView from "./split-view";
-import ImageEdit from "./imageEdit";
-import {
-  OpenBook,
-  TargetIcon,
-  WindowsIcon,
-  SelectionIcon,
-} from "@/components/ui/icons";
-import UserDownload from "./userDownload";
+import CropImage from "./CropImage";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
-import FormModal from "@/components/ui/FormModal";
+import EditorToolbar, { ViewPage } from "@/components/ui/EditorToolbar";
+import { Split } from "lucide-react";
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -23,6 +16,8 @@ export default function Editor() {
   const [isCrop, setIsCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
   const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
+  const [activePage, setActivePage] = useState<ViewPage>('sideBySide');
+
   // Array containing pairs of georeferenced markers and their corresponding image markers
   const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
     { latLong: [number, number]; pixelCoords: [number, number] }[]
@@ -34,7 +29,7 @@ export default function Editor() {
   const [imageMarkers, setImageMarkers] = useState<
     { pixelCoordinates: [number, number] }[]
   >([]);
-  const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
+
 
   //function to add a new project
   const addProject = (name: string) => {
@@ -83,14 +78,6 @@ export default function Editor() {
     setIsAutoSaved(true);
   };
 
-  const handleToggleSideBySide = () => {
-    if (!isCrop) {
-      setIsSideBySide(!isSideBySide); // Toggle the value of isSideBySide
-      setIsOverlay(false); // Close the overlay view when side by side is activated
-      console.log(isSideBySide); // Log the value of isSideBySide
-    }
-  };
-
   const handleToggleCrop = () => {
     if (!isCrop) {
       setWasSideBySide(isSideBySide); // Save the current value of isSideBySide
@@ -111,15 +98,6 @@ export default function Editor() {
     handleToggleCrop();
   };
 
-  const handleToggleOverlay = () => {
-    if (!isOverlay) {
-      setIsOverlay(!isOverlay); // Toggle the value of isOverlay
-      setIsSideBySide(false); // Close the side by side view when overlay is activated
-      setIsCrop(false); // Close the image edit view when overlay is activated
-      console.log(isOverlay);
-    }
-  };
-
   // Add the handleToggleCoordTable function
   const handleToggleCoordTable = () => {
     setIsCoordList((prevIsCoordList) => !prevIsCoordList); // Toggle the value of isCoordTable
@@ -127,126 +105,77 @@ export default function Editor() {
   // Condtition to check if there are atleast 3 markers to display the coordinates table and the values are not 0
   const isGeorefValid = georefMarkerPairs.length >= 3 && georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
 
-  // Add a new function to handle the click event of the Feedback button
-  const handleFeedbackClick = () => {
-    setFormModalOpen(true);
-  };
-
   // Remove all placed markers
   const resetMarkerRequest = () => {
     // TODO: Implement the logic to reset all placed markers
     return;
   };
 
+  // Handle download requests
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = localStorage.getItem("tiffUrl")!;
+    link.download = "georeferenced.tiff";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
   return (
     <div className="flex flex-col h-screen bg-white">
-      <div className="flex items-center justify-between p-4 background-dark shadow-md">
-        <div className="items-center text-white">
-          <input
-            type="text"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            className="text-xl font-semibold bg-transparent border-none outline-none"
-            placeholder="Project name" // Add placeholder attribute
-          />
-          {isAutoSaved && (
-            <span className="text-sm text-gray-500">Auto saved</span>
-          )}
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button
-            className={`${
-              isSideBySide ? "bg-blue-500" : "bg-gray-700"
-            } hover:bg-blue-800 dark:hover:bg-blue-800`}
-            variant="toggle"
-            onClick={handleToggleSideBySide} // Add onClick event handler
-          >
-            <OpenBook className="text-white" />
-            Side by side
-          </Button>
-          <Button
-            className="bg-gray-200 dark:bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800"
-            variant="secondary"
-            onClick={handleToggleOverlay}
-            disabled={!isGeorefValid}
-          >
-            <WindowsIcon className="text-gray-500" />
-            Overlay
-          </Button>
-          <Button
-            className={`${
-              isCoordList ? "bg-blue-500" : "bg-gray-700"
-            } hover:bg-blue-800 dark:hover:bg-blue-800`}
-            variant="toggle"
-            onClick={handleToggleCoordTable}
-          >
-            <TargetIcon className="text-gray-500" />
-            <span>Coordinates</span>
-          </Button>
-          <Button
-            className={`${
-              isCrop ? "bg-blue-500" : "bg-gray-700"
-            } hover:bg-blue-800 dark:hover:bg-blue-800`}
-            variant="toggle"
-            onClick={handleToggleCrop} // Add onClick event handler
-          >
-            <SelectionIcon className="text-white" />
-            Crop
-          </Button>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <UserDownload
-            projectId={projectId}>
-          </UserDownload>
-
-          {/* Feedback form */}
-          <Button className="bg-blue-500 hover:bg-blue-800" onClick={handleFeedbackClick}>Feedback</Button>
-          {isFormModalOpen && <FormModal onClose={() => setFormModalOpen(false)} />}
-
-          {/*<Button
-            className="bg-gray-200 dark:bg-gray-700 dark:hover:bg-blue-800 dark:text-white"
-            onClick={handleSave}
-          >
-            Continue
-          </Button>*/}
-        </div>
-        
-      </div>
-      {isOverlay ? (
-      // Assuming OverlayView is the component you want to show when isOverlay is true
-      <OverlayView
-      projectId={projectId}
-      />
-    ) : isSideBySide ? (
-      <SplitView
-        isCoordList={isCoordList}
+      <EditorToolbar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        handleDownload={handleDownload}
+        isAutoSaved={isAutoSaved}
+        projectName={projectName}
         projectId={projectId}
-        setGeorefMarkerPairs={setGeorefMarkerPairs}
-        georefMarkerPairs={georefMarkerPairs}
-        mapMarkers={mapMarkers}
-        setMapMarkers={setMapMarkers}
-        imageMarkers={imageMarkers}
-        setImageMarkers={setImageMarkers}
+        setProjectName={setProjectName}
+        hasBeenReferenced={isGeorefValid}
       />
-    ) : (
-      <div
-        className={`flex flex-col items-center justify-center flex-1 ${
-          !isCrop ? "bg-gray-100 dark:bg-gray-900" : "bg-gray-400 dark:bg-gray-800"
-        }`}
-      >
-        <div className="flex items-center justify-center w-full">
-          <div className="w-1/2 flex justify-center items-center">
-            <ImageEdit
-              editBool={isCrop}
-              onCrop={handleCrop}
-              resetMarkerRequest={resetMarkerRequest}
-              placedMarkerAmount={1} // Todo: Use the actual number of placed markers
-            />
+
+      {activePage === 'sideBySide' ? (
+        console.log("Side by side view requested"),
+        <SplitView
+          projectId={projectId}
+          setGeorefMarkerPairs={setGeorefMarkerPairs}
+          georefMarkerPairs={georefMarkerPairs}
+          mapMarkers={mapMarkers}
+          setMapMarkers={setMapMarkers}
+          imageMarkers={imageMarkers}
+          setImageMarkers={setImageMarkers}
+        />
+      ) : activePage === 'overlay' ? (
+        console.log("Overlay view requested"),
+        <OverlayView
+          projectId={projectId}
+        />
+      ) : activePage === 'crop' ? (
+        console.log("Crop view requested"),
+        <div className="flex flex-col items-center justify-center flex-1 bg-gray-400 dark:bg-gray-800">
+          <div className="flex items-center justify-center w-full">
+            <div className="w-1/2 flex justify-center items-center">
+              <CropImage
+                onCrop={handleCrop}
+                resetMarkerRequest={resetMarkerRequest}
+                placedMarkerAmount={1} // Todo: Use the actual number of placed markers
+              />
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      ) : (
+        // Just in case something goes wrong, display the SplitView as a fallback
+        console.log("Error, displaying fallback view"),
+        <SplitView
+          projectId={projectId}
+          setGeorefMarkerPairs={setGeorefMarkerPairs}
+          georefMarkerPairs={georefMarkerPairs}
+          mapMarkers={mapMarkers}
+          setMapMarkers={setMapMarkers}
+          imageMarkers={imageMarkers}
+          setImageMarkers={setImageMarkers}
+        />
+      )}
     </div>
   );
 }

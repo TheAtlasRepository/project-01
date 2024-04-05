@@ -16,9 +16,11 @@ import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
 import { Toaster, toast } from 'sonner'
+import MapToolbar from "@/components/ui/MapToolbar";
+import { QuestionMarkCircledIcon, SewingPinFilledIcon } from '@radix-ui/react-icons'
+import { List } from "lucide-react";
 
 interface SplitViewProps {
-  isCoordList?: boolean;
   projectId: number;
   georefMarkerPairs: {
     latLong: [number, number];
@@ -41,7 +43,6 @@ interface SplitViewProps {
 }
 
 export default function SplitView({
-  isCoordList,
   projectId,
   georefMarkerPairs,
   setGeorefMarkerPairs,
@@ -53,7 +54,7 @@ export default function SplitView({
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [helpMessage, setHelpMessage] = useState<string | null>(
-    "Welcome to the georeferencing tool! Place a marker on the map or image to get started and dismiss this message. (The marker pair created should reflect the same point on the map and image.)"
+    "<b>Welcome to the georeferencing tool!</b><br>To dismiss this message, click on it or place a marker on the map or image to get started. <br><i>The marker pair created should reflect the same point on the map and image.</i>"
   );
 
   //mapbox states
@@ -64,6 +65,13 @@ export default function SplitView({
   );
   const handleStyleChange = (newStyle: string) => {
     setMapStyle(newStyle);
+  };
+
+  //state and toggle for coordinate list
+  const [isCoordTableHidden, setIsCoordTableHidden] = useState(true);
+
+  const toggleCoordTableHidden = () => {
+    setIsCoordTableHidden(!isCoordTableHidden);
   };
 
   //georeferencing types
@@ -155,6 +163,7 @@ export default function SplitView({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   // const [imageMarkers, setImageMarkers] = useState<ImageMarker[]>([]);
   const [calculatedDragDistance, setCalculatedDragDistance] = useState(0);
+  const [isCoordList, setIsCoordList] = useState(false);
 
   const addImageMarker = (event: React.MouseEvent<HTMLDivElement>) => {
     console.log(waitingForMapMarker);
@@ -343,6 +352,28 @@ export default function SplitView({
 
   return (
     <div className="h-screen">
+      <MapToolbar>
+        <MapStyleToggle onStyleChange={handleStyleChange} />
+
+        <div>
+          <Button
+            className={`${!isCoordTableHidden ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+            onClick={toggleCoordTableHidden}
+          >
+            <SewingPinFilledIcon /> Coordinates
+          </Button>
+        </div>
+
+        {helpMessage && (
+          <div className="max-w-sm flex flex-row cursor-pointer" onClick={() => setHelpMessage(null)}>
+            <div className="text-2xl mr-3">
+              <QuestionMarkCircledIcon height={48} width={48} color="#0e101b" />
+            </div>
+            <div dangerouslySetInnerHTML={{ __html: helpMessage }} />
+          </div>
+        )}
+      </MapToolbar>
+
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">
@@ -352,11 +383,6 @@ export default function SplitView({
             richColors
             closeButton
           />
-          {helpMessage && (
-            <Alert variant={"default"} className="rounded-md p-2">
-              <AlertDescription>{helpMessage}</AlertDescription>
-            </Alert>
-          )}
 
           {errorMessage && (
             <Alert
@@ -390,9 +416,6 @@ export default function SplitView({
               addMapMarker([lat, lng]);
             }}
           >
-            <div className="absolute top-0 left-0 m-4">
-              <MapStyleToggle onStyleChange={handleStyleChange} />
-            </div>
 
             <GeolocateControl position="bottom-right" />
             <NavigationControl position="bottom-right" />
@@ -500,11 +523,11 @@ export default function SplitView({
               </div>
             )}
           </div>
-          {isCoordList && (
-            <CoordinateList georefMarkerPairs={georefMarkerPairs} />
-          )}
+          
         </Allotment.Pane>
       </Allotment>
+
+      <CoordinateList georefMarkerPairs={georefMarkerPairs} isHidden={isCoordTableHidden} toggleHidden={toggleCoordTableHidden} />
     </div>
   );
 }

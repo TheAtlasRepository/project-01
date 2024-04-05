@@ -13,7 +13,7 @@ export default function MapStyleToggle({
 
   return (
     <div
-      className="flex flex-col items-left text-sm bg-white rounded-md shadow-md divide-x p-2 dark:bg-gray-900"
+      className="flex flex-col items-left divide-x"
     >
       <RadioGroup defaultValue="streets-v12" className="text-primary dark:text-gray-300" onValueChange={handleChange}>
         <div className="flex items-center space-x-2">
