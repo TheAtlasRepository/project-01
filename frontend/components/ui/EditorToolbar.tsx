@@ -22,6 +22,7 @@ interface EditorToolbarProps {
     projectName: string;
     projectId: number;
     setProjectName: (value: string) => void;
+    hasBeenReferenced: boolean;
 }
 
 const EditorToolbar = (props: EditorToolbarProps) => {
@@ -30,7 +31,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
     const [lastActivePage, setLastActivePage] = React.useState<ViewPage>(props.activePage); // Last active page (for remembering where the user were)
     const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
     const [hasPlacedMarker, setHasPlacedMarker] = useState(true); // State to check if the user has placed a marker
-    const [hasBeenReferenced, setHasBeenReferenced] = useState(false); // State to check if the image has been referenced
+    const [hasBeenReferenced, setHasBeenReferenced] = useState(props.hasBeenReferenced); // State to check if the image has been referenced
     const [isWarningExitModalOpen, setIsWarningExitModalOpen] = useState(false);
 
     const handleButtonClick = (page: ViewPage) => {
