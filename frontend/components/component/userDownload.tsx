@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 
 interface UserDownloadProps {
     projectId: number;
+    isDisabled: boolean;
 }
 
-const UserDownload = ({ projectId }: UserDownloadProps) => {
+const UserDownload = ({ projectId, isDisabled }: UserDownloadProps) => {
 
 
     const handleDownload = () => {
@@ -26,6 +27,7 @@ const UserDownload = ({ projectId }: UserDownloadProps) => {
                 size="default"
                 asChild={false}
                 onClick={handleDownload}
+                disabled={isDisabled}
                 >
                 Download
             </Button>

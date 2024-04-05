@@ -23,6 +23,17 @@ export default function Editor() {
   const [isCrop, setIsCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
   const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
+  // Array containing pairs of georeferenced markers and their corresponding image markers
+  const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
+    { latLong: [number, number]; pixelCoords: [number, number] }[]
+  >([]);
+  const [mapMarkers, setMapMarkers] = useState<
+    { geoCoordinates: [number, number] }[]
+  >([]);
+
+  const [imageMarkers, setImageMarkers] = useState<
+    { pixelCoordinates: [number, number] }[]
+  >([]);
   const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
 
   //function to add a new project
@@ -107,12 +118,14 @@ export default function Editor() {
       setIsCrop(false); // Close the image edit view when overlay is activated
       console.log(isOverlay);
     }
-  }
+  };
 
   // Add the handleToggleCoordTable function
   const handleToggleCoordTable = () => {
     setIsCoordList((prevIsCoordList) => !prevIsCoordList); // Toggle the value of isCoordTable
   };
+  // Condtition to check if there are atleast 3 markers to display the coordinates table and the values are not 0
+  const isGeorefValid = georefMarkerPairs.length >= 3 && georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
 
   // Add a new function to handle the click event of the Feedback button
   const handleFeedbackClick = () => {
@@ -155,6 +168,7 @@ export default function Editor() {
             className="bg-gray-200 dark:bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800"
             variant="secondary"
             onClick={handleToggleOverlay}
+            disabled={!isGeorefValid}
           >
             <WindowsIcon className="text-gray-500" />
             Overlay
@@ -208,6 +222,12 @@ export default function Editor() {
       <SplitView
         isCoordList={isCoordList}
         projectId={projectId}
+        setGeorefMarkerPairs={setGeorefMarkerPairs}
+        georefMarkerPairs={georefMarkerPairs}
+        mapMarkers={mapMarkers}
+        setMapMarkers={setMapMarkers}
+        imageMarkers={imageMarkers}
+        setImageMarkers={setImageMarkers}
       />
     ) : (
       <div
