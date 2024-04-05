@@ -172,6 +172,18 @@ const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest
           </div>
         </div>
       </Alert>
+
+      <Alert variant="help" className="mt-5 dark:bg-gray-900">
+        <div className="flex items-start">
+          <div>
+            <InfoCircledIcon className="h-4 w-4"/>
+          </div>
+          <div className="ml-2 flex flex-col justify-center">
+            <AlertTitle>This project is currently in Beta!</AlertTitle>
+            <AlertDescription>Because of this, there may be features that don't work as intended or don't even work at all. <i>But don't worry, we're working on making the application ready!</i></AlertDescription>
+          </div>
+        </div>
+      </Alert>
     </div>
   );
 }
