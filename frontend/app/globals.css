@@ -39,6 +39,10 @@ body {
   margin-right: 1.5rem;
 }
 
+.btn-nav-mob {
+  margin-right: 0;
+}
+
 .btn-nav:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));

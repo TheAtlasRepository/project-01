@@ -1,13 +1,17 @@
+import { useState, useEffect } from 'react';
+
 const Logo = () => {
-  let logoText = 'Image'; // Default text
+  const [logoText, setLogoText] = useState('Image'); // Default text
 
   // Array of domains that will make the logo show "PDF"
-  const pdfDomains = ['https://url1.com', 'https://url2.com'];
+  const PDF_URLS = process.env.NEXT_PUBLIC_PDF_URLS ? process.env.NEXT_PUBLIC_PDF_URLS.split(',') : [];
 
-  // If the current origin is in the array, change the text
-  if (typeof window !== 'undefined' && pdfDomains.includes(window.location.origin)) {
-    logoText = 'PDF';
-  }
+  useEffect(() => {
+    // If the current host is in the array, change the text
+    if (PDF_URLS.includes(window.location.host)) {
+      setLogoText('PDF');
+    }
+  }, []);
 
   return (
     <div className={`flex justify-center items-center text-l text-white`}>

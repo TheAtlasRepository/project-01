@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
+import { Toaster, toast } from 'sonner'
 
 interface SplitViewProps {
   isCoordList?: boolean;
@@ -52,7 +53,7 @@ export default function SplitView({
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [helpMessage, setHelpMessage] = useState<string | null>(
-    "Welcome to the georeferencing tool! Place your first marker on the map or image to get started. (the marker pair created should reflect the same point on the map and image)"
+    "Welcome to the georeferencing tool! Place a marker on the map or image to get started and dismiss this message. (The marker pair created should reflect the same point on the map and image.)"
   );
 
   //mapbox states
@@ -225,9 +226,8 @@ export default function SplitView({
     // Determine if the last pair is valid
     const lastPair = georefMarkerPairs[georefMarkerPairs.length - 1];
     if (lastPair) {
-      setHelpMessage(
-        "Marker placed! Place the corresponding marker on the image."
-      );
+      // Remove help message
+      setHelpMessage(null);
     }
     const isValidPair =
       lastPair &&
@@ -255,13 +255,12 @@ export default function SplitView({
         .then((data) => {
           // Handle successful API response
           console.log("Success:", data);
-          setHelpMessage(
-            "Pair added successfully! Place a marker to the map or image to add another pair."
-          );
+          toast.success('Pair added successfully! Place another marker to add another pair.');
         })
         .catch((error) => {
           // Handle API call error
           console.error("Error:", error.message);
+          toast.error('Error adding pair. Please try again.');
         })
         .finally(() => {
           // This reset allows for a new API call if further valid pairs are added
@@ -347,9 +346,23 @@ export default function SplitView({
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">
-          <Alert variant={"help"} className="">
-            <AlertDescription>{helpMessage}</AlertDescription>
-          </Alert>
+          <Toaster 
+            expand={false}
+            position="bottom-right"
+            richColors
+            closeButton
+          />
+
+          <Button className="m-4" variant={"blue"} onClick={handleGeoref}>
+            Start Georeferencing
+          </Button>
+
+          {helpMessage && (
+            <Alert variant={"default"} className="rounded-md p-2">
+              <AlertDescription>{helpMessage}</AlertDescription>
+            </Alert>
+          )}
+
           {errorMessage && (
             <Alert
               variant="destructive"
@@ -373,7 +386,6 @@ export default function SplitView({
           <Map
             mapboxAccessToken={mapboxToken}
             mapStyle={mapStyle}
-            initialViewState={{ latitude: 50, longitude: 10 }}
             maxZoom={20}
             minZoom={3}
             reuseMaps={true}

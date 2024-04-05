@@ -11,6 +11,7 @@ import {
 import UserDownload from "./userDownload";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
+import FormModal from "@/components/ui/FormModal";
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -33,6 +34,7 @@ export default function Editor() {
   const [imageMarkers, setImageMarkers] = useState<
     { pixelCoordinates: [number, number] }[]
   >([]);
+  const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
 
   //function to add a new project
   const addProject = (name: string) => {
@@ -125,6 +127,17 @@ export default function Editor() {
   // Condtition to check if there are atleast 3 markers to display the coordinates table and the values are not 0
   const isGeorefValid = georefMarkerPairs.length >= 3 && georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
 
+  // Add a new function to handle the click event of the Feedback button
+  const handleFeedbackClick = () => {
+    setFormModalOpen(true);
+  };
+
+  // Remove all placed markers
+  const resetMarkerRequest = () => {
+    // TODO: Implement the logic to reset all placed markers
+    return;
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white">
       <div className="flex items-center justify-between p-4 background-dark shadow-md">
@@ -181,47 +194,59 @@ export default function Editor() {
             Crop
           </Button>
         </div>
-        <UserDownload
-          projectId={projectId}
-          isDisabled={!isGeorefValid}
+
+        <div className="flex items-center space-x-4">
+          <UserDownload
+            projectId={projectId}>
+          </UserDownload>
+
+          {/* Feedback form */}
+          <Button className="bg-blue-500 hover:bg-blue-800" onClick={handleFeedbackClick}>Feedback</Button>
+          {isFormModalOpen && <FormModal onClose={() => setFormModalOpen(false)} />}
+
+          {/*<Button
+            className="bg-gray-200 dark:bg-gray-700 dark:hover:bg-blue-800 dark:text-white"
+            onClick={handleSave}
           >
-        </UserDownload>
-        <Button
-          className="bg-gray-200 dark:bg-gray-700 dark:hover:bg-blue-800 dark:text-white"
-          onClick={handleSave}
-        >
-          Continue
-        </Button>
+            Continue
+          </Button>*/}
+        </div>
+        
       </div>
       {isOverlay ? (
-        // Assuming OverlayView is the component you want to show when isOverlay is true
-        <OverlayView projectId={projectId} />
-      ) : isSideBySide ? (
-        <SplitView
-          isCoordList={isCoordList}
-          projectId={projectId}
-          setGeorefMarkerPairs={setGeorefMarkerPairs}
-          georefMarkerPairs={georefMarkerPairs}
-          mapMarkers={mapMarkers}
-          setMapMarkers={setMapMarkers}
-          imageMarkers={imageMarkers}
-          setImageMarkers={setImageMarkers}
-        />
-      ) : (
-        <div
-          className={`flex flex-col items-center justify-center flex-1 ${
-            !isCrop
-              ? "bg-gray-100 dark:bg-gray-900"
-              : "bg-gray-400 dark:bg-gray-800"
-          }`}
-        >
-          <div className="flex items-center justify-center w-full">
-            <div className="w-1/2 flex justify-center items-center">
-              <ImageEdit editBool={isCrop} onCrop={handleCrop} />
-            </div>
+      // Assuming OverlayView is the component you want to show when isOverlay is true
+      <OverlayView
+      projectId={projectId}
+      />
+    ) : isSideBySide ? (
+      <SplitView
+        isCoordList={isCoordList}
+        projectId={projectId}
+        setGeorefMarkerPairs={setGeorefMarkerPairs}
+        georefMarkerPairs={georefMarkerPairs}
+        mapMarkers={mapMarkers}
+        setMapMarkers={setMapMarkers}
+        imageMarkers={imageMarkers}
+        setImageMarkers={setImageMarkers}
+      />
+    ) : (
+      <div
+        className={`flex flex-col items-center justify-center flex-1 ${
+          !isCrop ? "bg-gray-100 dark:bg-gray-900" : "bg-gray-400 dark:bg-gray-800"
+        }`}
+      >
+        <div className="flex items-center justify-center w-full">
+          <div className="w-1/2 flex justify-center items-center">
+            <ImageEdit
+              editBool={isCrop}
+              onCrop={handleCrop}
+              resetMarkerRequest={resetMarkerRequest}
+              placedMarkerAmount={1} // Todo: Use the actual number of placed markers
+            />
           </div>
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 }

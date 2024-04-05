@@ -6,5 +6,7 @@ python-multipart
 pdf2image
 setuptools
 rio-tiler
+python-dotenv
+poppler-utils
 
 ###### Requirements with Version Specifiers ######
