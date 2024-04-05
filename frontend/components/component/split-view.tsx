@@ -352,11 +352,6 @@ export default function SplitView({
             richColors
             closeButton
           />
-
-          <Button className="m-4" variant={"blue"} onClick={handleGeoref}>
-            Start Georeferencing
-          </Button>
-
           {helpMessage && (
             <Alert variant={"default"} className="rounded-md p-2">
               <AlertDescription>{helpMessage}</AlertDescription>
