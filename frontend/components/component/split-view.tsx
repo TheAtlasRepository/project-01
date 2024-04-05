@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import { Toaster, toast } from 'sonner'
 import MapToolbar from "@/components/ui/MapToolbar";
-import { QuestionMarkCircledIcon } from '@radix-ui/react-icons'
+import { QuestionMarkCircledIcon, SewingPinFilledIcon } from '@radix-ui/react-icons'
+import { List } from "lucide-react";
 
 interface SplitViewProps {
   projectId: number;
@@ -37,6 +38,13 @@ export default function SplitView({ projectId }: SplitViewProps) {
   );
   const handleStyleChange = (newStyle: string) => {
     setMapStyle(newStyle);
+  };
+
+  //state and toggle for coordinate list
+  const [isCoordTableHidden, setIsCoordTableHidden] = useState(true);
+
+  const toggleCoordTableHidden = () => {
+    setIsCoordTableHidden(!isCoordTableHidden);
   };
 
   //georeferencing types
@@ -253,10 +261,10 @@ export default function SplitView({ projectId }: SplitViewProps) {
 
         <div>
           <Button
-            className={`${isCoordList ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
-            onClick={() => setIsCoordList(!isCoordList)}
+            className={`${!isCoordTableHidden ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+            onClick={toggleCoordTableHidden}
           >
-            Coordinate List
+            <SewingPinFilledIcon /> Coordinates
           </Button>
         </div>
 
@@ -388,11 +396,11 @@ export default function SplitView({ projectId }: SplitViewProps) {
               </div>
             ))}
           </div>
-          {isCoordList && (
-            <CoordinateList georefMarkerPairs={georefMarkerPairs} />
-          )}
+          
         </Allotment.Pane>
       </Allotment>
+
+      <CoordinateList georefMarkerPairs={georefMarkerPairs} isHidden={isCoordTableHidden} toggleHidden={toggleCoordTableHidden} />
     </div>
   );
 }

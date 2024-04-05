@@ -9,13 +9,13 @@ interface WarningExitModalProps {
 const WarningExitModal: React.FC<WarningExitModalProps> = ({ onCancel, onConfirm }) => {
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center p-4 z-50 backdrop-blur-md">
+        <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] backdrop-blur-md">
             <div className="bg-white shadow-xl rounded-lg overflow-hidden w-full max-w-2xl flex flex-col z-60">
                 <div className="p-6 flex-1 flex flex-col gap-2 text-black min-h-72 justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold mb-4 text-primary dark:text-white">Confirm crop</h1>
+                        <h1 className="text-2xl font-bold mb-4 text-primary dark:text-white">You have added points</h1>
                         <p>
-                            You have added points, and cropping the image will reset these.<br />
+                            You have added points, and leaving the editor will delete your file.<br />
                             Do you wish to proceed?
                         </p>
                     </div>
