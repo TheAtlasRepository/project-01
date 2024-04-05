@@ -1,6 +1,8 @@
 # Image/PDF 2 Map
 
->> **TODO:** Add project description.
+ <!-- [Try Image2Map here!](https://image2map.co) -->
+
+Image2Map simplifies geospatial data handling by offering an intuitive web platform that enables seamless georeferencing of digital images and PDF files. Georeferencing is the process of aligning spatial data (images or maps) to geographic coordinates. Image2Map simplifies this by allowing users to upload images/PDF's and pinpoint specific locations on the image, thereby embedding geospatial metadata into the files. This transformation turns your files into geographically accurate representations, ideal for applications in urban planning, environmental analysis, historical research etc.
 
 ## Project requirements & development server setup
 
@@ -19,6 +21,8 @@
 #### Docker build
 
 First you will have to create a `.env.local` file in the directory ./frontend, it should look like `.env.example`
+>
+Second you will have to create a `.env` file in the directory ./backend, it should look like `.env.example`
 
 To run you you will have to [Download Docker compose](https://docs.docker.com/compose/install/), recomend docker desktop.
 
@@ -78,7 +82,7 @@ You are now done with the automatic startup, and will see more terminals appear,
 
    pip install -r requirements.txt
 
-   uvicorn main:app --reload
+   python main.py --port 8000
    ```
 
 > **Note:** Open a new terminal to progress, remember to activate the conda enviroment in this terminal too.

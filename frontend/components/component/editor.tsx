@@ -18,6 +18,18 @@ export default function Editor() {
   const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
   const [activePage, setActivePage] = useState<ViewPage>('sideBySide');
 
+  // Array containing pairs of georeferenced markers and their corresponding image markers
+  const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
+    { latLong: [number, number]; pixelCoords: [number, number] }[]
+  >([]);
+  const [mapMarkers, setMapMarkers] = useState<
+    { geoCoordinates: [number, number] }[]
+  >([]);
+
+  const [imageMarkers, setImageMarkers] = useState<
+    { pixelCoordinates: [number, number] }[]
+  >([]);
+
 
   //function to add a new project
   const addProject = (name: string) => {
@@ -90,6 +102,8 @@ export default function Editor() {
   const handleToggleCoordTable = () => {
     setIsCoordList((prevIsCoordList) => !prevIsCoordList); // Toggle the value of isCoordTable
   };
+  // Condtition to check if there are atleast 3 markers to display the coordinates table and the values are not 0
+  const isGeorefValid = georefMarkerPairs.length >= 3 && georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
 
   // Remove all placed markers
   const resetMarkerRequest = () => {
@@ -117,12 +131,19 @@ export default function Editor() {
         projectName={projectName}
         projectId={projectId}
         setProjectName={setProjectName}
+        hasBeenReferenced={isGeorefValid}
       />
 
       {activePage === 'sideBySide' ? (
         console.log("Side by side view requested"),
         <SplitView
           projectId={projectId}
+          setGeorefMarkerPairs={setGeorefMarkerPairs}
+          georefMarkerPairs={georefMarkerPairs}
+          mapMarkers={mapMarkers}
+          setMapMarkers={setMapMarkers}
+          imageMarkers={imageMarkers}
+          setImageMarkers={setImageMarkers}
         />
       ) : activePage === 'overlay' ? (
         console.log("Overlay view requested"),
@@ -147,6 +168,12 @@ export default function Editor() {
         console.log("Error, displaying fallback view"),
         <SplitView
           projectId={projectId}
+          setGeorefMarkerPairs={setGeorefMarkerPairs}
+          georefMarkerPairs={georefMarkerPairs}
+          mapMarkers={mapMarkers}
+          setMapMarkers={setMapMarkers}
+          imageMarkers={imageMarkers}
+          setImageMarkers={setImageMarkers}
         />
       )}
     </div>
