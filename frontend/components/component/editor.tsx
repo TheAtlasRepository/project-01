@@ -10,13 +10,9 @@ export default function Editor() {
   const [projectId, setProjectId] = useState(0);
   const [projectName, setProjectName] = useState("Project 1");
   const [isAutoSaved, setIsAutoSaved] = useState(false);
-  const [isSideBySide, setIsSideBySide] = useState(false); // Add state for side by side toggle
-  const [isOverlay, setIsOverlay] = useState(false); // Add state for crop toggle
-  const [wasSideBySide, setWasSideBySide] = useState(false);
-  const [isCrop, setIsCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
-  const [isCoordList, setIsCoordList] = useState(true); // Add state for coordinates table
   const [activePage, setActivePage] = useState<ViewPage>('sideBySide');
+  const [isGeorefValid, setIsGeorefValid] = useState(false);
 
   // Array containing pairs of georeferenced markers and their corresponding image markers
   const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
@@ -78,32 +74,19 @@ export default function Editor() {
     setIsAutoSaved(true);
   };
 
-  const handleToggleCrop = () => {
-    if (!isCrop) {
-      setWasSideBySide(isSideBySide); // Save the current value of isSideBySide
-      setIsSideBySide(false); // Set isSideBySide to false when cropping is activated
-      setIsCoordList(false); // Close the coordinates table when cropping is activated
-    } else {
-      setIsSideBySide(wasSideBySide); // Restore the value of isSideBySide when cropping is deactivated
-    }
-
-    setIsCrop((prevCrop) => !prevCrop); // Toggle the value of isCrop
-
-    console.log(isCrop); // Log the value of isSideBySide
-  };
-
   // Update the image source when the user has cropped the image, and close the crop tool
   const handleCrop = () => {
     setImageSrc(localStorage.getItem("pdfData")!);
-    handleToggleCrop();
   };
-
-  // Add the handleToggleCoordTable function
-  const handleToggleCoordTable = () => {
-    setIsCoordList((prevIsCoordList) => !prevIsCoordList); // Toggle the value of isCoordTable
-  };
-  // Condtition to check if there are atleast 3 markers to display the coordinates table and the values are not 0
-  const isGeorefValid = georefMarkerPairs.length >= 3 && georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
+  
+  // Check if there are atleast 3 markers to display the coordinates table and the values are not 0, and set the state
+  useEffect(() => {
+    const valid = georefMarkerPairs.length >= 3 && 
+      georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && 
+      georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
+  
+    setIsGeorefValid(valid);
+  }, [georefMarkerPairs]);
 
   // Remove all placed markers
   const resetMarkerRequest = () => {
@@ -119,7 +102,7 @@ export default function Editor() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
+  }
 
   return (
     <div className="flex flex-col h-screen bg-white">

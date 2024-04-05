@@ -367,7 +367,7 @@ export default function SplitView({
         {helpMessage && (
           <div className="max-w-sm flex flex-row cursor-pointer" onClick={() => setHelpMessage(null)}>
             <div className="text-2xl mr-3">
-              <QuestionMarkCircledIcon height={48} width={48} color="#0e101b" />
+              <QuestionMarkCircledIcon height={48} width={48} color="" className="fill-gray-800 dark:fill-white" />
             </div>
             <div dangerouslySetInnerHTML={{ __html: helpMessage }} />
           </div>
@@ -460,7 +460,7 @@ export default function SplitView({
             )}
           </Map>
         </Allotment.Pane>
-        <Allotment.Pane minSize={200} className="bg-gray-100">
+        <Allotment.Pane minSize={200} className="bg-gray-100 dark:bg-gray-800">
           <div className="w-full overflow-visible">
             <ImageMap
               src={localStorage.getItem("pdfData")!}
