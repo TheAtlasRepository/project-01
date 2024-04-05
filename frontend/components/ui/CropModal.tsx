@@ -10,8 +10,8 @@ const CropModal: React.FC<CropModalProps> = ({ onCancel, onConfirm }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center p-4 z-50 backdrop-blur-md">
-            <div className="bg-white shadow-xl rounded-lg overflow-hidden w-full max-w-2xl flex flex-col z-60">
-                <div className="p-6 flex-1 flex flex-col gap-2 text-black min-h-72 justify-between">
+            <div className="bg-white dark:bg-gray-900 shadow-xl rounded-lg overflow-hidden w-full max-w-2xl flex flex-col z-60">
+                <div className="p-6 flex-1 flex flex-col gap-2 text-black dark:text-white min-h-72 justify-between">
                     <div>
                         <h1 className="text-2xl font-bold mb-4 text-primary dark:text-white">Confirm crop</h1>
                         <p>

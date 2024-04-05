@@ -23,6 +23,7 @@ interface EditorToolbarProps {
     projectId: number;
     setProjectName: (value: string) => void;
     hasBeenReferenced: boolean;
+    //hasPlacedMarker: boolean;
 }
 
 const EditorToolbar = (props: EditorToolbarProps) => {
@@ -31,7 +32,6 @@ const EditorToolbar = (props: EditorToolbarProps) => {
     const [lastActivePage, setLastActivePage] = React.useState<ViewPage>(props.activePage); // Last active page (for remembering where the user were)
     const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
     const [hasPlacedMarker, setHasPlacedMarker] = useState(true); // State to check if the user has placed a marker
-    const [hasBeenReferenced, setHasBeenReferenced] = useState(props.hasBeenReferenced); // State to check if the image has been referenced
     const [isWarningExitModalOpen, setIsWarningExitModalOpen] = useState(false);
 
     const handleButtonClick = (page: ViewPage) => {
@@ -95,15 +95,16 @@ const EditorToolbar = (props: EditorToolbarProps) => {
             {/* Center Group */}
             <div className="flex items-center gap-4">
                 <Button
-                    className={`${activePage === 'sideBySide' ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+                    className={`${activePage === 'sideBySide' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('sideBySide')}
                 >
                     <ViewVerticalIcon className='text-white mr-2' width={20} height={20}/>
                     Split View
                 </Button>
                 <Button
-                    className={`${activePage === 'overlay' ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+                    className={`${activePage === 'overlay' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('overlay')}
+                    disabled={!props.hasBeenReferenced}
                 >
                     <StackIcon className='text-white mr-2' width={20} height={20}/>
                     Overlay
@@ -119,7 +120,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
                     <span>Coordinates</span>
                 </Button>*/}
                 <Button
-                    className={`${activePage === 'crop' ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+                    className={`${activePage === 'crop' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('crop')}
                 >
                     <CropIcon className='text-white mr-2' width={20} height={20}/>
@@ -129,19 +130,19 @@ const EditorToolbar = (props: EditorToolbarProps) => {
 
             {/* Right Group */}
             <div className="flex items-center gap-4">
-                <Button className="bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800" onClick={handleFeedbackClick}>
+                <Button className="bg-gray-700 dark:bg-gray-700 dark:text-white hover:bg-blue-800 dark:hover:bg-blue-800" onClick={handleFeedbackClick}>
                     <FileTextIcon className='text-white mr-2' width={20} height={20}/>
                     Feedback
                 </Button>
                 {isFormModalOpen && <FormModal onClose={() => setFormModalOpen(false)} />}
 
                 <Button
-                    className="bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800"
+                    className="bg-gray-700 dark:bg-gray-700 dark:text-white hover:bg-blue-800 dark:hover:bg-blue-800"
                     variant="default"
                     size="default"
                     asChild={false}
                     onClick={props.handleDownload}
-                    disabled={!hasBeenReferenced}
+                    disabled={!props.hasBeenReferenced}
                     >
                     <DownloadIcon className='text-white mr-2' width={20} height={20}/>
                     Download
@@ -149,7 +150,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
 
                 <Button
                     onClick={handleExitEditor}
-                    className="bg-gray-700 hover:bg-blue-800 dark:hover:bg-blue-800"
+                    className="bg-gray-700 dark:bg-gray-700 dark:text-white hover:bg-blue-800 dark:hover:bg-blue-800"
                 >
                     <ExitIcon className='text-white mr-2' width={20} height={20}/>
                     Exit Editor

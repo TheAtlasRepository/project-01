@@ -9,12 +9,12 @@ const FormModal: React.FC<FormModalProps> = ({ onClose }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999] backdrop-blur-md">
-            <div className="bg-white shadow-xl rounded-lg overflow-hidden w-full max-w-2xl flex flex-col z-60">
+            <div className="bg-white dark:bg-gray-900 shadow-xl rounded-lg overflow-hidden w-full max-w-2xl flex flex-col z-60">
                 <div className="p-6 flex-1 flex flex-col gap-2 justify-center">
                     <div style={{ marginTop: '20px', marginBottom: '20px', height: '600px' }}>
                         <iframe width="100%" height="100%" src="https://s.surveyplanet.com/66043b3975706c97c9c178b2"></iframe>
                     </div>
-                    <Button onClick={onClose} variant={"default"}>Close</Button>
+                    <Button onClick={onClose} variant={"default"} className='dark:bg-gray-700 dark:text-white dark:hover:bg-black'>Close</Button>
                 </div>
             </div>
         </div>
