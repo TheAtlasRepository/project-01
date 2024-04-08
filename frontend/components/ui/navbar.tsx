@@ -13,6 +13,11 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
   const [isOpen, setOpen] = useState(false);
   const mobileRef = useRef(null);
+  const pages = [
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/About' },
+    { name: 'Your Data', path: '/Privacy' },
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -36,17 +41,11 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
         {/* Desktop menu */}
         <div className="hidden md:flex lg:items-center">
           <div className="flex items-center text-xs">
-            <button className={`btn-nav ${activePage === 'Home' ? 'btn-nav-active' : ''}`}>
-              <Link href="/">Home</Link>  
+          {pages.map((page) => (
+            <button className={`btn-nav ${activePage === page.name ? 'btn-nav-active' : ''}`} key={page.name}>
+              <Link href={page.path}>{page.name}</Link>
             </button>
-
-            <button className={`btn-nav ${activePage === 'About' ? 'btn-nav-active' : ''}`}>
-              <Link href="/About">About</Link>  
-            </button>
-
-            <button className={`btn-nav ${activePage === 'Your Data' ? 'btn-nav-active' : ''}`}>
-              <Link href="/Privacy">Your Data</Link>  
-            </button>
+          ))}
 
           </div>
         </div>
@@ -68,23 +67,13 @@ const Navbar: React.FC<NavbarProps> = ({ activePage }) => {
       </div>
       
       {/* Mobile menu */}
-      <div className={`background-dark h-screen w-screen shadow-sm absolute z-10 ${isOpen ? 'top-16 transition-all duration-500 ease-out' : '-top-[2000px] transition-all duration-500 ease-in'}`}>
+      <div className={`md:hidden background-dark h-screen w-screen shadow-sm absolute z-10 ${isOpen ? 'top-16 transition-all duration-500 ease-out' : '-top-[2000px] transition-all duration-500 ease-in'}`}>
         <div className="flex flex-col items-center justify-center text-2xl h-5/6">
-          <button className={`my-2 btn-nav btn-nav-mob ${activePage === 'Home' ? 'btn-nav-active' : ''}`}>
-            <Link href="/">Home</Link>  
-          </button>
-
-          <button className={`my-2 btn-nav btn-nav-mob ${activePage === 'About' ? 'btn-nav-active' : ''}`}>
-            <Link href="/About">About</Link>  
-          </button>
-
-          <button className={`my-2 btn-nav btn-nav-mob ${activePage === 'Your Data' ? 'btn-nav-active' : ''}`}>
-            <Link href="/Privacy">Your Data</Link>  
-          </button>
-
-          <button className={`my-2 mb-6 btn-nav btn-nav-mob ${activePage === 'Text & CSV To Map' ? 'btn-nav-active' : ''}`}>
-            <Link href="/Text2Map">Text & CSV To Map</Link>  
-          </button>
+          {pages.map((page) => (
+            <button className={`my-2 btn-nav btn-nav-mob ${activePage === page.name ? 'btn-nav-active' : ''}`} key={page.name}>
+              <Link href={page.path}>{page.name}</Link>
+            </button>
+          ))}
         </div>
       </div>
     </div>
