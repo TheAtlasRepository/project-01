@@ -9,14 +9,18 @@ type CropImageProps = {
     onCrop: () => void;
     resetMarkerRequest: () => void;
     placedMarkerAmount?: number;
+    projectId: number;
 };
 
-export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmount }: CropImageProps) {
+export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmount, projectId }: CropImageProps) {
     const [crop, setCrop] = useState<Crop>(); 
     const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
     const [applyButtonText, setApplyButtonText] = useState('Apply Crop');
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+
+    // Base URL for the backend API from .env
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     // When the user requests to apply the crop
     const handleApplyCrop = async () => {
@@ -135,6 +139,28 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
         onCrop();
     };
 
+    // Deletes all markers from project and applies the crop
+    const deleteMarkersAndApplyCrop = () => {
+        deleteMarkersRequest();
+        handleApplyCrop();
+    };
+
+    // Contacts API and deletes all markers from project
+    const deleteMarkersRequest = () => {
+        console.log("Deleting project points...");
+        axios.delete(`${BASE_URL}/project/${projectId}/points`, {
+            headers: {
+                'accept': 'application/json'
+            }
+        })
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.error('Error deleting data: ', error);
+        });
+    };
+
     // Shows the crop modal if there are placed markers, otherwise just applies the crop
     const applyCropOrShowModal = () => {
         if (placedMarkerAmount && placedMarkerAmount > 0) {
@@ -173,7 +199,7 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
                 >
                     {applyButtonText}
                 </Button>
-                {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => handleApplyCrop()}/>}
+                {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => deleteMarkersAndApplyCrop()}/>}
             </div>
         </div>
     );

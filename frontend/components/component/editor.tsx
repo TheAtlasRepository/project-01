@@ -141,6 +141,7 @@ export default function Editor() {
               <CropImage
                 onCrop={handleCrop}
                 resetMarkerRequest={resetMarkerRequest}
+                projectId={projectId}
                 placedMarkerAmount={1} // Todo: Use the actual number of placed markers
               />
             </div>
