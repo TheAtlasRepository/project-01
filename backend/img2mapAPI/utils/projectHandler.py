@@ -170,6 +170,20 @@ class ProjectHandler:
             raise Exception("points is empty")
         return list
     
+    async def removeAllProjectPoints(self, projectId: int) -> bool:
+        """
+        Remove all points from a project
+        """
+        if await self.projectExists(projectId) == False:
+            raise Exception("Project not found")
+        params: dict = {"projectId": projectId}
+        points = await self._StorageHandler.fetch("point", params)
+        if points is not None and points != []:
+            for point in points:
+                await self._StorageHandler.remove(point["id"], "point")
+            return True
+        raise Exception("No points found for this project")
+
     async def removePoint(self, projectId: int, pointId: int) -> bool:
         """
         Remove a point from a project

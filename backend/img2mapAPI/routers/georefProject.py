@@ -84,6 +84,15 @@ async def updatePoint(projectId: int, pointId: int, point: Point):
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+@router.delete("/{projectId}/point")
+async def deletePoints(projectId: int, backgroundTasks: BackgroundTasks):
+    """ Delete all points from a project and return action status"""
+    try:
+        backgroundTasks.add_task(_projectHandler.removeAllProjectPoints, projectId)
+        return Response(content="Deletion request of points accepted", status_code=202, media_type="text/plain", background=backgroundTasks)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 @router.delete("/{projectId}/point/{pointId}")
 async def deletePoint(projectId: int, pointId: int, backgroundTasks: BackgroundTasks):
     """ Delete a point from a project returns action status"""

@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from img2mapAPI.routers import *
 from dotenv import load_dotenv, get_key
+from .utils.core.FileHelper import clearTmpFolder
 import os
 
 #setting the default environment to development
@@ -80,11 +81,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Clear files in the temp folder
+clearTmpFolder()
+
 # Default route
 @router.get("/")
 async def root():
     return {"message": "Welcome to the georeferencing API. Please refer to the documentation for more information. at /docs or /redoc"}
 
 #adding the routers to the app
-app.router.include_router(converters.router, prefix="/converter", tags=["converter"])
+app.router.include_router(converters.router, prefix="/converter", tags=["File Converting & Editing"])
+app.router.include_router(server.router, prefix="/serverInfo", tags=["Server Info"])
 app.router.include_router(georefProject.router)
