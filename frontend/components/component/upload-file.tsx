@@ -10,6 +10,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import axios from "axios";
+import { RotateLoader } from 'react-spinners';
 
 type UploadFileProps = {
   clearStateRequest: () => void;
@@ -19,6 +21,11 @@ type UploadFileProps = {
 const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
+  const [serverIsRunning, setServerIsRunning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Base URL for the backend API from .env
+  const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   //wrap the useSearchParams in suspense
   const params = useSearchParams();
@@ -28,7 +35,20 @@ const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest
     // If there is an error message in the URL, set the error message state to the value in the URL
     if (params.get("e")) {
       handleErrorMsg(params.get("e") as string);
-    }   
+    } 
+
+    // Add this block
+    axios.get(`${BASE_URL}/serverInfo/`)
+      .then(response => {
+        if (response.data.status === 'running') {
+          setServerIsRunning(true);
+          setIsLoading(false);
+        }
+      })
+      .catch(error => {
+        setServerIsRunning(false);
+        setIsLoading(false);
+      });
   }, [params]);
 
   // Handle file input change when user has used "Open a file"-button
@@ -101,51 +121,76 @@ const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest
 
   return (
     <div className="mx-auto w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4">
-      <div
-        onClick={() => document.querySelector("input")?.click()}
-        className="cursor-pointer"
-      >
-        <div
-          className="rounded-lg border-4 border-dashed border-lb p-10 py-20 text-center transition-all hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <UploadIconFolder className="mx-auto mb-6 text-blue-300 dark:text-blue-600" />
-          <div className="text-lg font-medium text-gray-400 text-pretty">
-            Open, or drop your <b>image or PDF</b> here 
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <span> <QuestionMarkCircledIcon className="h-4 w-4 ml-1"/></span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ideal images are maps, satellite photos, urban plans, etc.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-                        
-          </div>
-          {fileName && (
-            <div className="text-lg font-medium text-gray-400 mt-4">
-              {fileName}
+      {isLoading ? (
+        <div className="rounded-lg border-4 border-dashed border-lb p-10 py-20 text-center transition-all dark:border-gray-800 text-primary text-xl min-h-96 h-96">
+          <div className="h-full flex justify-center items-center mx-auto my-auto">
+            <div>
+              <RotateLoader color="#9CA3AF"/>
             </div>
-          )}
+            
+          </div>
+          
         </div>
-
-        <input
-          type="file"
-          accept=".pdf, image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        <Button
-          className="mt-6 w-full bg-blue-600 text-white text-xl dark:text-gray-200 dark:bg-blue-800 dark:hover:bg-blue-900"
-          variant="blue"
-        >
-          Open a file
-        </Button>
-      </div>
+      ) : (
+        serverIsRunning ? (
+          <div
+            onClick={() => document.querySelector("input")?.click()}
+            className="cursor-pointer"
+          >
+            <div
+              className="rounded-lg border-4 border-dashed border-lb p-10 py-20 text-center transition-all hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-800 min-h-96"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <UploadIconFolder className="mx-auto mb-6 text-blue-300 dark:text-blue-600" />
+              <div className="text-lg font-medium text-gray-400 text-pretty">
+                Open, or drop your <b>image or PDF</b> here 
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span> <QuestionMarkCircledIcon className="h-4 w-4 ml-1"/></span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Ideal images are maps, satellite photos, urban plans, etc.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                            
+              </div>
+              {fileName && (
+                <div className="text-lg font-medium text-gray-400 mt-4">
+                  {fileName}
+                </div>
+              )}
+            </div>
+  
+            <input
+              type="file"
+              accept=".pdf, image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Button
+              className="mt-6 w-full bg-blue-600 text-white text-xl dark:text-gray-200 dark:bg-blue-800 dark:hover:bg-blue-900"
+              variant="blue"
+            >
+              Open a file
+            </Button>
+          </div>
+        ) : (
+          <div className="rounded-lg border-4 border-dashed border-lb p-10 py-20 text-center transition-all dark:border-gray-800 text-primary text-xl min-h-96">
+            <p className="text-2xl font-bold">Server's Taking a Coffee Break ☕️</p>
+            <p>
+              Oops! Looks like our server is on a short coffee break. We're working to perk it up.
+              <br />
+              <br />
+              Please swing by later! ☕️
+            </p>
+          </div>
+        )
+      )}
+      
 
       {errorMessage && (
         <Alert variant="destructive" className="mt-5 dark:bg-gray-900">
