@@ -177,6 +177,11 @@ blanke_tile.save(bytes_io, format='PNG')
 blank_tile_bytes = bytes_io.getvalue()
 
 async def generateTile(tiff_path, x: int, y: int, z: int):
+    # Check if the zoom level is greater than the maximum zoom level this stops computation of tiles that are too zoomed out
+    # this is done to prevent the server from being overloaded when generating tiles that are too zoomed out
+    MAX_ZOOM = 5
+    if z < MAX_ZOOM:
+        return Response(content=blank_tile_bytes, media_type="image/png")
     try:
         with Reader(tiff_path) as src:
                 tile, mask = src.tile(x, y, z)
