@@ -171,12 +171,13 @@ def getCornerCoordinates(tiff_path):
 
         return [top_left, top_right, bottom_right, bottom_left]
 
-blanke_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
-bytes_io = io.BytesIO()
-blanke_tile.save(bytes_io, format='PNG')
-blank_tile_bytes = bytes_io.getvalue()
+
 
 async def generateTile(tiff_path, x: int, y: int, z: int):
+    blanke_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
+    bytes_io = io.BytesIO()
+    blanke_tile.save(bytes_io, format='PNG')
+    blank_tile_bytes = bytes_io.getvalue()
     # Check if the zoom level is greater than the maximum zoom level this stops computation of tiles that are too zoomed out
     # this is done to prevent the server from being overloaded when generating tiles that are too zoomed out
     MAX_ZOOM = 5
