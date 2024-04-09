@@ -15,10 +15,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
-import { Toaster, toast } from 'sonner'
+import { Toaster, toast } from "sonner";
 import MapToolbar from "@/components/ui/MapToolbar";
-import { QuestionMarkCircledIcon, SewingPinFilledIcon } from '@radix-ui/react-icons'
+import {
+  QuestionMarkCircledIcon,
+  SewingPinFilledIcon,
+} from "@radix-ui/react-icons";
 import { List } from "lucide-react";
+import { set } from "lodash";
 
 interface SplitViewProps {
   projectId: number;
@@ -79,9 +83,6 @@ export default function SplitView({
 
   const [waitingForImageMarker, setWaitingForImageMarker] = useState(true);
   const [waitingForMapMarker, setWaitingForMapMarker] = useState(true);
-
-  // const [activeMapMarkerIndex, setActiveMapMarkerIndex] = useState<number | null>(null);
-  // const [activeImageMarkerIndex, setActiveImageMarkerIndex] = useState<number | null>(null);
 
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(
@@ -264,12 +265,14 @@ export default function SplitView({
         .then((data) => {
           // Handle successful API response
           console.log("Success:", data);
-          toast.success('Pair added successfully! Place another marker to add another pair.');
+          toast.success(
+            "Pair added successfully! Place another marker to add another pair."
+          );
         })
         .catch((error) => {
           // Handle API call error
           console.error("Error:", error.message);
-          toast.error('Error adding pair. Please try again.');
+          toast.error("Error adding pair. Please try again.");
         })
         .finally(() => {
           // This reset allows for a new API call if further valid pairs are added
@@ -333,22 +336,19 @@ export default function SplitView({
     }
   };
 
-  // const handleDragEnd = (newPosition: { x: number; y: number }) => {
-  //   //ondragend updates the tempImageMarker state with the new position
-  //   setTempImageMarker([newPosition.x, newPosition.y]);
-  // };
+  const handleSniperDragEnd = (position: { x: number; y: number }) => {
+    setTempImageMarker([
+      tempImageMarker![0] + position.x,
+      tempImageMarker![1] + position.y,
+    ]);
+  };
 
-  // const screenToimageCoords = (screenX: number, screenY: number) => {
-  //   const adjustedX = (screenX - transform.x) / zoomLevel;
-  //   const adjustedY = (screenY - transform.y) / zoomLevel;
+  // //get image rect for drag calculations
+  // const [imageRect, setImageRect] = useState<DOMRect | null>(null);
 
-  //   return { x: adjustedX, y: adjustedY };
-  // };
-
-  // const handleSniperDragEnd = (position: { x: number; y: number }) => {
-  //   const { x, y } = screenToimageCoords(position.x, position.y);
-  //   setTempImageMarker([x, y]);
-  // };
+  const imageRect = document
+    .getElementById("image-container")
+    ?.getBoundingClientRect();
 
   return (
     <div className="h-screen">
@@ -357,7 +357,9 @@ export default function SplitView({
 
         <div>
           <Button
-            className={`${!isCoordTableHidden ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+            className={`${
+              !isCoordTableHidden ? "bg-blue-500" : "bg-gray-700"
+            } hover:bg-blue-800 dark:hover:bg-blue-800`}
             onClick={toggleCoordTableHidden}
           >
             <SewingPinFilledIcon /> Coordinates
@@ -365,9 +367,17 @@ export default function SplitView({
         </div>
 
         {helpMessage && (
-          <div className="max-w-sm flex flex-row cursor-pointer" onClick={() => setHelpMessage(null)}>
+          <div
+            className="max-w-sm flex flex-row cursor-pointer"
+            onClick={() => setHelpMessage(null)}
+          >
             <div className="text-2xl mr-3">
-              <QuestionMarkCircledIcon height={48} width={48} color="" className="fill-gray-800 dark:fill-white" />
+              <QuestionMarkCircledIcon
+                height={48}
+                width={48}
+                color=""
+                className="fill-gray-800 dark:fill-white"
+              />
             </div>
             <div dangerouslySetInnerHTML={{ __html: helpMessage }} />
           </div>
@@ -377,7 +387,7 @@ export default function SplitView({
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">
-          <Toaster 
+          <Toaster
             expand={false}
             position="bottom-right"
             richColors
@@ -416,7 +426,6 @@ export default function SplitView({
               addMapMarker([lat, lng]);
             }}
           >
-
             <GeolocateControl position="bottom-right" />
             <NavigationControl position="bottom-right" />
             <div className="absolute top-20">
@@ -518,16 +527,20 @@ export default function SplitView({
                   onConfirm={confirmPlacement}
                   onCancel={cancelPlacement}
                   draggable={true}
-                  // onDragEnd={handleSniperDragEnd}
+                  onDragEnd={handleSniperDragEnd}
+                  // rect={imageRect}
                 />
               </div>
             )}
           </div>
-          
         </Allotment.Pane>
       </Allotment>
 
-      <CoordinateList georefMarkerPairs={georefMarkerPairs} isHidden={isCoordTableHidden} toggleHidden={toggleCoordTableHidden} />
+      <CoordinateList
+        georefMarkerPairs={georefMarkerPairs}
+        isHidden={isCoordTableHidden}
+        toggleHidden={toggleCoordTableHidden}
+      />
     </div>
   );
 }

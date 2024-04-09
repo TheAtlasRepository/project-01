@@ -4,6 +4,7 @@
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
 
+import { set } from "lodash";
 import React, { useState } from "react";
 
 interface SniperScopeProps {
@@ -19,29 +20,53 @@ export default function SniperScope({
   onCancel,
   draggable,
   onDragEnd,
-}: SniperScopeProps) {
+}: // rect,
+SniperScopeProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [intialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!draggable) return;
     event.preventDefault();
+    // console.log(rect);
+    // if (!rect) return;
+    if (!draggable) return;
     setIsDragging(true);
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDragStart({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
   };
 
   const handleMouseMove = (event: React.MouseEvent) => {
     if (!isDragging) return;
-    console.log("handleMouseMove");
-    setPosition((prevPosition) => ({
-      x: prevPosition.x + event.movementX,
-      y: prevPosition.y + event.movementY,
-    }));
+    // console.log("handleMouseMove");
+    // setPosition((prevPosition) => ({
+    //   x: prevPosition.x + event.movementX,
+    //   y: prevPosition.y + event.movementY,
+    // }));
+    const rect = event.currentTarget.getBoundingClientRect();
+    let newX = event.clientX - rect.left;
+    let newY = event.clientY - rect.top;
+
+    // newX -= dragStart.x;
+    // newY -= dragStart.y;
+
+    // newX = Math.round(newX);
+    // newY = Math.round(newY);
+
+    setPosition({ x: newX, y: newY });
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setDragStart({ x: 0, y: 0 });
+
     if (onDragEnd) {
-      onDragEnd({ x: position.x, y: position.y });
+      onDragEnd(position);
     }
   };
 
@@ -54,7 +79,6 @@ export default function SniperScope({
             : "None",
         }}
         onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseUp}
       >
         <div
@@ -83,6 +107,7 @@ export default function SniperScope({
                 className="absolute -right-11 top-1/2 transform -translate-y-1/2 w-14 h-14 bg-black rounded-xl flex items-center justify-center
                 hover:bg-gray-800 cursor-move"
                 onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
               >
                 <MoveIcon className="text-white" />
               </div>
