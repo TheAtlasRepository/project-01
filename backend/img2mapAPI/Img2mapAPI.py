@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from img2mapAPI.routers import *
 from dotenv import load_dotenv, get_key
+from .utils.core.FileHelper import clearTmpFolder
 import os
 
 #setting the default environment to development
@@ -79,6 +80,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Clear files in the temp folder
+clearTmpFolder()
 
 # Default route
 @router.get("/")
