@@ -5,6 +5,7 @@ import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
 import EditorToolbar, { ViewPage } from "@/components/ui/EditorToolbar";
 import { Split } from "lucide-react";
+import { set } from "lodash";
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -88,10 +89,13 @@ export default function Editor() {
     setIsGeorefValid(valid);
   }, [georefMarkerPairs]);
 
-  // Remove all placed markers
+  // Resets all marker arrays and disables overlay view
   const resetMarkerRequest = () => {
-    // TODO: Implement the logic to reset all placed markers
-    return;
+    console.log("Resetting markers...");
+    setGeorefMarkerPairs([]);
+    setMapMarkers([]);
+    setImageMarkers([]);
+    setIsGeorefValid(false);
   };
 
   // Handle download requests

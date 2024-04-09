@@ -141,12 +141,13 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
 
     // Deletes all markers from project and applies the crop
     const deleteMarkersAndApplyCrop = () => {
-        deleteMarkersRequest();
+        removeMarkersApiRequest(); // local function
+        resetMarkerRequest(); // passed as prop
         handleApplyCrop();
     };
 
     // Contacts API and deletes all markers from project
-    const deleteMarkersRequest = () => {
+    const removeMarkersApiRequest = () => {
         console.log("Deleting project points...");
         axios.delete(`${BASE_URL}/project/${projectId}/points`, {
             headers: {
