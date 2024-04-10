@@ -357,7 +357,7 @@ export default function SplitView({
 
         <div>
           <Button
-            className={`${!isCoordTableHidden ? "bg-blue-500" : "bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800`}
+            className={`${!isCoordTableHidden ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
             onClick={toggleCoordTableHidden}
           >
             <SewingPinFilledIcon /> Coordinates
