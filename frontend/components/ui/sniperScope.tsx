@@ -3,8 +3,9 @@
  * @see https://v0.dev/t/Xd71eMQMsMo
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
-import React from "react";
-import Draggable from "react-draggable";
+
+import { set } from "lodash";
+import React, { useState } from "react";
 
 interface SniperScopeProps {
   //onconfirm click event type
@@ -12,7 +13,6 @@ interface SniperScopeProps {
   onCancel: () => void;
   draggable?: boolean;
   onDragEnd?: (position: { x: number; y: number }) => void;
-  position?: { x: number; y: number };
 }
 
 export default function SniperScope({
@@ -20,68 +20,116 @@ export default function SniperScope({
   onCancel,
   draggable,
   onDragEnd,
-  position,
 }: // rect,
 SniperScopeProps) {
-  const handleStop = (e: any, data: any) => {
-    if (!onDragEnd) return;
-    onDragEnd({ x: data.x, y: data.y });
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [intialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    // console.log(rect);
+    // if (!rect) return;
+    if (!draggable) return;
+    setIsDragging(true);
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDragStart({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (!isDragging) return;
+    // console.log("handleMouseMove");
+    // setPosition((prevPosition) => ({
+    //   x: prevPosition.x + event.movementX,
+    //   y: prevPosition.y + event.movementY,
+    // }));
+    const rect = event.currentTarget.getBoundingClientRect();
+    let newX = event.clientX - rect.left;
+    let newY = event.clientY - rect.top;
+
+    // newX -= dragStart.x;
+    // newY -= dragStart.y;
+
+    // newX = Math.round(newX);
+    // newY = Math.round(newY);
+
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDragStart({ x: 0, y: 0 });
+
+    if (onDragEnd) {
+      onDragEnd(position);
+    }
   };
 
   return (
-    <Draggable onStop={handleStop} position={position}>
-      <div className="flex">
-        <div>
-          <div
-            key="1"
-            className="relative bg-transparent w-[267px] h-[229px] flex items-center justify-center"
-          >
-            <div className="absolute inset-0 flex justify-center items-center">
-              <div className="w-[200px] h-[200px] rounded-full border-4 border-black relative">
-                <div className="absolute inset-0 flex justify-center ">
-                  <div className="w-0.5 h-full bg-black" />
-                </div>
-                <div className="absolute inset-0 flex items-center">
-                  <div className="h-0.5 w-full bg-black" />
-                </div>
+    <div className="flex">
+      <div
+        style={{
+          transform: draggable
+            ? `translate(${position.x}px, ${position.y}px)`
+            : "None",
+        }}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <div
+          key="1"
+          className="relative bg-transparent w-[267px] h-[229px] flex items-center justify-center"
+        >
+          <div className="absolute inset-0 flex justify-center items-center">
+            <div className="w-[200px] h-[200px] rounded-full border-4 border-black relative">
+              <div className="absolute inset-0 flex justify-center ">
+                <div className="w-0.5 h-full bg-black" />
+              </div>
+              <div className="absolute inset-0 flex items-center">
+                <div className="h-0.5 w-full bg-black" />
               </div>
             </div>
-            <div className="relative bg-transparent w-[267px] h-[229px] flex items-center justify-center">
-              <div className="w-[200px] h-[200px] rounded-full border-4 border-black relative">
-                <div className="absolute inset-0 flex justify-center">
-                  <div className="w-0.5 h-full bg-black" />
-                </div>
-                <div className="absolute inset-0 flex items-center">
-                  <div className="h-0.5 w-full bg-black" />
-                </div>
-                <div
-                  className="absolute -right-11 top-1/2 transform -translate-y-1/2 w-14 h-14 bg-black rounded-xl flex items-center justify-center
-                hover:bg-gray-800 cursor-move"
-                  // onMouseDown={handleMouseDown}
-                  // onMouseMove={handleMouseMove}
-                >
-                  <MoveIcon className="text-white" />
-                </div>
+          </div>
+          <div className="relative bg-transparent w-[267px] h-[229px] flex items-center justify-center">
+            <div className="w-[200px] h-[200px] rounded-full border-4 border-black relative">
+              <div className="absolute inset-0 flex justify-center">
+                <div className="w-0.5 h-full bg-black" />
               </div>
-              <div className="absolute bottom-2 transform translate-y-2/3 flex items-center justify-center">
-                <div
-                  className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800"
-                  onClick={onConfirm}
-                >
-                  <CheckIcon className="text-white" />
-                </div>
-                <div
-                  className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800"
-                  onClick={onCancel}
-                >
-                  <XIcon className="text-white" />
-                </div>
+              <div className="absolute inset-0 flex items-center">
+                <div className="h-0.5 w-full bg-black" />
+              </div>
+              <div
+                className="absolute -right-11 top-1/2 transform -translate-y-1/2 w-14 h-14 bg-black rounded-xl flex items-center justify-center
+                hover:bg-gray-800 cursor-move"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+              >
+                <MoveIcon className="text-white" />
+              </div>
+            </div>
+            <div className="absolute bottom-2 transform translate-y-2/3 flex items-center justify-center">
+              <div
+                className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800"
+                onClick={onConfirm}
+              >
+                <CheckIcon className="text-white" />
+              </div>
+              <div
+                className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800"
+                onClick={onCancel}
+              >
+                <XIcon className="text-white" />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </Draggable>
+    </div>
   );
 }
 
