@@ -105,3 +105,78 @@ export const initalGeorefimage = async (projectId: number): Promise<void> => {
     console.log("Initial georefimage done");
   }
 };
+
+/**
+ * DELETE /project/{projectId}
+ * Deletes a project and its related data
+ * @param projectId - The ID of the project to delete
+ * @returns {Promise<void>} A Promise that resolves when the project is deleted successfully
+ * @throws {Error} Will throw an error if the request fails
+ */
+export const deleteProject = async (projectId: number): Promise<void> => {
+  try {
+    await axios.delete(`${BASE_URL}/project/${projectId}`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
+  } finally {
+    console.log("Project deleted");
+  }
+};
+
+/**
+ * DELETE /project/{projectId}/point
+ * Deletes all markers from a project
+ * @param projectId - The ID of the project to delete markers from
+ * @returns {Promise<void>} A Promise that resolves when all markers are deleted successfully
+ * @throws {Error} Will throw an error if the request fails
+ */
+export const deleteAllMarkers = async (projectId: number): Promise<void> => {
+  try {
+    await axios.delete(`${BASE_URL}/project/${projectId}/point`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
+  } finally {
+    console.log("All markers deleted");
+  }
+};
+
+/**
+ * POST /converter/cropPng
+ * Crops a PNG using the provided coordinates and image.
+ *
+ * @param {FormData} formData - FormData object containing 'file', blob, 'filename'
+ * @param {number} p1x - The x-coordinate of the first point.
+ * @param {number} p1y - The y-coordinate of the first point.
+ * @param {number} p2x - The x-coordinate of the second point.
+ * @param {number} p2y - The y-coordinate of the second point.
+ * @returns {Promise<void>} A Promise that resolves when the image is cropped successfully.
+ * @throws {Error} Will throw an error if the request fails.
+ */
+export const cropImage = async (formData: FormData, p1x: number, p1y: number, p2x: number, p2y: number): Promise<string> => {
+  try {
+    const response = await axios.post(`${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      responseType: 'blob'
+    });
+
+    // Convert the response data to a Blob, create a Blob URL and return the URL
+    const newBlob = new Blob([response.data], { type: 'image/png' });
+    const blobUrl = URL.createObjectURL(newBlob);
+    return blobUrl;
+
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
+  } finally {
+    console.log("Image cropped");
+  }
+};
