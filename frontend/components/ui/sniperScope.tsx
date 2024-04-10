@@ -29,7 +29,7 @@ SniperScopeProps) {
   };
 
   return (
-    <Draggable onStop={handleStop} position={position}>
+    <Draggable onStop={handleStop} position={position} disabled={!draggable}>
       <div className="flex">
         <div>
           <div
