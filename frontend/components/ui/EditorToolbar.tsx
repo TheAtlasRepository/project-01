@@ -11,6 +11,7 @@ import {
 import FormModal from "@/components/ui/FormModal";
 import WarningExitModal from '@/components/ui/WarningExitModal';
 import { ViewVerticalIcon, StackIcon, CropIcon, FileTextIcon, DownloadIcon, ExitIcon } from '@radix-ui/react-icons'
+import * as api from "@/components/component/projectAPI";
 
 export type ViewPage = 'sideBySide' | 'overlay' | 'coordTable' | 'crop'; // Pages in the editor, add more pages as needed
 
@@ -33,6 +34,9 @@ const EditorToolbar = (props: EditorToolbarProps) => {
     const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
     const [hasPlacedMarker, setHasPlacedMarker] = useState(true); // State to check if the user has placed a marker
     const [isWarningExitModalOpen, setIsWarningExitModalOpen] = useState(false);
+
+    // Base URL for the backend API from .env
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     const handleButtonClick = (page: ViewPage) => {
         // If the user clicks on the active page, go to the last active page and return
@@ -70,10 +74,15 @@ const EditorToolbar = (props: EditorToolbarProps) => {
         // Exit the editor
         console.log("Requested to exit editor!");
         
-        //TODO: Make API call to delete the project and redirect the user
-
-        // Redirect the user to the homepage
-        window.location.href = "/";
+        // Make API request to delete current project
+        api.deleteProject(props.projectId)
+            .then(() => {
+                // Redirect the user to the homepage
+                window.location.href = "/";
+            })
+            .catch(error => {
+                console.error('Error deleting data: ', error);
+            });        
     }
 
     return (

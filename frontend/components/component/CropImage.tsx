@@ -1,22 +1,54 @@
 import ReactCrop, { Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import CropModal from "@/components/ui/CropModal";
-import axios from 'axios';
+import * as api from "@/components/component/projectAPI";
+import { create } from 'lodash';
 
 type CropImageProps = {
     onCrop: () => void;
     resetMarkerRequest: () => void;
     placedMarkerAmount?: number;
+    projectId: number;
 };
 
-export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmount }: CropImageProps) {
+export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmount, projectId }: CropImageProps) {
     const [crop, setCrop] = useState<Crop>(); 
     const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
     const [applyButtonText, setApplyButtonText] = useState('Apply Crop');
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+
+    useEffect(() => {
+        setCrop({
+            unit: '%',
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+        });
+    }, []);
+
+
+    const updateImageApi = async(url: string) => {
+        // Fetch image Blob from the blob URL
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        // Create a FormData and add the blob file
+        const formData = new FormData();
+        formData.append('file', blob, 'filename');
+
+        // Upload the cropped image to the server
+        await api.uploadImage(projectId, formData)
+            .then(() => {
+                console.log("Image uploaded");
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+            });
+    }
 
     // When the user requests to apply the crop
     const handleApplyCrop = async () => {
@@ -68,52 +100,35 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
             const p2x = Math.round((crop.x + crop.width) * scaleFactorX);
             const p2y = Math.round((crop.y + crop.height) * scaleFactorY);
 
-            // Fetch the Blob from the blob URL
+            // Fetch image Blob from the blob URL
             const response = await fetch(imageSrc);
             const blob = await response.blob();
 
             // Create a FormData and add the blob file
             const formData = new FormData();
             formData.append('file', blob, 'filename');
+            
+            api.cropImage(formData, p1x, p1y, p2x, p2y)
+                .then((blobUrl) => {
+                    // Tell the current component and parent component that the image has been cropped
+                    window.localStorage.setItem("pdfData", blobUrl);
+                    setImageSrc(localStorage.getItem("pdfData")!);
+                    updateImageApi(localStorage.getItem("pdfData")!);
+                    onCrop();
 
-            // Base URL for the backend API from .env
-            const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-            //Try to send a request to the API
-            try {
-                // Send a POST request to the API with the coordinates and file
-                const response = await axios.post(`${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    responseType: 'blob' // Tell axios to expect a Blob in the response
+                    // Reset the crop state, use max width and height
+                    setCrop({
+                        unit: '%',
+                        x: 0,
+                        y: 0,
+                        width: 100,
+                        height: 100,
+                    });
+                })
+                .catch((error) => {
+                    // handle error
+                    console.error("Error:", error.message);
                 });
-
-                // Convert the response data to a Blob
-                const newBlob = new Blob([response.data], { type: 'image/png' });
-
-                // Convert the new Blob to a Blob URL
-                const blobUrl = URL.createObjectURL(newBlob);
-
-                // Update the source URL of the image
-                window.localStorage.setItem("pdfData", blobUrl);
-                
-                // Tell the current component and parent component that the image has been cropped
-                setImageSrc(localStorage.getItem("pdfData")!);
-                onCrop();
-
-                // Reset the crop state, use max width and height
-                setCrop({
-                    unit: '%',
-                    x: 0,
-                    y: 0,
-                    width: 100,
-                    height: 100,
-                });
-            } catch (error) {
-                // Log any errors
-                console.error('Error:', error);
-            }
 
             // Reset the apply button text
             setApplyButtonText('Apply Crop');
@@ -133,6 +148,21 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
             height: 100,
         });
         onCrop();
+    };
+
+    // Deletes all markers from project and applies the crop
+    const deleteMarkersAndApplyCrop = () => {
+        console.log("Deleting project points...");
+        api.deleteAllMarkers(projectId)
+            .then(() => {
+                console.log("All markers deleted");
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+            });   
+
+        resetMarkerRequest(); // passed as prop
+        handleApplyCrop();
     };
 
     // Shows the crop modal if there are placed markers, otherwise just applies the crop
@@ -173,7 +203,7 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
                 >
                     {applyButtonText}
                 </Button>
-                {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => handleApplyCrop()}/>}
+                {isCropModalOpen && <CropModal onCancel={() => setIsCropModalOpen(false)} onConfirm={() => deleteMarkersAndApplyCrop()}/>}
             </div>
         </div>
     );

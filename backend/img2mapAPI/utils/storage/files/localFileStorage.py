@@ -2,11 +2,15 @@ import os
 import shutil
 import tempfile
 from .fileStorage import FileStorage
+from ...core.FileHelper import clearTmpFolder
 from fastapi import UploadFile
 
 _tempPath = "./temp"
 if not os.path.exists(_tempPath):
     os.makedirs(_tempPath)
+
+# Clear files in the temp folder
+clearTmpFolder()
 
 #File storage using the local file system
 class LocalFileStorage(FileStorage):

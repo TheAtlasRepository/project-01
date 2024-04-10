@@ -86,5 +86,6 @@ async def root():
     return {"message": "Welcome to the georeferencing API. Please refer to the documentation for more information. at /docs or /redoc"}
 
 #adding the routers to the app
-app.router.include_router(converters.router, prefix="/converter", tags=["converter"])
+app.router.include_router(converters.router, prefix="/converter", tags=["File Converting & Editing"])
+app.router.include_router(server.router, prefix="/serverInfo", tags=["Server Info"])
 app.router.include_router(georefProject.router)
