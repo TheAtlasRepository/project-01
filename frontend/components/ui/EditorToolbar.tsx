@@ -11,7 +11,7 @@ import {
 import FormModal from "@/components/ui/FormModal";
 import WarningExitModal from '@/components/ui/WarningExitModal';
 import { ViewVerticalIcon, StackIcon, CropIcon, FileTextIcon, DownloadIcon, ExitIcon } from '@radix-ui/react-icons'
-import axios from 'axios';
+import * as api from "@/components/component/projectAPI";
 
 export type ViewPage = 'sideBySide' | 'overlay' | 'coordTable' | 'crop'; // Pages in the editor, add more pages as needed
 
@@ -75,21 +75,14 @@ const EditorToolbar = (props: EditorToolbarProps) => {
         console.log("Requested to exit editor!");
         
         // Make API request to delete current project
-        console.log("Deleting project...");
-        axios.delete(`${BASE_URL}/project/${props.projectId}`, {
-            headers: {
-                'accept': 'application/json'
-            }
-        })
-        .then(response => {
-            console.log(response.data);
-        })
-        .catch(error => {
-            console.error('Error deleting data: ', error);
-        });
-
-        // Redirect the user to the homepage
-        window.location.href = "/";
+        api.deleteProject(props.projectId)
+            .then(() => {
+                // Redirect the user to the homepage
+                window.location.href = "/";
+            })
+            .catch(error => {
+                console.error('Error deleting data: ', error);
+            });        
     }
 
     return (
