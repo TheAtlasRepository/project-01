@@ -21,7 +21,6 @@ import {
   QuestionMarkCircledIcon,
   SewingPinFilledIcon,
 } from "@radix-ui/react-icons";
-import { List } from "lucide-react";
 import { set } from "lodash";
 
 interface SplitViewProps {
@@ -200,7 +199,6 @@ export default function SplitView({
       return;
     }
     setTempImageMarker([x, y]);
-
     setWaitingForImageMarker(false);
     setWaitingForMapMarker(false);
   };
@@ -336,19 +334,27 @@ export default function SplitView({
     }
   };
 
+  //controlled position for sniper scope
+  //used to reset the dragging transformations to zero when the drag ends
+  const [controlledPosition, setControlledPosition] = useState({ x: 0, y: 0 });
+
+  // handle drag end for sniper scope on imageMap
   const handleSniperDragEnd = (position: { x: number; y: number }) => {
-    setTempImageMarker([
-      tempImageMarker![0] + position.x,
-      tempImageMarker![1] + position.y,
-    ]);
+    if (!tempImageMarker) return;
+    // add the dragged distance to the original tempImageMarker position
+    // to get the new position of the marker
+    let x = position.x + tempImageMarker[0];
+    let y = position.y + tempImageMarker[1];
+
+    // round to nearest whole pixel
+    Math.round(x);
+    Math.round(y);
+
+    // reset transform position to zero
+    setControlledPosition({ x: 0, y: 0 });
+    // set the new position of the marker
+    setTempImageMarker([x, y]);
   };
-
-  // //get image rect for drag calculations
-  // const [imageRect, setImageRect] = useState<DOMRect | null>(null);
-
-  const imageRect = document
-    .getElementById("image-container")
-    ?.getBoundingClientRect();
 
   return (
     <div className="h-screen">
@@ -524,18 +530,17 @@ export default function SplitView({
                 }}
               >
                 <SniperScope
+                  position={controlledPosition}
                   onConfirm={confirmPlacement}
                   onCancel={cancelPlacement}
                   draggable={true}
                   onDragEnd={handleSniperDragEnd}
-                  // rect={imageRect}
                 />
               </div>
             )}
           </div>
         </Allotment.Pane>
       </Allotment>
-
       <CoordinateList
         georefMarkerPairs={georefMarkerPairs}
         isHidden={isCoordTableHidden}
