@@ -1,6 +1,6 @@
 import ReactCrop, { Crop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import CropModal from "@/components/ui/CropModal";
 import * as api from "@/components/component/projectAPI";
@@ -19,6 +19,16 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
     const [applyButtonText, setApplyButtonText] = useState('Apply Crop');
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+
+    useEffect(() => {
+        setCrop({
+            unit: '%',
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+        });
+    }, []);
 
 
     const updateImageApi = async(url: string) => {

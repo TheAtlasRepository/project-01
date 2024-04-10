@@ -22,9 +22,9 @@ interface GeorefMarkerPair {
 
 const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHidden, toggleHidden }) => {
   return (
-      <Draggable handle=".handle" defaultClassName={`rounded-lg fixed max-w-2xl z-[999] top-20 right-2 ${isHidden ? 'hidden' : ''}`}>
+      <Draggable bounds="body" handle=".handle" defaultClassName={`rounded-lg fixed max-w-2xl z-[999] top-20 right-2 ${isHidden ? 'hidden' : ''}`}>
         <div>
-          <div className="bg-gray-800 p-2 pl-4 flex justify-between">
+          <div className="bg-gray-800 dark:bg-gray-900 dark:text-white p-2 pl-4 flex justify-between">
             <div>
               Coordinates
             </div>
@@ -37,7 +37,7 @@ const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHi
               </div>
             </div>
           </div>
-          <Table>
+          <Table className="dark:bg-gray-700">
             <TableHeader>
               <TableRow>
                 <TableHead>Longitude</TableHead>
