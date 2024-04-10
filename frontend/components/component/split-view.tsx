@@ -21,7 +21,6 @@ import {
   QuestionMarkCircledIcon,
   SewingPinFilledIcon,
 } from "@radix-ui/react-icons";
-import { set } from "lodash";
 
 interface SplitViewProps {
   projectId: number;
