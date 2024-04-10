@@ -152,7 +152,7 @@ export const deleteAllMarkers = async (projectId: number): Promise<void> => {
  * POST /converter/cropPng
  * Crops a PNG using the provided coordinates and image.
  *
- * @param {string} imageSrc - The source URL of the (blob) image to crop.
+ * @param {FormData} formData - FormData object containing 'file', blob, 'filename'
  * @param {number} p1x - The x-coordinate of the first point.
  * @param {number} p1y - The y-coordinate of the first point.
  * @param {number} p2x - The x-coordinate of the second point.
@@ -160,16 +160,7 @@ export const deleteAllMarkers = async (projectId: number): Promise<void> => {
  * @returns {Promise<void>} A Promise that resolves when the image is cropped successfully.
  * @throws {Error} Will throw an error if the request fails.
  */
-export const cropImage = async (imageSrc: string, p1x: number, p1y: number, p2x: number, p2y: number): Promise<void> => {
-  // Fetch the Blob from the blob URL
-  const response = await fetch(imageSrc);
-  const blob = await response.blob();
-
-  // Create a FormData and add the blob file
-  const formData = new FormData();
-  formData.append('file', blob, 'filename');
-
-  // Make API request to crop the image
+export const cropImage = async (formData: FormData, p1x: number, p1y: number, p2x: number, p2y: number): Promise<string> => {
   try {
     const response = await axios.post(`${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`, formData, {
       headers: {
@@ -178,10 +169,11 @@ export const cropImage = async (imageSrc: string, p1x: number, p1y: number, p2x:
       responseType: 'blob'
     });
 
-    // Convert the response data to a Blob, create a Blob URL and store it in local storage
+    // Convert the response data to a Blob, create a Blob URL and return the URL
     const newBlob = new Blob([response.data], { type: 'image/png' });
     const blobUrl = URL.createObjectURL(newBlob);
-    window.localStorage.setItem("pdfData", blobUrl);
+    return blobUrl;
+
   } catch (error) {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   } finally {

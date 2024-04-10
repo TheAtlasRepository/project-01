@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import CropModal from "@/components/ui/CropModal";
 import * as api from "@/components/component/projectAPI";
+import { create } from 'lodash';
 
 type CropImageProps = {
     onCrop: () => void;
@@ -19,8 +20,25 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
-    // Base URL for the backend API from .env
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const updateImageApi = async(url: string) => {
+        // Fetch image Blob from the blob URL
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        // Create a FormData and add the blob file
+        const formData = new FormData();
+        formData.append('file', blob, 'filename');
+
+        // Upload the cropped image to the server
+        await api.uploadImage(projectId, formData)
+            .then(() => {
+                console.log("Image uploaded");
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+            });
+    }
 
     // When the user requests to apply the crop
     const handleApplyCrop = async () => {
@@ -72,11 +90,20 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
             const p2x = Math.round((crop.x + crop.width) * scaleFactorX);
             const p2y = Math.round((crop.y + crop.height) * scaleFactorY);
 
+            // Fetch image Blob from the blob URL
+            const response = await fetch(imageSrc);
+            const blob = await response.blob();
+
+            // Create a FormData and add the blob file
+            const formData = new FormData();
+            formData.append('file', blob, 'filename');
             
-            api.cropImage(imageSrc, p1x, p1y, p2x, p2y)
-                .then(() => {
+            api.cropImage(formData, p1x, p1y, p2x, p2y)
+                .then((blobUrl) => {
                     // Tell the current component and parent component that the image has been cropped
+                    window.localStorage.setItem("pdfData", blobUrl);
                     setImageSrc(localStorage.getItem("pdfData")!);
+                    updateImageApi(localStorage.getItem("pdfData")!);
                     onCrop();
 
                     // Reset the crop state, use max width and height
