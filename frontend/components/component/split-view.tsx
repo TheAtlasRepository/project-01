@@ -15,10 +15,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
-import { Toaster, toast } from 'sonner'
+import { Toaster, toast } from "sonner";
 import MapToolbar from "@/components/ui/MapToolbar";
-import { QuestionMarkCircledIcon, SewingPinFilledIcon } from '@radix-ui/react-icons'
-import { List } from "lucide-react";
+import {
+  QuestionMarkCircledIcon,
+  SewingPinFilledIcon,
+} from "@radix-ui/react-icons";
 
 interface SplitViewProps {
   projectId: number;
@@ -79,9 +81,6 @@ export default function SplitView({
 
   const [waitingForImageMarker, setWaitingForImageMarker] = useState(true);
   const [waitingForMapMarker, setWaitingForMapMarker] = useState(true);
-
-  // const [activeMapMarkerIndex, setActiveMapMarkerIndex] = useState<number | null>(null);
-  // const [activeImageMarkerIndex, setActiveImageMarkerIndex] = useState<number | null>(null);
 
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(
@@ -199,7 +198,6 @@ export default function SplitView({
       return;
     }
     setTempImageMarker([x, y]);
-
     setWaitingForImageMarker(false);
     setWaitingForMapMarker(false);
   };
@@ -264,12 +262,14 @@ export default function SplitView({
         .then((data) => {
           // Handle successful API response
           console.log("Success:", data);
-          toast.success('Pair added successfully! Place another marker to add another pair.');
+          toast.success(
+            "Pair added successfully! Place another marker to add another pair."
+          );
         })
         .catch((error) => {
           // Handle API call error
           console.error("Error:", error.message);
-          toast.error('Error adding pair. Please try again.');
+          toast.error("Error adding pair. Please try again.");
         })
         .finally(() => {
           // This reset allows for a new API call if further valid pairs are added
@@ -333,22 +333,47 @@ export default function SplitView({
     }
   };
 
-  // const handleDragEnd = (newPosition: { x: number; y: number }) => {
-  //   //ondragend updates the tempImageMarker state with the new position
-  //   setTempImageMarker([newPosition.x, newPosition.y]);
-  // };
+  //controlled position for sniper scope
+  //used to reset the dragging transformations to zero when the drag ends
+  const [controlledPosition, setControlledPosition] = useState({ x: 0, y: 0 });
 
-  // const screenToimageCoords = (screenX: number, screenY: number) => {
-  //   const adjustedX = (screenX - transform.x) / zoomLevel;
-  //   const adjustedY = (screenY - transform.y) / zoomLevel;
+  // handle drag end for sniper scope on imageMap
+  const handleSniperDragEnd = (position: { x: number; y: number }) => {
+    if (!tempImageMarker) return;
+    // add the dragged distance to the original tempImageMarker position
+    // to get the new position of the marker
+    let x = position.x / zoomLevel + tempImageMarker[0];
+    let y = position.y / zoomLevel + tempImageMarker[1];
 
-  //   return { x: adjustedX, y: adjustedY };
-  // };
+    // round to nearest whole pixel
+    x = Math.round(x);
+    y = Math.round(y);
 
-  // const handleSniperDragEnd = (position: { x: number; y: number }) => {
-  //   const { x, y } = screenToimageCoords(position.x, position.y);
-  //   setTempImageMarker([x, y]);
-  // };
+    // reset transform position to zero
+    setControlledPosition({ x: 0, y: 0 });
+    // set the new position of the marker
+    setTempImageMarker([x, y]);
+  };
+
+  useEffect(() => {
+    // if sniperscope position is outside bounds of image, reset to closest edge
+    if (tempImageMarker) {
+      const x = tempImageMarker[0];
+      const y = tempImageMarker[1];
+      if (x < 0) {
+        setTempImageMarker([0, y]);
+      }
+      if (y < 0) {
+        setTempImageMarker([x, 0]);
+      }
+      if (x > imageSize.width) {
+        setTempImageMarker([imageSize.width, y]);
+      }
+      if (y > imageSize.height) {
+        setTempImageMarker([x, imageSize.height]);
+      }
+    }
+  }, [tempImageMarker, imageSize]);
 
   return (
     <div className="h-screen">
@@ -357,7 +382,11 @@ export default function SplitView({
 
         <div>
           <Button
-            className={`${!isCoordTableHidden ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
+            className={`${
+              !isCoordTableHidden
+                ? "bg-blue-500 dark:bg-blue-500"
+                : "bg-gray-700 dark:bg-gray-700"
+            } hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
             onClick={toggleCoordTableHidden}
           >
             <SewingPinFilledIcon /> Coordinates
@@ -365,9 +394,17 @@ export default function SplitView({
         </div>
 
         {helpMessage && (
-          <div className="max-w-sm flex flex-row cursor-pointer" onClick={() => setHelpMessage(null)}>
+          <div
+            className="max-w-sm flex flex-row cursor-pointer"
+            onClick={() => setHelpMessage(null)}
+          >
             <div className="text-2xl mr-3">
-              <QuestionMarkCircledIcon height={48} width={48} color="" className="fill-gray-800 dark:fill-white" />
+              <QuestionMarkCircledIcon
+                height={48}
+                width={48}
+                color=""
+                className="fill-gray-800 dark:fill-white"
+              />
             </div>
             <div dangerouslySetInnerHTML={{ __html: helpMessage }} />
           </div>
@@ -377,7 +414,7 @@ export default function SplitView({
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">
-          <Toaster 
+          <Toaster
             expand={false}
             position="bottom-right"
             richColors
@@ -416,7 +453,6 @@ export default function SplitView({
               addMapMarker([lat, lng]);
             }}
           >
-
             <GeolocateControl position="bottom-right" />
             <NavigationControl position="bottom-right" />
             <div className="absolute top-20">
@@ -515,19 +551,22 @@ export default function SplitView({
                 }}
               >
                 <SniperScope
+                  position={controlledPosition}
                   onConfirm={confirmPlacement}
                   onCancel={cancelPlacement}
                   draggable={true}
-                  // onDragEnd={handleSniperDragEnd}
+                  onDragEnd={handleSniperDragEnd}
                 />
               </div>
             )}
           </div>
-          
         </Allotment.Pane>
       </Allotment>
-
-      <CoordinateList georefMarkerPairs={georefMarkerPairs} isHidden={isCoordTableHidden} toggleHidden={toggleCoordTableHidden} />
+      <CoordinateList
+        georefMarkerPairs={georefMarkerPairs}
+        isHidden={isCoordTableHidden}
+        toggleHidden={toggleCoordTableHidden}
+      />
     </div>
   );
 }
