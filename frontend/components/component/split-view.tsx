@@ -355,6 +355,26 @@ export default function SplitView({
     setTempImageMarker([x, y]);
   };
 
+  useEffect(() => {
+    // if sniperscope position is outside bounds of image, reset to closest edge
+    if (tempImageMarker) {
+      const x = tempImageMarker[0];
+      const y = tempImageMarker[1];
+      if (x < 0) {
+        setTempImageMarker([0, y]);
+      }
+      if (y < 0) {
+        setTempImageMarker([x, 0]);
+      }
+      if (x > imageSize.width) {
+        setTempImageMarker([imageSize.width, y]);
+      }
+      if (y > imageSize.height) {
+        setTempImageMarker([x, imageSize.height]);
+      }
+    }
+  }, [tempImageMarker, imageSize]);
+
   return (
     <div className="h-screen">
       <MapToolbar>

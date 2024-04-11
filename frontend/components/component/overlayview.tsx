@@ -83,7 +83,7 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
           style={{ width: "100%", height: "100%" }}
           mapStyle={mapStyle}
           mapboxAccessToken={mapboxToken}
-          minZoom={4}
+          minZoom={5}
           maxZoom={19}
         >
           <GeolocateControl position="bottom-right" />
