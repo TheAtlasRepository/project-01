@@ -8,12 +8,13 @@ import { create } from 'lodash';
 
 type CropImageProps = {
     onCrop: () => void;
+    onCancelCrop: () => void;
     resetMarkerRequest: () => void;
-    placedMarkerAmount?: number;
+    placedMarkerAmount: number;
     projectId: number;
 };
 
-export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmount, projectId }: CropImageProps) {
+export default function CropImage({ onCrop, onCancelCrop, resetMarkerRequest, placedMarkerAmount, projectId }: CropImageProps) {
     const [crop, setCrop] = useState<Crop>(); 
     const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
     const [applyButtonText, setApplyButtonText] = useState('Apply Crop');
@@ -147,7 +148,7 @@ export default function CropImage({ onCrop, resetMarkerRequest, placedMarkerAmou
             width: 100,
             height: 100,
         });
-        onCrop();
+        onCancelCrop();
     };
 
     // Deletes all markers from project and applies the crop
