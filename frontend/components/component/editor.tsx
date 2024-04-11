@@ -3,9 +3,11 @@ import SplitView from "./split-view";
 import CropImage from "./CropImage";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
-import EditorToolbar, { ViewPage } from "@/components/ui/EditorToolbar";
+import EditorToolbar from "@/components/ui/EditorToolbar";
 import { Split } from "lucide-react";
 import { set } from "lodash";
+
+export type ViewPage = 'sideBySide' | 'overlay' | 'crop'; // Pages in the editor, add more pages as needed
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
@@ -13,7 +15,9 @@ export default function Editor() {
   const [isAutoSaved, setIsAutoSaved] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
   const [activePage, setActivePage] = useState<ViewPage>('sideBySide');
+  const [lastActivePage, setLastActivePage] = useState<ViewPage>('sideBySide');
   const [isGeorefValid, setIsGeorefValid] = useState(false);
+  const [markerCount, setMarkerCount] = useState(0);
 
   // Array containing pairs of georeferenced markers and their corresponding image markers
   const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
@@ -27,6 +31,10 @@ export default function Editor() {
     { pixelCoordinates: [number, number] }[]
   >([]);
 
+  // Update marker count when the markers change
+  useEffect(() => {
+    setMarkerCount(mapMarkers.length + imageMarkers.length);
+  }, [mapMarkers, imageMarkers]);
 
   //function to add a new project
   const addProject = (name: string) => {
@@ -75,10 +83,30 @@ export default function Editor() {
     setIsAutoSaved(true);
   };
 
+  // Set active view
+  const setViewPage = (page: ViewPage) => {
+    // If the user clicks on the active page, go to the last active page and return
+    if (page === activePage) {
+      setLastActivePage(page);
+      setActivePage(lastActivePage);
+      return;
+    }
+
+    // If the user clicks on a different page, set the current page, and set new active page
+    setLastActivePage(activePage); // Save the last active page
+    setActivePage(page); // Set the active page in the toolbar
+  }
+
   // Update the image source when the user has cropped the image, and close the crop tool
   const handleCrop = () => {
     setImageSrc(localStorage.getItem("pdfData")!);
   };
+
+  const cancelCrop = () => {
+    // Reset the image source to the original image and go back to old view
+    setImageSrc(localStorage.getItem("pdfData")!);
+    setViewPage(lastActivePage);
+  }
   
   // Check if there are atleast 3 markers to display the coordinates table and the values are not 0, and set the state
   useEffect(() => {
@@ -112,12 +140,13 @@ export default function Editor() {
     <div className="flex flex-col h-screen bg-white">
       <EditorToolbar
         activePage={activePage}
-        setActivePage={setActivePage}
+        onButtonClick={setViewPage}
         handleDownload={handleDownload}
         isAutoSaved={isAutoSaved}
         projectName={projectName}
         projectId={projectId}
         setProjectName={setProjectName}
+        placedMarkerAmount={markerCount}
         hasBeenReferenced={isGeorefValid}
       />
 
@@ -144,9 +173,10 @@ export default function Editor() {
             <div className="w-1/2 flex justify-center items-center">
               <CropImage
                 onCrop={handleCrop}
+                onCancelCrop={cancelCrop}
                 resetMarkerRequest={resetMarkerRequest}
                 projectId={projectId}
-                placedMarkerAmount={1} // Todo: Use the actual number of placed markers
+                placedMarkerAmount={markerCount}
               />
             </div>
           </div>
