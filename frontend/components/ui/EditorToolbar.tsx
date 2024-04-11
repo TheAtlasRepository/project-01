@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { use } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   OpenBook,
@@ -12,45 +12,32 @@ import FormModal from "@/components/ui/FormModal";
 import WarningExitModal from '@/components/ui/WarningExitModal';
 import { ViewVerticalIcon, StackIcon, CropIcon, FileTextIcon, DownloadIcon, ExitIcon } from '@radix-ui/react-icons'
 import * as api from "@/components/component/projectAPI";
-
-export type ViewPage = 'sideBySide' | 'overlay' | 'coordTable' | 'crop'; // Pages in the editor, add more pages as needed
+import { set } from 'lodash';
+import { ViewPage } from "@/components/component/editor";
 
 interface EditorToolbarProps {
     activePage: ViewPage;
-    setActivePage: React.Dispatch<React.SetStateAction<ViewPage>>;
+    onButtonClick: (page: ViewPage) => void;
     handleDownload: () => void;
     isAutoSaved: boolean;
     projectName: string;
     projectId: number;
     setProjectName: (value: string) => void;
     hasBeenReferenced: boolean;
-    //hasPlacedMarker: boolean;
+    placedMarkerAmount: number;
 }
 
 const EditorToolbar = (props: EditorToolbarProps) => {
-
     const [activePage, setActivePage] = React.useState<ViewPage>(props.activePage); // Current page
-    const [lastActivePage, setLastActivePage] = React.useState<ViewPage>(props.activePage); // Last active page (for remembering where the user were)
     const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
-    const [hasPlacedMarker, setHasPlacedMarker] = useState(true); // State to check if the user has placed a marker
     const [isWarningExitModalOpen, setIsWarningExitModalOpen] = useState(false);
 
-    // Base URL for the backend API from .env
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    useEffect(() => {
+        setActivePage(props.activePage);
+    }, [props.activePage]);
 
     const handleButtonClick = (page: ViewPage) => {
-        // If the user clicks on the active page, go to the last active page and return
-        if (page === activePage) {
-            setLastActivePage(page);
-            setActivePage(lastActivePage);
-            props.setActivePage(lastActivePage);
-            return;
-        }
-
-        // If the user clicks on a different page, set the current page, and set new active page
-        setLastActivePage(activePage); // Save the last active page
-        setActivePage(page); // Set the active page in the toolbar
-        props.setActivePage(page); // Set the view page in the parent component
+        props.onButtonClick(page);
     };
 
     // Handle feedback button click and show the feedback form modal
@@ -61,7 +48,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
     // When the user clicks the Exit Editor button
     const handleExitEditor = () => {
         // If the user has placed a marker, show a warning modal
-        if (hasPlacedMarker) {
+        if (props.placedMarkerAmount && props.placedMarkerAmount > 0) {
             setIsWarningExitModalOpen(true);
             return;
         }
@@ -118,16 +105,6 @@ const EditorToolbar = (props: EditorToolbarProps) => {
                     <StackIcon className='text-white mr-2' width={20} height={20}/>
                     Overlay
                 </Button>
-                {/*<Button
-                    className={`${
-                        props.isCoordList ? "bg-blue-500" : "bg-gray-700"
-                    } hover:bg-blue-800 dark:hover:bg-blue-800`}
-                    variant="toggle"
-                    onClick={props.handleToggleCoordTable}
-                >
-                    <TargetIcon className="text-gray-500" />
-                    <span>Coordinates</span>
-                </Button>*/}
                 <Button
                     className={`${activePage === 'crop' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('crop')}
