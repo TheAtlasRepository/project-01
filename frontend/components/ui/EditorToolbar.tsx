@@ -1,18 +1,9 @@
-import React, { use } from 'react';
-import { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import {
-  OpenBook,
-  TargetIcon,
-  WindowsIcon,
-  SelectionIcon,
-  TextDocumentIcon,
-} from "@/components/ui/icons";
 import FormModal from "@/components/ui/FormModal";
 import WarningExitModal from '@/components/ui/WarningExitModal';
 import { ViewVerticalIcon, StackIcon, CropIcon, FileTextIcon, DownloadIcon, ExitIcon } from '@radix-ui/react-icons'
 import * as api from "@/components/component/projectAPI";
-import { set } from 'lodash';
 import { ViewPage } from "@/components/component/editor";
 
 interface EditorToolbarProps {
