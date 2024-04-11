@@ -28,14 +28,10 @@ interface EditorToolbarProps {
 }
 
 const EditorToolbar = (props: EditorToolbarProps) => {
-    const [activePage, setActivePage] = React.useState<ViewPage>(props.activePage); // Current page
     const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
     const [isWarningExitModalOpen, setIsWarningExitModalOpen] = useState(false);
 
-    useEffect(() => {
-        setActivePage(props.activePage);
-    }, [props.activePage]);
-
+    // Handle button click to change the view page
     const handleButtonClick = (page: ViewPage) => {
         props.onButtonClick(page);
     };
@@ -91,14 +87,14 @@ const EditorToolbar = (props: EditorToolbarProps) => {
             {/* Center Group */}
             <div className="flex items-center gap-4">
                 <Button
-                    className={`${activePage === 'sideBySide' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
+                    className={`${props.activePage === 'sideBySide' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('sideBySide')}
                 >
                     <ViewVerticalIcon className='text-white mr-2' width={20} height={20}/>
                     Split View
                 </Button>
                 <Button
-                    className={`${activePage === 'overlay' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
+                    className={`${props.activePage === 'overlay' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('overlay')}
                     disabled={!props.hasBeenReferenced}
                 >
@@ -106,7 +102,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
                     Overlay
                 </Button>
                 <Button
-                    className={`${activePage === 'crop' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
+                    className={`${props.activePage === 'crop' ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
                     onClick={() => handleButtonClick('crop')}
                 >
                     <CropIcon className='text-white mr-2' width={20} height={20}/>
