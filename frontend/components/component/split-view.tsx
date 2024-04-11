@@ -342,12 +342,12 @@ export default function SplitView({
     if (!tempImageMarker) return;
     // add the dragged distance to the original tempImageMarker position
     // to get the new position of the marker
-    let x = position.x + tempImageMarker[0];
-    let y = position.y + tempImageMarker[1];
+    let x = position.x / zoomLevel + tempImageMarker[0];
+    let y = position.y / zoomLevel + tempImageMarker[1];
 
     // round to nearest whole pixel
-    Math.round(x);
-    Math.round(y);
+    x = Math.round(x);
+    y = Math.round(y);
 
     // reset transform position to zero
     setControlledPosition({ x: 0, y: 0 });
@@ -362,7 +362,11 @@ export default function SplitView({
 
         <div>
           <Button
-            className={`${!isCoordTableHidden ? "bg-blue-500 dark:bg-blue-500" : "bg-gray-700 dark:bg-gray-700"} hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
+            className={`${
+              !isCoordTableHidden
+                ? "bg-blue-500 dark:bg-blue-500"
+                : "bg-gray-700 dark:bg-gray-700"
+            } hover:bg-blue-800 dark:hover:bg-blue-800 dark:text-white`}
             onClick={toggleCoordTableHidden}
           >
             <SewingPinFilledIcon /> Coordinates
