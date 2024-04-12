@@ -124,6 +124,10 @@ export default function ImageMap({
           onLoadingComplete={({ naturalWidth, naturalHeight }) => {
             setImageSize({ width: naturalWidth, height: naturalHeight });
           }}
+          //prevent default drag event
+          onDragStart={(e) => {
+            e.preventDefault();
+          }}
         />
       </div>
       {children}
