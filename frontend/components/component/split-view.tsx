@@ -236,6 +236,8 @@ export default function SplitView({
       // Remove help message
       setHelpMessage(null);
     }
+    // Check if the last pair is valid
+    // A valid pair has non-zero values for all 4 coordinates
     const isValidPair =
       lastPair &&
       lastPair.latLong[0] !== 0 &&
@@ -375,6 +377,13 @@ export default function SplitView({
     }
   }, [tempImageMarker, imageSize]);
 
+  const handleMouseWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const zoomDelta = event.deltaY > 0 ? -0.1 : 0.1;
+    const newZoomLevel = Math.max(zoomLevel + zoomDelta, 0.1);
+    setZoomLevel(newZoomLevel);
+  };
+
   return (
     <div className="h-screen">
       <MapToolbar>
@@ -497,7 +506,7 @@ export default function SplitView({
           </Map>
         </Allotment.Pane>
         <Allotment.Pane minSize={200} className="bg-gray-100 dark:bg-gray-800">
-          <div className="w-full overflow-visible">
+          <div className="w-full overflow-visible" onWheel={handleMouseWheel}>
             <ImageMap
               src={localStorage.getItem("pdfData")!}
               onClick={addImageMarker}
@@ -527,6 +536,7 @@ export default function SplitView({
                     imageSize
                   ),
                 }}
+                className="pointer-events-auto"
               >
                 <Image
                   src="/map-pin.svg"
@@ -549,6 +559,7 @@ export default function SplitView({
                     imageSize
                   ),
                 }}
+                className="pointer-events-auto"
               >
                 <SniperScope
                   position={controlledPosition}
