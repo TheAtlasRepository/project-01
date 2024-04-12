@@ -236,6 +236,8 @@ export default function SplitView({
       // Remove help message
       setHelpMessage(null);
     }
+    // Check if the last pair is valid
+    // A valid pair has non-zero values for all 4 coordinates
     const isValidPair =
       lastPair &&
       lastPair.latLong[0] !== 0 &&
