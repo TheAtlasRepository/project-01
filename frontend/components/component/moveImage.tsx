@@ -1,4 +1,5 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface ImageMapProps {
   src: string;
@@ -39,18 +40,6 @@ export default function ImageMap({
   const [localIsDragging, setLocalIsDragging] = useState(false);
   // const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  //size of imgs container
-  // const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
-
-  //sets size of img container relative to size of img
-  useEffect(() => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      setImageSize({ width: img.width, height: img.height });
-    };
-  }, [src]);
-
   const setDragState = (bool: boolean) => {
     setIsDragging(bool);
     setLocalIsDragging(bool);
@@ -77,17 +66,17 @@ export default function ImageMap({
     setDragStart({ x: event.clientX, y: event.clientY });
   };
 
-  const handleMouseWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const zoomDelta = event.deltaY > 0 ? -0.1 : 0.1;
-    const minZoom = 0.1;
-    setZoomLevel((prevZoomLevel) =>
-      Math.max(prevZoomLevel + zoomDelta, minZoom)
-    );
-  };
-
   //event listener for mouse wheel
   useEffect(() => {
+    const handleMouseWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const zoomDelta = event.deltaY > 0 ? -0.1 : 0.1;
+      const minZoom = 0.1;
+      setZoomLevel((prevZoomLevel) =>
+        Math.max(prevZoomLevel + zoomDelta, minZoom)
+      );
+    };
+
     const container = document.getElementById("image-container");
     if (container) {
       container.addEventListener(
@@ -103,7 +92,7 @@ export default function ImageMap({
         );
       }
     };
-  }, []);
+  }, [setZoomLevel]);
 
   return (
     // <div style={{ width: imgSize.width / 2, height: imgSize.height / 2 }}>
@@ -127,11 +116,14 @@ export default function ImageMap({
           overflow: "auto",
         }}
       >
-        <img
+        <Image
           src={src}
-          alt="Image"
-          onDragStart={(e) => e.preventDefault()}
-          // style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          alt="imageMap"
+          width={imageSize.width}
+          height={imageSize.height}
+          onLoadingComplete={({ naturalWidth, naturalHeight }) => {
+            setImageSize({ width: naturalWidth, height: naturalHeight });
+          }}
         />
       </div>
       {children}
