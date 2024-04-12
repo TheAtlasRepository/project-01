@@ -57,8 +57,6 @@ SniperScopeProps) {
                 <div
                   className="absolute -right-11 top-1/2 transform -translate-y-1/2 w-14 h-14 bg-black rounded-xl flex items-center justify-center
                 hover:bg-gray-800 cursor-move"
-                  // onMouseDown={handleMouseDown}
-                  // onMouseMove={handleMouseMove}
                 >
                   <MoveIcon className="text-white" />
                 </div>
