@@ -19,7 +19,17 @@ warnings.filterwarnings("ignore", category=rio.errors.NotGeoreferencedWarning) #
 defaultCrs = 'EPSG:4326'
 
 def createGcps(PointList : PointList):
-    """Create Rasterio GCPs from a list of points"""
+    """Create a list of GCPs from a list of points
+
+    Args:
+        PointList (PointList): The list of points to create the GCPs from.
+
+    Raises:
+        Exception: With message regarding the error.
+
+    Returns:
+        []: A list of rasterio GCPs.
+    """
     if len(PointList.points) < 3:
         raise Exception("Not enough points to create a transform")
 
@@ -174,6 +184,20 @@ def getCornerCoordinates(tiff_path):
 
 
 async def generateTile(tiff_path, x: int, y: int, z: int):
+    """Generate a tile from a georeferenced TIFF file.
+
+    Args:
+        tiff_path (string): Path to the georeferenced TIFF file.
+        x (int): column index of the tile.
+        y (int): row index of the tile.
+        z (int): Zoom level.
+
+    Raises:
+        e: Any exception that occurs during tile generation, that is not caught. unintended exceptions.
+
+    Returns:
+        Response: A FastAPI Response object containing the tile image. If the tile is outside the bounds of the image, a blank tile is returned.
+    """
     blanke_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
     bytes_io = io.BytesIO()
     blanke_tile.save(bytes_io, format='PNG')
