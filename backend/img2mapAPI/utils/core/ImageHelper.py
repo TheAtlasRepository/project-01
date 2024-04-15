@@ -39,13 +39,14 @@ async def image2png(file: UploadFile) -> Tuple[str, str]:
     """
     #local setup
     inputImage = getUniqeFileName('png')
-    image_name = file.filename[:-4] + '.png'
+    image_name = file.filename.rpartition('.')[0] + '.png'
     #save the image
     with open(inputImage, 'w+b') as img:
         img.write(await file.read())
     
     image = Image.open(inputImage)
     png_image = image.convert('RGB')
+    image.close()
     tempImage = getUniqeFileName('png')
     with open(tempImage, 'w+b') as img:
         png_image.save(img, 'PNG')
