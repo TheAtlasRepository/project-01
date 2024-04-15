@@ -1,6 +1,4 @@
 import sqlite3 as sql
-import os
-import sys
 from typing import Union
 from pydantic import BaseModel
 from img2mapAPI.utils.storage.data.storageHandler import StorageHandler as sh
