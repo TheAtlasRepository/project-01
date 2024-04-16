@@ -173,13 +173,13 @@ def getCornerCoordinates(tiff_path):
         # Get the bounds of the image
         bounds = dataset.bounds
 
-        # Calculate corner coordinates based on the bounds
-        top_left = (bounds.left, bounds.top)
-        top_right = (bounds.right, bounds.top)
-        bottom_right = (bounds.right, bounds.bottom)
-        bottom_left = (bounds.left, bounds.bottom)
+        # get west, south, east, north coordinates
+        west = bounds.left
+        south = bounds.bottom
+        east = bounds.right
+        north = bounds.top
 
-        return [top_left, top_right, bottom_right, bottom_left]
+        return [west, north, east, south]
 
 
 
