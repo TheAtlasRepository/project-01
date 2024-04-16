@@ -297,7 +297,7 @@ export default function SplitView({
 
           if (hasEnoughEntries) {
             setHelpMessage(
-              "All pairs added! The map has been georeferenced, go to overlayview to see your georeferenced map"
+              "Enough pairs added! The map has been georeferenced, go to Overlay to see your map!"
             );
             handleGeoref();
           }

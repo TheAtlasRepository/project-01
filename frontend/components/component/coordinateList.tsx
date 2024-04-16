@@ -10,6 +10,7 @@ import Draggable from "react-draggable";
 import { DragHandleDots2Icon, CrossCircledIcon } from '@radix-ui/react-icons'
 import { useState } from "react";
 import { MinusCircledIcon } from '@radix-ui/react-icons'
+import { Button } from "@/components/ui/button";
 
 interface CoordinateListProps {
   georefMarkerPairs: GeorefMarkerPair[];
@@ -49,25 +50,22 @@ const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHi
           <Table className="dark:bg-gray-700">
             <TableHeader>
               <TableRow>
-                <TableHead>Local ID</TableHead>
-                <TableHead>Backend ID</TableHead>
                 <TableHead>Longitude</TableHead>
                 <TableHead>Latitude</TableHead>
                 <TableHead>Map X</TableHead>
                 <TableHead>Map Y</TableHead>
+                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {georefMarkerPairs.map((pair, index) => (
                 <TableRow key={index}>
-                  <TableCell>{index}</TableCell>
-                  <TableCell>{pair.pointId}</TableCell>
                   <TableCell>{pair.latLong[0]}</TableCell>
                   <TableCell>{pair.latLong[1]}</TableCell>
                   <TableCell>{pair.pixelCoords[0]}</TableCell>
                   <TableCell>{pair.pixelCoords[1]}</TableCell>
                   <TableCell>
-                    <button className="text-red-500" onClick={handleDelete(pair.pointId, index)}>Delete</button>
+                    <Button className="bg-red-600 dark:bg-red-600 dark:text-white hover:bg-red-700 dark:hover:bg-red-700" onClick={handleDelete(pair.pointId, index)}>Delete</Button>
                   </TableCell>
                 </TableRow>
               ))}
