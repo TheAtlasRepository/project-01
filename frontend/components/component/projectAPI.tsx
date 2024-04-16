@@ -6,12 +6,13 @@ interface ProjectResponse {
 }
 
 interface MarkerPairResponse {
-  id: number;
-  lat: number;
-  lng: number;
-  col: number;
-  row: number;
-  name: string;
+  Project: {
+    id: number;
+  };
+  Point: {
+    id: number;
+    inProjectId: number;
+  };
 }
 
 interface ErrorResponse {
@@ -60,6 +61,7 @@ export const addMarkerPair = async (
         name: "",
       }
     );
+    console.log(response.data);
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
@@ -145,6 +147,26 @@ export const deleteAllMarkers = async (projectId: number): Promise<void> => {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   } finally {
     console.log("All markers deleted");
+  }
+};
+
+/**
+ * DELETE /project/{projectId}/point/{pointId}
+ * Deletes a marker pair from a project
+ * @param projectId - The ID of the project to delete the marker pair from
+ * @param pointId - The ID of the marker pair to delete
+ */
+export const deleteMarkerPair = async (projectId: number, pointId: number): Promise<void> => {
+  try {
+    await axios.delete(`${BASE_URL}/project/${projectId}/point/${pointId}`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
+  } finally {
+    console.log("Marker pair deleted");
   }
 };
 

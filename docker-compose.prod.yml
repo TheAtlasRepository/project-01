@@ -1,10 +1,5 @@
 version: 'version 1.0.0'
 
-networks:
-  img2map-network:
-    driver: bridge
-  #This is the network that the containers will use to communicate with each other
-
 services:
   img2map-api:
     #Uvicorn server running python FastAPI
@@ -14,11 +9,11 @@ services:
     environment:
       - PORT=8000
       - ENVIRONMENT=production
-      - CORS_ORIGINS=http://localhost:3000,next-app:3000,
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:80,http://localhost:443
     build:
       context: ./backend
       dockerfile: ./docker/prod.Dockerfile
-    expose:
+    ports:
       - "8000:8000"
     networks:
       - img2map-network
@@ -32,10 +27,13 @@ services:
       - "80:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_BACKEND_URL=img2map-api:8000
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
     env_file:
       - ./frontend/.env
     networks:
       - img2map-network
 
-  
+networks:
+  img2map-network:
+    driver: bridge
+#This is the network that the containers will use to communicate with each other
