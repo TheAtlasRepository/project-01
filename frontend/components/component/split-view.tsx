@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Map, NavigationControl, GeolocateControl, Marker } from "react-map-gl";
 import type { MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -42,6 +42,9 @@ interface SplitViewProps {
   setImageMarkers: React.Dispatch<
     React.SetStateAction<{ pixelCoordinates: [number, number] }[]>
   >;
+  setGeorefCornerCoordinates: React.Dispatch<
+    React.SetStateAction<[number, number, number, number]>
+  >;
 }
 
 export default function SplitView({
@@ -52,6 +55,7 @@ export default function SplitView({
   setMapMarkers,
   imageMarkers,
   setImageMarkers,
+  setGeorefCornerCoordinates,
 }: SplitViewProps) {
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -296,6 +300,15 @@ export default function SplitView({
       .initalGeorefimage(projectId)
       .then((data) => {
         console.log("Success:", data);
+        api.getGeorefCoordinates(projectId).then((data) => {
+          console.log("Success:", data);
+          //flatten 2d array to 1d array
+          const flatData = data.flat();
+          setGeorefCornerCoordinates(
+            flatData as [number, number, number, number]
+          );
+          console.log("Georef Corner Coordinates:", data);
+        });
       })
       .catch((error) => {
         console.error("Error:", error.message);
