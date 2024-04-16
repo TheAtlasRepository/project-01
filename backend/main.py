@@ -27,10 +27,10 @@ def main():
     app = Img2mapAPI.app
     #check if the mode is production
     if args.mode == 'prod':
-        print("Running in production mode")
+        print("Server running in production mode")
         uvicorn.run(app, host=host, port=port)
     else:
-        print("Running in development mode")
+        print("Server running in development mode")
         config = uvicorn.Config(app, host=host, port=port, log_level="info", reload=True, reload_dirs=["img2mapAPI"])
         server = uvicorn.Server(config)
         server.run()

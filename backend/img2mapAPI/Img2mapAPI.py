@@ -57,9 +57,9 @@ swagger_url = "/docs"
 doc_url = "/redoc"
 
 if ENVIRONMENT == 'development':
-    print("Running in development mode")
+    print("App running in development mode")
 else:
-    print("Running in production mode")
+    print("App running in production mode")
     swagger_url = None
     doc_url = None
 
