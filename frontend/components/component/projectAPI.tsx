@@ -160,23 +160,46 @@ export const deleteAllMarkers = async (projectId: number): Promise<void> => {
  * @returns {Promise<void>} A Promise that resolves when the image is cropped successfully.
  * @throws {Error} Will throw an error if the request fails.
  */
-export const cropImage = async (formData: FormData, p1x: number, p1y: number, p2x: number, p2y: number): Promise<string> => {
+export const cropImage = async (
+  formData: FormData,
+  p1x: number,
+  p1y: number,
+  p2x: number,
+  p2y: number
+): Promise<string> => {
   try {
-    const response = await axios.post(`${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      responseType: 'blob'
-    });
+    const response = await axios.post(
+      `${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "blob",
+      }
+    );
 
     // Convert the response data to a Blob, create a Blob URL and return the URL
-    const newBlob = new Blob([response.data], { type: 'image/png' });
+    const newBlob = new Blob([response.data], { type: "image/png" });
     const blobUrl = URL.createObjectURL(newBlob);
     return blobUrl;
-
   } catch (error) {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   } finally {
     console.log("Image cropped");
+  }
+};
+
+//get from "{base_url}/project/{projectid}/georef/coordinates" which returns [top_left, top_right, bottom_right, bottom_left]
+export const getGeorefCoordinates = async (
+  projectId: number
+): Promise<number[][]> => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/project/${projectId}/georef/coordinates`
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   }
 };
