@@ -9,18 +9,28 @@ import {
 import Draggable from "react-draggable";
 import { DragHandleDots2Icon, CrossCircledIcon } from '@radix-ui/react-icons'
 import { useState } from "react";
+import { MinusCircledIcon } from '@radix-ui/react-icons'
+import { Button } from "@/components/ui/button";
 
 interface CoordinateListProps {
   georefMarkerPairs: GeorefMarkerPair[];
   isHidden: boolean;
   toggleHidden: () => void;
+  onDeleteMarker: (pointId: number | null, index: number) => void;
 }
 interface GeorefMarkerPair {
+  pointId: number | null;
   latLong: number[];
   pixelCoords: number[];
 }
 
-const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHidden, toggleHidden }) => {
+const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHidden, toggleHidden, onDeleteMarker }) => {
+  const handleDelete = (pointId: number | null, index: number) => {
+    return () => {
+      onDeleteMarker(pointId, index);
+    };
+  }
+  
   return (
       <Draggable bounds="body" handle=".handle" defaultClassName={`rounded-lg fixed max-w-2xl z-[999] top-20 right-2 ${isHidden ? 'hidden' : ''}`}>
         <div>
@@ -44,6 +54,7 @@ const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHi
                 <TableHead>Latitude</TableHead>
                 <TableHead>Map X</TableHead>
                 <TableHead>Map Y</TableHead>
+                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -53,6 +64,9 @@ const CoordinateList: React.FC<CoordinateListProps> = ({ georefMarkerPairs, isHi
                   <TableCell>{pair.latLong[1]}</TableCell>
                   <TableCell>{pair.pixelCoords[0]}</TableCell>
                   <TableCell>{pair.pixelCoords[1]}</TableCell>
+                  <TableCell>
+                    <Button className="bg-red-600 dark:bg-red-600 dark:text-white hover:bg-red-700 dark:hover:bg-red-700" onClick={handleDelete(pair.pointId, index)}>Delete</Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -236,13 +236,11 @@ class ProjectHandler:
         if points is None or points == []:
             point.Idproj = 1
         else:
-            iterator = 1
             point.Idproj = 1
-            for p in points:
-                if p["Idproj"] >= point.Idproj:
-                    iterator += 1
-                    point.Idproj += 1
-
+            ids = [p["Idproj"] for p in points]  # List of IDs taken from the database
+            while point.Idproj in ids:
+                point.Idproj += 1
+        
         #save the point to storage
         dbid = await self._StorageHandler.saveInStorage(point, "point", "id")
         if dbid is None:
