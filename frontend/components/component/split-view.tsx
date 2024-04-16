@@ -25,12 +25,13 @@ import {
 interface SplitViewProps {
   projectId: number;
   georefMarkerPairs: {
+    pointId: number | null;
     latLong: [number, number];
     pixelCoords: [number, number];
   }[];
   setGeorefMarkerPairs: React.Dispatch<
     React.SetStateAction<
-      { latLong: [number, number]; pixelCoords: [number, number] }[]
+      { pointId: number | null, latLong: [number, number]; pixelCoords: [number, number] }[]
     >
   >;
   mapMarkers: { geoCoordinates: [number, number] }[];
@@ -42,6 +43,8 @@ interface SplitViewProps {
   setImageMarkers: React.Dispatch<
     React.SetStateAction<{ pixelCoordinates: [number, number] }[]>
   >;
+
+  onDeleteMarker: (pointId: number | null, index: number) => void;
 }
 
 export default function SplitView({
@@ -52,6 +55,7 @@ export default function SplitView({
   setMapMarkers,
   imageMarkers,
   setImageMarkers,
+  onDeleteMarker
 }: SplitViewProps) {
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -115,7 +119,7 @@ export default function SplitView({
           lastPair.pixelCoords[1] !== 0)
       ) {
         // Add a new pair if the array is empty or the last pair is complete
-        return [...pairs, { latLong: geoCoordinates, pixelCoords: [0, 0] }];
+        return [...pairs, { pointId: null, latLong: geoCoordinates, pixelCoords: [0, 0] }];
       } else {
         // Update the last pair if it's incomplete
         return pairs.map((pair, index) =>
@@ -142,7 +146,7 @@ export default function SplitView({
           lastPair.latLong[1] !== 0)
       ) {
         // Add a new pair if the array is empty or the last pair is complete
-        return [...pairs, { latLong: [0, 0], pixelCoords: pixelCoordinates }];
+        return [...pairs, { pointId: null, latLong: [0, 0], pixelCoords: pixelCoordinates }];
       } else {
         // Update the last pair if it's incomplete
         return pairs.map((pair, index) =>
@@ -153,6 +157,16 @@ export default function SplitView({
       }
     });
   };
+
+  // Used to replace the pointId of the last pair in georefMarkerPairs
+  const replaceLastMarkerId = (pointId: number) => {
+    console.log("Replacing last marker id with:", pointId);
+    setGeorefMarkerPairs((pairs) =>
+      pairs.map((pair, index) =>
+        index === pairs.length - 1 ? { ...pair, pointId } : pair
+      )
+    );
+  }
 
   //image states
   const [transform, setTransform] = useState({ x: 0, y: 0 });
@@ -240,6 +254,7 @@ export default function SplitView({
     // A valid pair has non-zero values for all 4 coordinates
     const isValidPair =
       lastPair &&
+      lastPair.pointId === null &&
       lastPair.latLong[0] !== 0 &&
       lastPair.latLong[1] !== 0 &&
       lastPair.pixelCoords[0] !== 0 &&
@@ -267,6 +282,7 @@ export default function SplitView({
           toast.success(
             "Pair added successfully! Place another marker to add another pair."
           );
+          replaceLastMarkerId(data.Point.inProjectId);
         })
         .catch((error) => {
           // Handle API call error
@@ -287,7 +303,7 @@ export default function SplitView({
           }
         });
     }
-  }, [georefMarkerPairs, projectId]); // Depend on georefMarkerPairs to automatically re-trigger when they change
+  }, [mapMarkers, imageMarkers, projectId]); // Depend on georefMarkerPairs to automatically re-trigger when they change
 
   //function to handle the georeferencing process
   const handleGeoref = () => {
@@ -312,8 +328,6 @@ export default function SplitView({
       setWaitingForMapMarker(false);
     }
     if (tempImageMarker) {
-      setImageMarkers([...imageMarkers, { pixelCoordinates: tempImageMarker }]);
-
       updateImageMarkerList(tempImageMarker);
       setTempImageMarker(null);
       setWaitingForMapMarker(true);
@@ -577,6 +591,7 @@ export default function SplitView({
         georefMarkerPairs={georefMarkerPairs}
         isHidden={isCoordTableHidden}
         toggleHidden={toggleCoordTableHidden}
+        onDeleteMarker={onDeleteMarker}
       />
     </div>
   );

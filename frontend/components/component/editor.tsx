@@ -21,7 +21,7 @@ export default function Editor() {
 
   // Array containing pairs of georeferenced markers and their corresponding image markers
   const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
-    { latLong: [number, number]; pixelCoords: [number, number] }[]
+    { pointId: number | null ; latLong: [number, number]; pixelCoords: [number, number] }[]
   >([]);
   const [mapMarkers, setMapMarkers] = useState<
     { geoCoordinates: [number, number] }[]
@@ -120,11 +120,27 @@ export default function Editor() {
   // Resets all marker arrays and disables overlay view
   const resetMarkerRequest = () => {
     console.log("Resetting markers...");
+    api.deleteAllMarkers(projectId);
     setGeorefMarkerPairs([]);
     setMapMarkers([]);
     setImageMarkers([]);
     setIsGeorefValid(false);
   };
+
+  function handleMarkerPairDelete(pointId: number | null, index: number): void {
+    // Delete the marker pair locally
+    console.log("Deleting marker pair at index", index+1);
+    setGeorefMarkerPairs(prevState => prevState.filter((_, i) => i !== index));
+    setMapMarkers(prevState => prevState.filter((_, i) => i !== index));
+    setImageMarkers(prevState => prevState.filter((_, i) => i !== index));
+    console.log(imageMarkers, mapMarkers, georefMarkerPairs);
+
+    // Return if no pointId is given, else proceed with API deletion
+    if (pointId === null) {
+      return;
+    }
+    api.deleteMarkerPair(projectId, pointId)
+  }
 
   // Handle download requests
   const handleDownload = () => {
@@ -160,6 +176,7 @@ export default function Editor() {
           setMapMarkers={setMapMarkers}
           imageMarkers={imageMarkers}
           setImageMarkers={setImageMarkers}
+          onDeleteMarker={handleMarkerPairDelete}
         />
       ) : activePage === 'overlay' ? (
         console.log("Overlay view requested"),
@@ -192,6 +209,7 @@ export default function Editor() {
           setMapMarkers={setMapMarkers}
           imageMarkers={imageMarkers}
           setImageMarkers={setImageMarkers}
+          onDeleteMarker={handleMarkerPairDelete}
         />
       )}
     </div>
