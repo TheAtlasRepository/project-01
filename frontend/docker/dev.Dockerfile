@@ -14,6 +14,13 @@ RUN \
 
 COPY .. .
 
+# run the linting if possible
+RUN \
+  if [ -f yarn.lock ]; then yarn lint; \
+  elif [ -f package-lock.json ]; then npm run lint; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm run lint; \
+  else echo "No linting step specified for this project."; \
+  fi
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line to disable telemetry at run time
 # ENV NEXT_TELEMETRY_DISABLED 1

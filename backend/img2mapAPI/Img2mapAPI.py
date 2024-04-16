@@ -86,7 +86,10 @@ app.add_middleware(
 # Default route
 @router.get("/")
 async def root():
-    return {"message": "Welcome to the georeferencing API. Please refer to the documentation for more information. at /docs or /redoc"}
+    if ENVIRONMENT == 'production':
+        return {"message": "Welcome to the georeferencing API, currently this is only intended for use by the img2map application."}
+    else:
+        return {"message": "Welcome to the georeferencing API. Please refer to the documentation for more information. at /docs or /redoc"}
 
 #adding the routers to the app
 app.router.include_router(converters.router, prefix="/converter", tags=["File Converting & Editing"])
