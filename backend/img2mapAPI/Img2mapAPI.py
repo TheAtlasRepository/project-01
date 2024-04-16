@@ -34,12 +34,14 @@ if load_dotenv('./.env'):
         #first try to get the environment from the environment variables, if fails try to get from os.environ
         ENVIRONMENT = get_key('./.env',key_to_get='ENVIRONMENT')
     except:
+        print("failed to get from environment variables from .env file, trying os.environ")
         try:
             ENVIRONMENT = os.environ['ENVIRONMENT']
         except:
             print("Error getting environment from environment variables")
             pass
         pass
+
 else:
     if 'ENVIRONMENT' in os.environ:
         ENVIRONMENT = os.environ['ENVIRONMENT']
@@ -56,12 +58,13 @@ else:
 swagger_url = "/docs"
 doc_url = "/redoc"
 
-if ENVIRONMENT == 'development':
-    print("App running in development mode")
-else:
+if ENVIRONMENT == 'production':
     print("App running in production mode")
     swagger_url = None
     doc_url = None
+else:
+    print("App running in development mode")
+    
 
 app = FastAPI(
     title="Img2Map API",
