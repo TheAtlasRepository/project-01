@@ -1,24 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { Map, Source, Layer } from "react-map-gl";
+import { GeolocateControl, NavigationControl } from "react-map-gl";
 import { Slider } from "@/components/ui/slider";
 import MapStyleToggle from "./mapStyleToggle";
-import { GeolocateControl, NavigationControl } from "react-map-gl";
 import GeocoderControl from "./geocoder-control";
 import MapToolbar from "@/components/ui/MapToolbar";
 
 interface MapOverlayProps {
   projectId: number;
+  georefCornerCoordinates: [number, number, number, number];
 }
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
-const OverlayView = ({ projectId }: MapOverlayProps) => {
+const OverlayView = ({
+  projectId,
+  georefCornerCoordinates,
+}: MapOverlayProps) => {
   const [dataUrl, setDataUrl] = useState("");
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!);
   const [opacity, setOpacity] = useState(100);
   const [mapStyle, setMapStyle] = useState(
     "mapbox://styles/mapbox/streets-v12"
   );
+
+  const [bounds, setBounds] = useState<[number, number, number, number]>();
+
+  useEffect(() => {
+    // Calculate the bounds of the georeferenced image add a padding to the bounding area
+    const [west, south, east, north] = georefCornerCoordinates;
+    const padding = 0.2;
+    const bounds = [
+      west - padding,
+      south - padding,
+      east + padding,
+      north + padding,
+    ];
+    setBounds(bounds as [number, number, number, number]);
+
+    console.log("Bounds set:" + bounds);
+  }, [georefCornerCoordinates]);
 
   // Used to set the opacity of the image overlay
   const handleOpacity = (values: number[]) => {
@@ -54,6 +75,9 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
       );
   }, [projectId, imageSrc]);
 
+  if (!bounds) {
+    return <div className="flex">Loading map...</div>;
+  }
   return (
     <div className="w-full h-full flex flex-col">
       <div className="w-full flex-1">
@@ -78,13 +102,14 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
             </div>
           </div>
         </MapToolbar>
-
         <Map
           style={{ width: "100%", height: "100%" }}
           mapStyle={mapStyle}
           mapboxAccessToken={mapboxToken}
           minZoom={5}
           maxZoom={19}
+          //maxbounds to georefCornerCoordinates directly
+          maxBounds={bounds}
         >
           <GeolocateControl position="bottom-right" />
           <NavigationControl position="bottom-right" />
