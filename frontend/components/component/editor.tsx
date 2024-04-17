@@ -22,7 +22,11 @@ export default function Editor() {
 
   // Array containing pairs of georeferenced markers and their corresponding image markers
   const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
-    { pointId: number | null ; latLong: [number, number]; pixelCoords: [number, number] }[]
+    {
+      pointId: number | null;
+      latLong: [number, number];
+      pixelCoords: [number, number];
+    }[]
   >([]);
   const [mapMarkers, setMapMarkers] = useState<
     { geoCoordinates: [number, number] }[]
@@ -135,17 +139,19 @@ export default function Editor() {
 
   function handleMarkerPairDelete(pointId: number | null, index: number): void {
     // Delete the marker pair locally
-    console.log("Deleting marker pair at index", index+1);
-    setGeorefMarkerPairs(prevState => prevState.filter((_, i) => i !== index));
-    setMapMarkers(prevState => prevState.filter((_, i) => i !== index));
-    setImageMarkers(prevState => prevState.filter((_, i) => i !== index));
+    console.log("Deleting marker pair at index", index + 1);
+    setGeorefMarkerPairs((prevState) =>
+      prevState.filter((_, i) => i !== index)
+    );
+    setMapMarkers((prevState) => prevState.filter((_, i) => i !== index));
+    setImageMarkers((prevState) => prevState.filter((_, i) => i !== index));
     console.log(imageMarkers, mapMarkers, georefMarkerPairs);
 
     // Return if no pointId is given, else proceed with API deletion
     if (pointId === null) {
       return;
     }
-    api.deleteMarkerPair(projectId, pointId)
+    api.deleteMarkerPair(projectId, pointId);
   }
 
   // Handle download requests
@@ -172,54 +178,61 @@ export default function Editor() {
         hasBeenReferenced={isGeorefValid}
       />
 
-      {activePage === 'sideBySide' ? (
-        console.log("Side by side view requested"),
-        <SplitView
-          projectId={projectId}
-          setGeorefMarkerPairs={setGeorefMarkerPairs}
-          georefMarkerPairs={georefMarkerPairs}
-          mapMarkers={mapMarkers}
-          setMapMarkers={setMapMarkers}
-          imageMarkers={imageMarkers}
-          setImageMarkers={setImageMarkers}
-          onDeleteMarker={handleMarkerPairDelete}
-          setGeorefCornerCoordinates={setGeorefCornerCoordinates}
-        />
-      ) : activePage === 'overlay' ? (
-        console.log("Overlay view requested"),
-        <OverlayView
-          projectId={projectId}
-        />
-      ) : activePage === 'crop' ? (
-        console.log("Crop view requested"),
-        <div className="flex flex-col items-center justify-center flex-1 bg-gray-400 dark:bg-gray-800">
-          <div className="flex items-center justify-center w-full">
-            <div className="w-1/2 flex justify-center items-center">
-              <CropImage
-                onCrop={handleCrop}
-                onCancelCrop={cancelCrop}
-                resetMarkerRequest={resetMarkerRequest}
-                projectId={projectId}
-                placedMarkerAmount={markerCount}
-              />
+      {activePage === "sideBySide"
+        ? (console.log("Side by side view requested"),
+          (
+            <SplitView
+              projectId={projectId}
+              setGeorefMarkerPairs={setGeorefMarkerPairs}
+              georefMarkerPairs={georefMarkerPairs}
+              mapMarkers={mapMarkers}
+              setMapMarkers={setMapMarkers}
+              imageMarkers={imageMarkers}
+              setImageMarkers={setImageMarkers}
+              onDeleteMarker={handleMarkerPairDelete}
+              setGeorefCornerCoordinates={setGeorefCornerCoordinates}
+            />
+          ))
+        : activePage === "overlay"
+        ? (console.log("Overlay view requested"),
+          (
+            <OverlayView
+              projectId={projectId}
+              georefCornerCoordinates={georefCornerCoordinates}
+            />
+          ))
+        : activePage === "crop"
+        ? (console.log("Crop view requested"),
+          (
+            <div className="flex flex-col items-center justify-center flex-1 bg-gray-400 dark:bg-gray-800">
+              <div className="flex items-center justify-center w-full">
+                <div className="w-1/2 flex justify-center items-center">
+                  <CropImage
+                    onCrop={handleCrop}
+                    onCancelCrop={cancelCrop}
+                    resetMarkerRequest={resetMarkerRequest}
+                    projectId={projectId}
+                    placedMarkerAmount={markerCount}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        // Just in case something goes wrong, display the SplitView as a fallback
-        console.log("Error, displaying fallback view"),
-        <SplitView
-          projectId={projectId}
-          setGeorefMarkerPairs={setGeorefMarkerPairs}
-          georefMarkerPairs={georefMarkerPairs}
-          mapMarkers={mapMarkers}
-          setMapMarkers={setMapMarkers}
-          imageMarkers={imageMarkers}
-          setImageMarkers={setImageMarkers}
-          onDeleteMarker={handleMarkerPairDelete}
-          setGeorefCornerCoordinates={setGeorefCornerCoordinates}
-        />
-      )}
+          ))
+        : // Just in case something goes wrong, display the SplitView as a fallback
+          (console.log("Error, displaying fallback view"),
+          (
+            <SplitView
+              projectId={projectId}
+              setGeorefMarkerPairs={setGeorefMarkerPairs}
+              georefMarkerPairs={georefMarkerPairs}
+              mapMarkers={mapMarkers}
+              setMapMarkers={setMapMarkers}
+              imageMarkers={imageMarkers}
+              setImageMarkers={setImageMarkers}
+              onDeleteMarker={handleMarkerPairDelete}
+              setGeorefCornerCoordinates={setGeorefCornerCoordinates}
+            />
+          ))}
     </div>
   );
 }
