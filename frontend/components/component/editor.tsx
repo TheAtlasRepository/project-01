@@ -4,27 +4,33 @@ import CropImage from "./CropImage";
 import * as api from "./projectAPI";
 import OverlayView from "./overlayview";
 import EditorToolbar from "@/components/ui/EditorToolbar";
-import { Split } from "lucide-react";
-import { set } from "lodash";
 
-export type ViewPage = 'sideBySide' | 'overlay' | 'crop'; // Pages in the editor, add more pages as needed
+export type ViewPage = "sideBySide" | "overlay" | "crop"; // Pages in the editor, add more pages as needed
 
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
   const [projectName, setProjectName] = useState("Project 1");
-  const [projectNameNormalized, setProjectNameNormalized] = useState("Project_1");
+  const [projectNameNormalized, setProjectNameNormalized] =
+    useState("Project_1");
   const [projectNameMaxLength, setProjectNameMaxLength] = useState(32); // Max 32 characters for project name
   const [isAutoSaved, setIsAutoSaved] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
-  const [activePage, setActivePage] = useState<ViewPage>('sideBySide');
-  const [lastActivePage, setLastActivePage] = useState<ViewPage>('sideBySide');
+  const [activePage, setActivePage] = useState<ViewPage>("sideBySide");
+  const [lastActivePage, setLastActivePage] = useState<ViewPage>("sideBySide");
   const [isGeorefValid, setIsGeorefValid] = useState(false);
   const [markerCount, setMarkerCount] = useState(0);
+  const [georefImageCoordinates, setGeorefImageCoordinates] = useState<
+    [number, number, number, number]
+  >([0, 0, 0, 0]);
   const projectNameTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Array containing pairs of georeferenced markers and their corresponding image markers
   const [georefMarkerPairs, setGeorefMarkerPairs] = useState<
-    { pointId: number | null ; latLong: [number, number]; pixelCoords: [number, number] }[]
+    {
+      pointId: number | null;
+      latLong: [number, number];
+      pixelCoords: [number, number];
+    }[]
   >([]);
   const [mapMarkers, setMapMarkers] = useState<
     { geoCoordinates: [number, number] }[]
@@ -98,7 +104,7 @@ export default function Editor() {
     // If the user clicks on a different page, set the current page, and set new active page
     setLastActivePage(activePage); // Save the last active page
     setActivePage(page); // Set the active page in the toolbar
-  }
+  };
 
   // Update the image source when the user has cropped the image, and close the crop tool
   const handleCrop = () => {
@@ -109,14 +115,19 @@ export default function Editor() {
     // Reset the image source to the original image and go back to old view
     setImageSrc(localStorage.getItem("pdfData")!);
     setViewPage(lastActivePage);
-  }
-  
+  };
+
   // Check if there are atleast 3 markers to display the coordinates table and the values are not 0, and set the state
   useEffect(() => {
-    const valid = georefMarkerPairs.length >= 3 && 
-      georefMarkerPairs.every((pair) => pair.latLong.every((val) => val !== 0)) && 
-      georefMarkerPairs.every((pair) => pair.pixelCoords.every((val) => val !== 0));
-  
+    const valid =
+      georefMarkerPairs.length >= 3 &&
+      georefMarkerPairs.every((pair) =>
+        pair.latLong.every((val) => val !== 0)
+      ) &&
+      georefMarkerPairs.every((pair) =>
+        pair.pixelCoords.every((val) => val !== 0)
+      );
+
     setIsGeorefValid(valid);
   }, [georefMarkerPairs]);
 
@@ -132,17 +143,19 @@ export default function Editor() {
 
   function handleMarkerPairDelete(pointId: number | null, index: number): void {
     // Delete the marker pair locally
-    console.log("Deleting marker pair at index", index+1);
-    setGeorefMarkerPairs(prevState => prevState.filter((_, i) => i !== index));
-    setMapMarkers(prevState => prevState.filter((_, i) => i !== index));
-    setImageMarkers(prevState => prevState.filter((_, i) => i !== index));
+    console.log("Deleting marker pair at index", index + 1);
+    setGeorefMarkerPairs((prevState) =>
+      prevState.filter((_, i) => i !== index)
+    );
+    setMapMarkers((prevState) => prevState.filter((_, i) => i !== index));
+    setImageMarkers((prevState) => prevState.filter((_, i) => i !== index));
     console.log(imageMarkers, mapMarkers, georefMarkerPairs);
 
     // Return if no pointId is given, else proceed with API deletion
     if (pointId === null) {
       return;
     }
-    api.deleteMarkerPair(projectId, pointId)
+    api.deleteMarkerPair(projectId, pointId);
   }
 
   // Handle download requests
@@ -153,7 +166,7 @@ export default function Editor() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
+  };
 
   // Handle setting the project name
   const handleSetProjectName = (name: string) => {
@@ -167,9 +180,9 @@ export default function Editor() {
     setProjectName(name);
 
     let normalizedName = name
-    .replace(/\s+/g, '_') // Replace spaces with underscores
-    .replace(/[\\/]/g, '-') // Replace slashes with dashes
-    .replace(/[^a-zA-Z0-9-_]/g, ''); // Remove all characters that are not A-Z, a-z, 0-9, -, or _
+      .replace(/\s+/g, "_") // Replace spaces with underscores
+      .replace(/[\\/]/g, "-") // Replace slashes with dashes
+      .replace(/[^a-zA-Z0-9-_]/g, ""); // Remove all characters that are not A-Z, a-z, 0-9, -, or _
     setProjectNameNormalized(normalizedName);
 
     // If timer is running, reset it
@@ -182,7 +195,7 @@ export default function Editor() {
       console.log("Updating project name:", name, "=>", projectNameNormalized);
       api.updateProjectName(projectId, projectNameNormalized);
     }, 3000);
-  }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -198,53 +211,61 @@ export default function Editor() {
         placedMarkerAmount={markerCount}
         hasBeenReferenced={isGeorefValid}
       />
-
-      {activePage === 'sideBySide' ? (
-        //console.log("Side by side view requested"),
-        <SplitView
-          projectId={projectId}
-          setGeorefMarkerPairs={setGeorefMarkerPairs}
-          georefMarkerPairs={georefMarkerPairs}
-          mapMarkers={mapMarkers}
-          setMapMarkers={setMapMarkers}
-          imageMarkers={imageMarkers}
-          setImageMarkers={setImageMarkers}
-          onDeleteMarker={handleMarkerPairDelete}
-        />
-      ) : activePage === 'overlay' ? (
-        //console.log("Overlay view requested"),
-        <OverlayView
-          projectId={projectId}
-        />
-      ) : activePage === 'crop' ? (
-        //console.log("Crop view requested"),
-        <div className="flex flex-col items-center justify-center flex-1 bg-gray-400 dark:bg-gray-800">
-          <div className="flex items-center justify-center w-full">
-            <div className="w-1/2 flex justify-center items-center">
-              <CropImage
-                onCrop={handleCrop}
-                onCancelCrop={cancelCrop}
-                resetMarkerRequest={resetMarkerRequest}
-                projectId={projectId}
-                placedMarkerAmount={markerCount}
-              />
+      {activePage === "sideBySide"
+        ? (console.log("Side by side view requested"),
+          (
+            <SplitView
+              projectId={projectId}
+              setGeorefMarkerPairs={setGeorefMarkerPairs}
+              georefMarkerPairs={georefMarkerPairs}
+              mapMarkers={mapMarkers}
+              setMapMarkers={setMapMarkers}
+              imageMarkers={imageMarkers}
+              setImageMarkers={setImageMarkers}
+              onDeleteMarker={handleMarkerPairDelete}
+              setGeorefImageCoordinates={setGeorefImageCoordinates}
+            />
+          ))
+        : activePage === "overlay"
+        ? (console.log("Overlay view requested"),
+          (
+            <OverlayView
+              projectId={projectId}
+              georefImageCoordinates={georefImageCoordinates}
+            />
+          ))
+        : activePage === "crop"
+        ? (console.log("Crop view requested"),
+          (
+            <div className="flex flex-col items-center justify-center flex-1 bg-gray-400 dark:bg-gray-800">
+              <div className="flex items-center justify-center w-full">
+                <div className="w-1/2 flex justify-center items-center">
+                  <CropImage
+                    onCrop={handleCrop}
+                    onCancelCrop={cancelCrop}
+                    resetMarkerRequest={resetMarkerRequest}
+                    projectId={projectId}
+                    placedMarkerAmount={markerCount}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        // Just in case something goes wrong, display the SplitView as a fallback
-        console.log("Error, displaying fallback view"),
-        <SplitView
-          projectId={projectId}
-          setGeorefMarkerPairs={setGeorefMarkerPairs}
-          georefMarkerPairs={georefMarkerPairs}
-          mapMarkers={mapMarkers}
-          setMapMarkers={setMapMarkers}
-          imageMarkers={imageMarkers}
-          setImageMarkers={setImageMarkers}
-          onDeleteMarker={handleMarkerPairDelete}
-        />
-      )}
+          ))
+        : // Just in case something goes wrong, display the SplitView as a fallback
+          (console.log("Error, displaying fallback view"),
+          (
+            <SplitView
+              projectId={projectId}
+              setGeorefMarkerPairs={setGeorefMarkerPairs}
+              georefMarkerPairs={georefMarkerPairs}
+              mapMarkers={mapMarkers}
+              setMapMarkers={setMapMarkers}
+              imageMarkers={imageMarkers}
+              setImageMarkers={setImageMarkers}
+              onDeleteMarker={handleMarkerPairDelete}
+              setGeorefImageCoordinates={setGeorefImageCoordinates}
+            />
+          ))}
     </div>
   );
 }

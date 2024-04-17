@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Map, NavigationControl, GeolocateControl, Marker } from "react-map-gl";
 import type { MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -31,7 +31,11 @@ interface SplitViewProps {
   }[];
   setGeorefMarkerPairs: React.Dispatch<
     React.SetStateAction<
-      { pointId: number | null, latLong: [number, number]; pixelCoords: [number, number] }[]
+      {
+        pointId: number | null;
+        latLong: [number, number];
+        pixelCoords: [number, number];
+      }[]
     >
   >;
   mapMarkers: { geoCoordinates: [number, number] }[];
@@ -42,6 +46,10 @@ interface SplitViewProps {
   imageMarkers: { pixelCoordinates: [number, number] }[];
   setImageMarkers: React.Dispatch<
     React.SetStateAction<{ pixelCoordinates: [number, number] }[]>
+  >;
+
+  setGeorefImageCoordinates: React.Dispatch<
+    React.SetStateAction<[number, number, number, number]>
   >;
 
   onDeleteMarker: (pointId: number | null, index: number) => void;
@@ -55,7 +63,8 @@ export default function SplitView({
   setMapMarkers,
   imageMarkers,
   setImageMarkers,
-  onDeleteMarker
+  setGeorefImageCoordinates,
+  onDeleteMarker,
 }: SplitViewProps) {
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -119,7 +128,10 @@ export default function SplitView({
           lastPair.pixelCoords[1] !== 0)
       ) {
         // Add a new pair if the array is empty or the last pair is complete
-        return [...pairs, { pointId: null, latLong: geoCoordinates, pixelCoords: [0, 0] }];
+        return [
+          ...pairs,
+          { pointId: null, latLong: geoCoordinates, pixelCoords: [0, 0] },
+        ];
       } else {
         // Update the last pair if it's incomplete
         return pairs.map((pair, index) =>
@@ -146,7 +158,10 @@ export default function SplitView({
           lastPair.latLong[1] !== 0)
       ) {
         // Add a new pair if the array is empty or the last pair is complete
-        return [...pairs, { pointId: null, latLong: [0, 0], pixelCoords: pixelCoordinates }];
+        return [
+          ...pairs,
+          { pointId: null, latLong: [0, 0], pixelCoords: pixelCoordinates },
+        ];
       } else {
         // Update the last pair if it's incomplete
         return pairs.map((pair, index) =>
@@ -166,7 +181,7 @@ export default function SplitView({
         index === pairs.length - 1 ? { ...pair, pointId } : pair
       )
     );
-  }
+  };
 
   //image states
   const [transform, setTransform] = useState({ x: 0, y: 0 });
@@ -312,6 +327,15 @@ export default function SplitView({
       .initalGeorefimage(projectId)
       .then((data) => {
         console.log("Success:", data);
+        api.getGeorefCoordinates(projectId).then((data) => {
+          console.log("Success:", data);
+          //flatten 2d array to 1d array
+          const flatData = data.flat();
+          setGeorefImageCoordinates(
+            flatData as [number, number, number, number]
+          );
+          console.log("Georef Corner Coordinates:", data);
+        });
       })
       .catch((error) => {
         console.error("Error:", error.message);

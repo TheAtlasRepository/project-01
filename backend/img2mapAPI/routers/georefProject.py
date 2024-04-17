@@ -177,11 +177,11 @@ async def getGeorefImage(projectId: int):
 
    
 @router.get("/{projectId}/georef/coordinates")
-async def getCornerCoordinates(projectId: int):
-    """ Get the corner coordinates of the image of a project by id, returns the corner coordinates if found"""
+async def getImageCoordinates(projectId: int):
+    """ Get the image coordinates of the image of a project by id, returns the image coordinates if found in format [west, north, east, south]"""
     try:
-        cornerCoordinates = await _projectHandler.getCornerCoordinates(projectId)
-        return cornerCoordinates
+        imageCoordinates = await _projectHandler.getImageCoordinates(projectId)
+        return imageCoordinates
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
