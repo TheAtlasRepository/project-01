@@ -4,18 +4,13 @@
 
 # Importing the required modules
 import tempfile
-from typing import List, Union
-from fastapi import UploadFile, File
+from typing import List
 from img2mapAPI.utils.models import Project, Point
 from img2mapAPI.utils.models.pointList import PointList
 from .storage.files.fileStorage import FileStorage
 from .storage.data.storageHandler import StorageHandler
 from .core import georefHelper as georef
 import datetime
-#server console log
-import sys
-# python file object
-from io import BytesIO
 
 class ProjectHandler:
     _FileStorage: FileStorage = None
@@ -130,19 +125,8 @@ class ProjectHandler:
         project.points = pointList
 
         return project
-
-    #TODO: not used in the current version, not manually tested
-    async def getProjects(self) -> List[Project]:
-        """
-        Get all projects
-        """
-        #Convert the data to a list of project objects
-        projects = self._StorageHandler.fetchAll("project")
-        list: List[Project] = [Project(**project) for project in projects]
-        if len(list) == 0:
-            raise Exception("No projects found")
-        return list
     
+
     async def projectExists(self, projectId: int) -> bool:
         """
         Check if a project exists
@@ -170,6 +154,30 @@ class ProjectHandler:
             raise Exception("points is empty")
         return list
     
+    async def getPoint(self, projectId: int, pointId: int, byDBID:bool = False) -> Point:
+        #Convert the data to a point object
+        #search by Idproj
+        if byDBID == True:
+            point = await self._StorageHandler.fetchOne(pointId, "point")
+            if point is None:
+                raise Exception("Point not found")
+            return Point.model_construct(None, **point)
+        
+        if await self.projectExists(projectId) == False:
+            raise Exception("Project not found")
+        point = None
+        params: dict = {"Idproj": pointId, "projectId": projectId}
+        points = await self._StorageHandler.fetch("point", params)
+        if points is None or points == []:
+            raise Exception("No points found")
+        else:
+            point = points[0]
+            point = Point.model_construct(None, **point)
+        if point is None:
+            ret = str(points)
+            raise Exception(f"Point not found: {ret}")
+        return point
+
     async def removeAllProjectPoints(self, projectId: int) -> bool:
         """
         Remove all points from a project
@@ -197,30 +205,7 @@ class ProjectHandler:
             return True
         raise Exception("Point not found")
 
-    #TODO: causes error on updateProject, removed for now, just cant update points atm
-    #dict etc. error          
-    async def updatePoints(self, projectId: int, points: List[Point]) -> None:
-        """
-        Update the points of a project
-        """
-        if await self.projectExists(projectId) == False:
-            raise Exception("Project not found")
-        if self.validatepoints(points) == False:
-            raise Exception("Invalid points")
-        #existing points
-        pointsInStorage = await self._StorageHandler.fetch("point", {"projectId": projectId})
-        #comapre the points in storage with the updated points and update the points
-        for point in points:
-            if point.id is None or point.id == 0:
-              await self.addPoint(projectId, point)
-            else:
-                #update the point in the storage
-              await self.updatePoint(projectId, point.id, point)
-
-    async def addPoint(self, projectId: int, point: Point) -> int:
-        """
-        Add a point to a project
-        """
+    async def addPoint(self, projectId: int, point: Point) -> int: 
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
         list: List[Point] = []
@@ -280,33 +265,6 @@ class ProjectHandler:
 
         return True
 
-    async def getPoint(self, projectId: int, pointId: int, byDBID:bool = False) -> Point:
-        """
-        Get a point of a project by id
-        """
-        #Convert the data to a point object
-        #search by Idproj
-        if byDBID == True:
-            point = await self._StorageHandler.fetchOne(pointId, "point")
-            if point is None:
-                raise Exception("Point not found")
-            return Point.model_construct(None, **point)
-        
-        if await self.projectExists(projectId) == False:
-            raise Exception("Project not found")
-        point = None
-        params: dict = {"Idproj": pointId, "projectId": projectId}
-        points = await self._StorageHandler.fetch("point", params)
-        if points is None or points == []:
-            raise Exception("No points found")
-        else:
-            point = points[0]
-            point = Point.model_construct(None, **point)
-        if point is None:
-            ret = str(points)
-            raise Exception(f"Point not found: {ret}")
-        return point
-     
     def validatepoints(self, points: List[Point]) -> bool:
         """
         Validate the points
@@ -331,8 +289,20 @@ class ProjectHandler:
         return True
     
     ### Files
-
-    #### In use by router:
+    async def getImageFile(self, projectId: int) -> bytes:
+        #get the image file path
+        project = await self._StorageHandler.fetchOne(projectId, "project")
+        filePath = project["imageFilePath"]
+        #get the image file
+        file = await self._FileStorage.get(filePath)
+        if file is None:
+            raise Exception("File not found")
+        return file
+    
+    async def getImageFilePath(self, projectId: int) -> str:
+        project = await self._StorageHandler.fetchOne(projectId, "project")
+        return project["imageFilePath"]
+    
     async def saveImageFile(self, projectId: int, file: tempfile, fileType: str) -> None:
         """
         Save the image file of a project
@@ -356,28 +326,32 @@ class ProjectHandler:
         #update the project with the file path
         project["imageFilePath"] = filePath
         await self._StorageHandler.update(projectId, project, "project")
-  
-    async def getImageFile(self, projectId: int) -> bytes:
-        """
-        Get the image file of a project
-        """
-        #get the image file path
+
+    async def removeImageFile(self, projectId: int) -> None:
+        #remove the image file
         project = await self._StorageHandler.fetchOne(projectId, "project")
-        filePath = project["imageFilePath"]
-        #get the image file
+        await self._FileStorage.remove(project["imageFilePath"])
+        #update the project with an empty file path
+        project["imageFilePath"] = ""
+        await self._StorageHandler.update(projectId, project, "project")
+    
+    async def getGeoreferencedFile(self, projectId: int) -> bytes:
+        #get the georeferenced file path
+        project = await self._StorageHandler.fetchOne(projectId, "project")
+        filePath = project["georeferencedFilePath"]
+        #get the georeferenced file
         file = await self._FileStorage.get(filePath)
         if file is None:
             raise Exception("File not found")
         return file
-    
+
     async def getGeoreferencedFilePath(self, projectId: int) -> str:
         """
         Get the georeferenced file path of a project
         """
         project = await self._StorageHandler.fetchOne(projectId, "project")
         return project["georeferencedFilePath"]
-        
-    #### Not in use by router:
+          
     async def saveGeoreferencedFile(self, projectId: int, file: bytes, fileType: str) -> None:
         """
         Save the georeferenced file of a project
@@ -400,30 +374,6 @@ class ProjectHandler:
         project["georeferencedFilePath"] = filePath
         await self._StorageHandler.update(projectId, project, "project")
 
-    async def getGeoreferencedFile(self, projectId: int) -> bytes:
-        """
-        Get the georeferenced file of a project
-        """
-        #get the georeferenced file path
-        project = await self._StorageHandler.fetchOne(projectId, "project")
-        filePath = project["georeferencedFilePath"]
-        #get the georeferenced file
-        file = await self._FileStorage.get(filePath)
-        if file is None:
-            raise Exception("File not found")
-        return file
-    
-    async def removeImageFile(self, projectId: int) -> None:
-        """
-        Remove the image file of a project
-        """
-        #remove the image file
-        project = await self._StorageHandler.fetchOne(projectId, "project")
-        await self._FileStorage.remove(project["imageFilePath"])
-        #update the project with an empty file path
-        project["imageFilePath"] = ""
-        await self._StorageHandler.update(projectId, project, "project")
-
     async def removeGeoreferencedFile(self, projectId: int) -> None:
         """
         Remove the georeferenced file of a project
@@ -434,31 +384,6 @@ class ProjectHandler:
         #update the project with an empty file path
         project["georeferencedFilePath"] = ""
         await self._StorageHandler.update(projectId, project, "project")
-
-    async def updateImageFile(self, projectId: int, file: bytes, fileType: str) -> None:
-        """
-        Update the image file of a project
-        """
-        #remove the old image file
-        await self.removeImageFile(projectId)
-        #save the new image file
-        await self.saveImageFile(projectId, file, fileType)
-    
-    async def updateGeoreferencedFile(self, projectId: int, file: bytes, fileType: str) -> None:
-        """
-        Update the georeferenced file of a project
-        """
-        #remove the old georeferenced file
-        await self.removeGeoreferencedFile(projectId)
-        #save the new georeferenced file
-        await self.saveGeoreferencedFile(projectId, file, fileType)
-    
-    async def getImageFilePath(self, projectId: int) -> str:
-        """
-        Get the image file path of a project
-        """
-        project = await self._StorageHandler.fetchOne(projectId, "project")
-        return project["imageFilePath"]
     
     ### Georeferencing
  
@@ -487,37 +412,8 @@ class ProjectHandler:
 
         # Save the georeferenced image
         await self.saveGeoreferencedFile(projectId, georeferencedImageBytes, "tiff")
-
-        
-    async def georefTiffImage(self, projectId: int, crs: str = None) -> None:
-        """
-        Georeference the image of a project
-        """
-        #get the image file path
-        project = await self.getProject(projectId)
-        imageFilePath = project.georeferencedFilePath
-        #get the points of the project
-        points = project.points
-        #georeference the image
-        georeferencedImage = None
-        if crs is None:
-            georeferencedImage = georef.reGeoreferencedImageTiff(imageFilePath, points)
-        else:
-            georeferencedImage = georef.reGeoreferencedImageTiff(imageFilePath, points, crs)
-        if georeferencedImage is None:
-            raise Exception("Image could not be georeferenced")
-        #save the georeferenced image
-        filePath = await self._FileStorage.saveFileFromPath(georeferencedImage, ".tiff")
-        georef.removeFile(georeferencedImage) #clean up temps from georeferencing
-        
-        #update the project with the file path
-        project.georeferencedFilePath = filePath
-        await self.updateProject(project.id, project)
-
+      
     async def getCornerCoordinates(self, projectId: int):
-        """
-        Get the corner coordinates of the image of a project
-        """
         #get the image file path
         project = await self.getProject(projectId)
         imageFilePath = project.georeferencedFilePath

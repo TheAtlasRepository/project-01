@@ -1,15 +1,15 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks, Path
-from fastapi.responses import FileResponse, Response
 from typing import List
+from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse, Response
 #internal imports:
-from ..utils.models.project import Project
 from ..utils.models.point import Point
+from ..utils.models.project import Project
 from ..utils.projectHandler import ProjectHandler
+from ..utils.core.georefHelper import generateTile
 from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
 from ..utils.storage.data.storageHandler import StorageHandler
 from ..utils.storage.data.sqliteLocalStorage import SQLiteStorage
-from ..utils.core.georefHelper import generateTile
 
 router = APIRouter(
     prefix="/project",
@@ -28,11 +28,11 @@ async def createProject(project: Project):
     Create a new project and return the id of the project
     - only the name is required, the rest of the attributes are optional
     """
-    #try:
-    id = await _projectHandler.createProject(project)
-    return {"id": id}
-    #except Exception as e:
-    #    raise HTTPException(status_code=400, detail=f'Project could not be created: {str(e.with_traceback(None))}, {e.args}')
+    try:
+        id = await _projectHandler.createProject(project)
+        return {"id": id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f'Project could not be created: {str(e)}')
 
 @router.put("/{projectId}")
 async def updateProject(projectId: int, project: Project):
@@ -145,22 +145,11 @@ async def getImage(projectId: int):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/{projectId}/georef/initial")
+@router.get("/{projectId}/georef")
 async def InitalgeorefImage(projectId: int, crs: str = None):
-    """ Georeference the image of a project by id, returns the georeferenced image file if found"""
-    #try:
-    await _projectHandler.georefPNGImage(projectId, crs)
-    imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
-    return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
-    #except Exception as e:
-    #    raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.get("/{projectId}/georef/referenced")
-async def adjustGeoref(projectId: int):
-    """ re-georeference the image of a project by id, returns the georeferenced image file if found"""
+    """ Georeference the image of a project by project id, returns the georeferenced image file if found"""
     try:
-        await _projectHandler.georefTiffImage(projectId)
+        await _projectHandler.georefPNGImage(projectId, crs)
         imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
         return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
     except Exception as e:
