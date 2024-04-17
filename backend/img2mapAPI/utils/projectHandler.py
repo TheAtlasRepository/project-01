@@ -22,10 +22,6 @@ class ProjectHandler:
     
     # Function to create a project
     async def createProject(self, project: Project) -> int:
-        """
-        Create a project and save it to storage
-        return the id of the created project
-        """
         #clear or set the needed fields
         project.id = None
         project.imageFilePath = ""
@@ -39,9 +35,6 @@ class ProjectHandler:
     
     # Function to update a project
     async def updateProject(self, projectId: int, project: Project) -> bool:
-        """
-        Update a project
-        """
         fetchedProject: dict = await self._StorageHandler.fetchOne(projectId, "project")
         if fetchedProject is None:
             raise Exception("Project not found")
@@ -82,9 +75,6 @@ class ProjectHandler:
  
     # Function to delete a project
     async def deleteProject(self, projectId: int) -> None:
-        """
-        Delete a project
-        """
         #find the project and remove it
         project = await self._StorageHandler.fetchOne(projectId, "project")
 
@@ -105,9 +95,6 @@ class ProjectHandler:
     
     # Function to get a project by id
     async def getProject(self, projectId: int) -> Project:
-        """
-        Get a project by id
-        """
         #Convert the data to a project object
         project = await self._StorageHandler.fetchOne(projectId, "project")
         project : Project = Project.model_construct(None, **project)
@@ -128,9 +115,6 @@ class ProjectHandler:
     
 
     async def projectExists(self, projectId: int) -> bool:
-        """
-        Check if a project exists
-        """
         project = await self._StorageHandler.fetchOne(projectId, "project")
         if project is None or project == {}:
             return False
@@ -139,9 +123,6 @@ class ProjectHandler:
     ### Points
 
     async def getProjectPoints(self, projectId: int) -> List[Point]:
-        """
-        Get all points of a project
-        """
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
         #Convert the data to a list of point objects
@@ -179,9 +160,6 @@ class ProjectHandler:
         return point
 
     async def removeAllProjectPoints(self, projectId: int) -> bool:
-        """
-        Remove all points from a project
-        """
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
         params: dict = {"projectId": projectId}
@@ -193,9 +171,6 @@ class ProjectHandler:
         raise Exception("No points found for this project")
 
     async def removePoint(self, projectId: int, pointId: int) -> bool:
-        """
-        Remove a point from a project
-        """
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
         params: dict = {"projectId": projectId, "Idproj": pointId}
@@ -233,9 +208,6 @@ class ProjectHandler:
         return (point.Idproj, dbid)
 
     async def updatePoint(self, projectId: int, pointId: int, point: Point) -> bool:
-        """
-        Update a point of a project
-        """
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
         if self.validatepoints([point]) == False:
@@ -266,9 +238,6 @@ class ProjectHandler:
         return True
 
     def validatepoints(self, points: List[Point]) -> bool:
-        """
-        Validate the points
-        """
         #check if the points are valid
         for point in points:
             #check if point is a point object
@@ -304,9 +273,6 @@ class ProjectHandler:
         return project["imageFilePath"]
     
     async def saveImageFile(self, projectId: int, file: tempfile, fileType: str) -> None:
-        """
-        Save the image file of a project
-        """
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
         #only accept png
@@ -346,16 +312,10 @@ class ProjectHandler:
         return file
 
     async def getGeoreferencedFilePath(self, projectId: int) -> str:
-        """
-        Get the georeferenced file path of a project
-        """
         project = await self._StorageHandler.fetchOne(projectId, "project")
         return project["georeferencedFilePath"]
           
     async def saveGeoreferencedFile(self, projectId: int, file: bytes, fileType: str) -> None:
-        """
-        Save the georeferenced file of a project
-        """
         #only accept tiff
         if fileType.find("tiff") == -1:
             raise Exception("Invalid file type")
@@ -375,9 +335,6 @@ class ProjectHandler:
         await self._StorageHandler.update(projectId, project, "project")
 
     async def removeGeoreferencedFile(self, projectId: int) -> None:
-        """
-        Remove the georeferenced file of a project
-        """
         #remove the georeferenced file
         project = await self._StorageHandler.fetchOne(projectId, "project")
         await self._FileStorage.removeFile(project["georeferencedFilePath"])
@@ -388,9 +345,6 @@ class ProjectHandler:
     ### Georeferencing
  
     async def georefPNGImage(self, projectId: int, crs: str = None) -> None:
-        """
-        Georeference the image of a project
-        """
         #get the image file path
         project = await self.getProject(projectId)
         imageFilePath = project.imageFilePath
@@ -422,3 +376,199 @@ class ProjectHandler:
         if coordinates is None:
             raise Exception("Coordinates not found")
         return coordinates
+    
+#Functions documentation
+#project functions
+def createProject(project: Project) -> int:
+    """Create a project and save it to storage
+    return the id of the created project
+
+    Args:
+        project (Project): The project object to create
+
+    Returns:
+        int: The id of the created project object
+    """
+def updateProject(projectId: int, project: Project) -> bool:
+    """Update a project
+
+    Args:
+        projectId (int): The id of the project to update
+        project (Project): The updated project object
+
+    Returns:
+        bool: True if the project was updated successfully, False otherwise
+    """
+def deleteProject(projectId: int) -> None:
+    """Delete a project
+
+    Args:
+        projectId (int): The id of the project to delete
+    """
+def getProject(projectId: int) -> Project:
+    """Get a project by id
+
+    Args:
+        projectId (int): The id of the project to get
+
+    Returns:
+        Project: The project object with the given id if it exists.
+    """
+def projectExists(projectId: int) -> bool:
+    """Check if a project exists
+
+    Args:
+        projectId (int): The id of the project to check
+
+    Returns:
+        bool: True if the project exists, False otherwise
+    """
+#points functions
+def getProjectPoints(projectId: int) -> List[Point]:
+    """Get all points of a project
+
+    Args:
+        projectId (int): The id of the project, which points to get
+
+    Returns:
+        List[Point]: List of points (Point objects) of the project
+    """
+def getPoint(projectId: int, pointId: int, byDBID:bool = False) -> Point:
+    """Get a point of a project by id
+
+    Args:
+        projectId (int): The id of the project, which the point belongs to
+        pointId (int): The id of the point to get
+        byDBID (bool, optional): Set true if point id is the ID in database. Defaults to False.
+
+    Returns:
+        Point: The point object with the given id if it exists.
+    """
+def removeAllProjectPoints(projectId: int) -> bool:
+    """Remove all points from a project
+
+    Args:
+        projectId (int): The id of the project, which points to remove
+
+    Returns:
+        bool: True if the points were removed successfully, False otherwise
+    """
+def removePoint(projectId: int, pointId: int) -> bool:
+    """Remove a point from a project
+
+    Args:
+        projectId (int): The id of the project, which the point belongs to
+        pointId (int): The id of the point to remove (Idproj)
+
+    Returns:
+        bool: True if the point was removed successfully, False otherwise
+    """
+def addPoint(projectId: int, point: Point) -> int:
+    """Add a point to a project
+
+    Args:
+        projectId (int): The id of the project, which the point belongs to
+        point (Point): The point object to add
+
+    Returns:
+        (int, int): First the id of the point in the project and second the id of the point in the database
+    """
+def updatePoint(projectId: int, pointId: int, point: Point) -> bool:
+    """Update a point of a project
+
+    Args:
+        projectId (int): The id of the project, which the point belongs to
+        pointId (int): The id of the point to update
+        point (Point): The updated point object
+
+    Returns:
+        bool: True if the point was updated successfully, False otherwise
+    """
+def validatepoints(points: List[Point]) -> bool:
+    """Validate the points
+
+    Args:
+        points (List[Point]): The list of points to validate
+
+    Returns:
+        bool: True if the points are valid, False otherwise
+    """
+#files functions
+def getImageFile(projectId: int) -> bytes:
+    """Get the image file of a project
+
+    Args:
+        projectId (int): The id of the project, which the image belongs to
+
+    Returns:
+        bytes: The image file in bytes of the project
+    """
+def getImageFilePath(projectId: int) -> str:
+    """Get the image file path of a project
+
+    Args:
+        projectId (int): The id of the project, which the image belongs to
+
+    Returns:
+        str: The image file path of the project
+    """
+def saveImageFile(projectId: int, file: tempfile, fileType: str) -> None:
+    """Save the image file of a project
+
+    Args:
+        projectId (int): The id of the project, which the image belongs to
+        file (tempfile): The image file to save
+        fileType (str): The type of the file
+    """
+def removeImageFile(projectId: int) -> None:
+    """Remove the image file of a project
+
+    Args:
+        projectId (int): The id of the project, which the image belongs to
+    """
+def getGeoreferencedFile(projectId: int) -> bytes:
+    """Get the georeferenced file of a project
+
+    Args:
+        projectId (int): The id of the project, which the georeferenced file belongs to
+
+    Returns:
+        bytes: The georeferenced file in bytes of the project
+    """
+def getGeoreferencedFilePath(projectId: int) -> str:
+    """Get the georeferenced file path of a project
+
+    Args:
+        projectId (int): The id of the project, which the georeferenced file belongs to
+
+    Returns:
+        str: The georeferenced file path of the project
+    """
+def saveGeoreferencedFile(projectId: int, file: bytes, fileType: str) -> None:
+    """Save the georeferenced file of a project
+
+    Args:
+        projectId (int): The id of the project, which the georeferenced file belongs to
+        file (bytes): The georeferenced file to save
+        fileType (str): The type of the file
+    """
+def removeGeoreferencedFile(projectId: int) -> None:
+    """Remove the georeferenced file of a project
+
+    Args:
+        projectId (int): The id of the project, which the georeferenced file belongs to
+    """
+#georeferencing functions
+def georefPNGImage(projectId: int, crs: str = None) -> None:
+    """Georeference the image of a project
+
+    Args:
+        projectId (int): The id of the project, which the image belongs to
+        crs (str, optional): Cordinate refrence system. Defaults to None.
+    """
+def getCornerCoordinates(projectId: int):
+    """Get the corner coordinates of the image of a project
+
+    Args:
+        projectId (int): The id of the project, which the image belongs to
+    """

@@ -1,6 +1,9 @@
 import os
 import shutil
 
+#This file contains helper functions for file operations in the API server for temporary files
+
+
 #checking if /tmp folder exists
 def getTmpFolderPath():
     if not os.path.exists('./temp'):
@@ -8,7 +11,7 @@ def getTmpFolderPath():
     return './temp'
 
 def clearTmpFolder():
-    print("Clearing the temp folder")
+    print("Clearing the temp folder") #TODO: Log this properly
 
     #check if the temp folder exists
     temp_folder = os.path.join('.', 'temp')
@@ -67,3 +70,42 @@ def createEmptyFile(suffix):
     with open(getUniqeFileName(suffix), "w") as file:
         file.write("")
     return file.name
+
+#Functions documentation
+def getTmpFolderPath():
+    """
+    Returns:
+        str: The path to the temp folder
+    """
+def clearTmpFolder():
+    """Clears the temp folder
+    """
+
+def getUniqeFileName(suffix : str, length=8):
+    """Creates a unique file name in the temp folder
+
+    Args:
+        suffix (str): The suffix of the file name
+        length (int, optional): Lenght of filename. Defaults to 8.
+
+    Raises:
+        Exception: Could not create a unique file name
+
+    Returns:
+        str: The unique file name, including the path to the temp folder
+    """
+def removeFile(filePath):
+    """Removes a file if it exists
+
+    Args:
+        filePath (str): The path to the file
+    """
+def createEmptyFile(suffix):
+    """Creates an empty file in the temp folder
+
+    Args:
+        suffix (str): The suffix of the file name
+
+    Returns:
+        str: The path to the empty file
+    """
