@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import MapStyleToggle from "./mapStyleToggle";
 import GeocoderControl from "./geocoder-control";
 import MapToolbar from "@/components/ui/MapToolbar";
+import { RotateLoader } from "react-spinners";
 
 interface MapOverlayProps {
   projectId: number;
@@ -24,22 +25,26 @@ const OverlayView = ({
     "mapbox://styles/mapbox/streets-v12"
   );
 
-  const [bounds, setBounds] = useState<[number, number, number, number]>();
+  //Used for setting the initial viewstate of the image
+  // sets latitude and longitude based on the center geo coordinates of the image
+  const latitude =
+    (georefCornerCoordinates[1] + georefCornerCoordinates[3]) / 2;
+  const longitude =
+    (georefCornerCoordinates[0] + georefCornerCoordinates[2]) / 2;
 
-  useEffect(() => {
-    // Calculate the bounds of the georeferenced image add a padding to the bounding area
-    const [west, south, east, north] = georefCornerCoordinates;
-    const padding = 0.2;
-    const bounds = [
-      west - padding,
-      south - padding,
-      east + padding,
-      north + padding,
-    ];
-    setBounds(bounds as [number, number, number, number]);
+  //zoom based on geo-graphical width of the image where geocornercoordinates is [west, south, east, north]
+  const zoom = Math.floor(
+    Math.log2(
+      360 / Math.abs(georefCornerCoordinates[2] - georefCornerCoordinates[0])
+    )
+  );
 
-    console.log("Bounds set:" + bounds);
-  }, [georefCornerCoordinates]);
+  // Passed to mapbox
+  const [viewport, setViewport] = useState({
+    latitude,
+    longitude,
+    zoom,
+  });
 
   // Used to set the opacity of the image overlay
   const handleOpacity = (values: number[]) => {
@@ -75,15 +80,21 @@ const OverlayView = ({
       );
   }, [projectId, imageSrc]);
 
-  if (!bounds) {
-    return <div className="flex">Loading map...</div>;
+  // if georefcornercoordinates is not set, show loading spinner
+  if (!georefCornerCoordinates) {
+    return (
+      <div className="flex w-full h-full flex-col">
+        <div className="flex h-full justify-center items-center">
+          <RotateLoader color="#000000" loading={true} size={15} />
+        </div>
+      </div>
+    );
   }
   return (
     <div className="w-full h-full flex flex-col">
       <div className="w-full flex-1">
         <MapToolbar>
           <MapStyleToggle onStyleChange={handleStyleChange} />
-
           <div className="flex flex-col items-start min-w-52">
             <div className="flex flex-row justify-start">
               <div>Image Overlay Opacity:</div>
@@ -103,13 +114,12 @@ const OverlayView = ({
           </div>
         </MapToolbar>
         <Map
+          initialViewState={{ ...viewport }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={mapStyle}
           mapboxAccessToken={mapboxToken}
           minZoom={5}
           maxZoom={19}
-          //maxbounds to georefCornerCoordinates directly
-          maxBounds={bounds}
         >
           <GeolocateControl position="bottom-right" />
           <NavigationControl position="bottom-right" />
