@@ -234,7 +234,7 @@ export const cropImage = async (
   }
 };
 
-//get from "{base_url}/project/{projectid}/georef/coordinates" which returns [top_left, top_right, bottom_right, bottom_left]
+//get from "{base_url}/project/{projectid}/georef/coordinates" which returns [west, north, east, south]
 export const getGeorefCoordinates = async (
   projectId: number
 ): Promise<number[][]> => {
