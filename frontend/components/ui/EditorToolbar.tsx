@@ -12,6 +12,7 @@ interface EditorToolbarProps {
     handleDownload: () => void;
     isAutoSaved: boolean;
     projectName: string;
+    projectNameMaxLength: number;
     projectId: number;
     setProjectName: (value: string) => void;
     hasBeenReferenced: boolean;
@@ -69,6 +70,7 @@ const EditorToolbar = (props: EditorToolbarProps) => {
                     onChange={(e) => props.setProjectName(e.target.value)}
                     className="text-xl font-semibold bg-transparent border-none outline-none"
                     placeholder="Project name" // Add placeholder attribute
+                    maxLength={props.projectNameMaxLength}
                 />
                 {props.isAutoSaved && (
                     <span className="text-sm text-gray-500">Auto saved</span>

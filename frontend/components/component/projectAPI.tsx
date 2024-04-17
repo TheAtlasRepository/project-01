@@ -109,6 +109,22 @@ export const initalGeorefimage = async (projectId: number): Promise<void> => {
 };
 
 /**
+ * PUT /project/{projectId} - { name }
+ * Updates the name of a project
+ * @param projectId - The ID of the project to update
+ * @param name - The new name of the project
+ */
+export const updateProjectName = async (projectId: number, name: string): Promise<void> => {
+  try {
+    await axios.put(`${BASE_URL}/project/${projectId}`, { name });
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
+  } finally {
+    console.log("Project name updated");
+  }
+}
+
+/**
  * DELETE /project/{projectId}
  * Deletes a project and its related data
  * @param projectId - The ID of the project to delete
