@@ -48,7 +48,7 @@ class ProjectHandler:
         georefPNGImage(projectId: int, crs: str = None) -> None: Georeference the image of a project
         getCornerCoordinates(projectId: int): Get the corner coordinates of the image of a project
     """
-    
+
     _FileStorage: FileStorage = None
     _StorageHandler: StorageHandler = None
 
@@ -67,7 +67,6 @@ class ProjectHandler:
             int: The id of the created project object
         """
 
-        #clear or set the needed fields
         project.id = None
         project.imageFilePath = ""
         project.georeferencedFilePath = ""
@@ -88,10 +87,10 @@ class ProjectHandler:
         Returns:
             bool: True if the project was updated successfully, False otherwise
         """
+
         fetchedProject: dict = await self._StorageHandler.fetchOne(projectId, "project")
         if fetchedProject is None:
             raise Exception("Project not found")
-        #check fields that are not allowed to be updated
         fetchedProject= Project.model_construct(_fields_set=None, **fetchedProject)
         project.id = projectId
         Created = None
@@ -105,24 +104,20 @@ class ProjectHandler:
             raise Exception("api object did not return a project object")
         project.lastModified = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        #compare the fetched project with the updated project and update allowed fields, points and image files are sent to other functions to be handled
         innProject: dict = dict(project)
         fetchedProjectDict: dict = dict(fetchedProject)
         specialFields = ["id", "created", "lastModified", "points"]
         for key in fetchedProjectDict:
             if key in innProject:
-                #check if key of points exists
                 if key == "points":
                     if project.points is not None or project.points != [] :
-                        #Todo: fiks the error on updatePoints, removed for now, just cant update points atm
-                      #  await self.updatePoints(projectId, project.points.points)
+                        #TODO: fiks the error on updatePoints, removed for now, just cant update points atm
+                        #  await self.updatePoints(projectId, project.points.points)
                         pass
-                #cheking special fields
                 elif key not in specialFields:
                     if fetchedProjectDict[key] != innProject[key]:
                         fetchedProjectDict[key] = innProject[key]
         fetchedProject: Project = Project.model_construct(None, **fetchedProjectDict)
-        #update the project in the storage
         await self._StorageHandler.update(projectId, fetchedProject, "project")
         return True
  
@@ -133,22 +128,14 @@ class ProjectHandler:
             projectId (int): The id of the project to delete
         """
 
-        #find the project and remove it
         project = await self._StorageHandler.fetchOne(projectId, "project")
+        if project is None: raise Exception("Project not found")
+        if project["imageFilePath"] != "": await self._FileStorage.removeFile(project["imageFilePath"])
+        if project["georeferencedFilePath"] != "": await self._FileStorage.removeFile(project["georeferencedFilePath"])
 
-        if project is None:
-            raise Exception("Project not found")
-        #remove the image and georeferenced files
-        if project["imageFilePath"] != "":
-            await self._FileStorage.removeFile(project["imageFilePath"])
-        if project["georeferencedFilePath"] != "":
-            await self._FileStorage.removeFile(project["georeferencedFilePath"])
-        
-        #delete project points
         points = await self._StorageHandler.fetch("point", {"projectId": projectId})
         for point in points:
             await self._StorageHandler.remove(point["id"], "point")
-        #remove the project
         await self._StorageHandler.remove(projectId, "project")
     
     async def getProject(self, projectId: int) -> Project:
@@ -161,22 +148,19 @@ class ProjectHandler:
             Project: The project object with the given id if it exists.
         """
 
-        #Convert the data to a project object
         project = await self._StorageHandler.fetchOne(projectId, "project")
         project : Project = Project.model_construct(None, **project)
-        if project is None:
-            raise Exception("Project not found")
-        #check for project points
+        if project is None: raise Exception("Project not found")
         try:
             points = await self.getProjectPoints(projectId)
         except:
             points = []
-        #make pointlist object and add the points to the project
+
         pointList = PointList()
         for point in points:
             pointList.points.append(point)
-        project.points = pointList
 
+        project.points = pointList
         return project
     
     async def projectExists(self, projectId: int) -> bool:
@@ -208,14 +192,12 @@ class ProjectHandler:
         
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
-        #Convert the data to a list of point objects
         params: dict = {"projectId": projectId}
         Points = await self._StorageHandler.fetch("point", params)
-        if Points is None:
-            raise Exception("No points found")
+
+        if Points is None: raise Exception("No points found")
         list: List[Point] = [Point.model_construct(None ,**point) for point in Points]
-        if len(list) == 0:
-            raise Exception("points is empty")
+        if len(list) == 0: raise Exception("points is empty")
         return list
     
     async def getPoint(self, projectId: int, pointId: int, byDBID:bool = False) -> Point:
@@ -308,11 +290,9 @@ class ProjectHandler:
         list.append(point)
         if self.validatepoints(list) == False: 
             raise Exception("Invalid point")
-        #set the projectId of the point
         point.projectId = projectId
         point.id = None
         point.error = None
-        #find the next idproj = 1
         points = await self._StorageHandler.fetch("point", {"projectId": projectId}) #format: List[dict] [{pointdict},{pointdict},{pointdict}]
         if points is None or points == []:
             point.Idproj = 1
@@ -322,7 +302,6 @@ class ProjectHandler:
             while point.Idproj in ids:
                 point.Idproj += 1
         
-        #save the point to storage
         dbid = await self._StorageHandler.saveInStorage(point, "point", "id")
         if dbid is None:
             raise Exception("Failed to save point")
@@ -345,15 +324,13 @@ class ProjectHandler:
         if self.validatepoints([point]) == False:
             raise Exception("Invalid point")
         
-        #find the point and update it
         params: dict = {"projectId": projectId, "Idproj": pointId}
         fetchedPointDict = await self._StorageHandler.fetch("point", params)
         if fetchedPointDict is None:
             raise Exception("Point not found")
         fetchedPointDict = fetchedPointDict[0]
-        #crate a point object
         updatedPoint: Point = Point.model_construct(None, **fetchedPointDict)
-        #update data point object based on the new point object
+        #Tranfering values
         updatedPoint.lat = point.lat
         updatedPoint.lng = point.lng
         updatedPoint.col = point.col
@@ -364,9 +341,7 @@ class ProjectHandler:
 
         newpoint : Point = updatedPoint
         dbid = fetchedPointDict["id"]
-        #update the point in the storage
         await self._StorageHandler.update(dbid, newpoint, "point")
-
         return True
 
     def validatepoints(self, points: List[Point]) -> bool:
@@ -379,9 +354,7 @@ class ProjectHandler:
             bool: True if the points are valid, False otherwise
         """
         
-        #check if the points are valid
         for point in points:
-            #check if point is a point object
             if isinstance(point, Point) == False:
                 try:
                     point = Point.model_construct(None, **point)
@@ -389,10 +362,9 @@ class ProjectHandler:
                         raise Exception("Invalid point object")
                 except:
                     raise Exception("Invalid point object")
-            #check if point has the required attributes
             if hasattr(point, "lat") == False or hasattr(point, "lng") == False or hasattr(point, "col") == False or hasattr(point, "row") == False:
                 raise Exception("Failed to validate points attributes")
-                #return False
+                #return False #TODO: check if this is the correct way to handle this
             if point.lat is None or point.lng is None or point.col is None or point.row is None:
                 return False
             
@@ -409,10 +381,8 @@ class ProjectHandler:
             bytes: The image file in bytes of the project
         """
         
-        #get the image file path
         project = await self._StorageHandler.fetchOne(projectId, "project")
         filePath = project["imageFilePath"]
-        #get the image file
         file = await self._FileStorage.get(filePath)
         if file is None:
             raise Exception("File not found")
@@ -442,21 +412,15 @@ class ProjectHandler:
         
         if await self.projectExists(projectId) == False:
             raise Exception("Project not found")
-        #only accept png
         if fileType.find("png") == -1:
             raise Exception(status_code=415, description="Invalid file type")
         
-        #fetch the project
         project = await self._StorageHandler.fetchOne(projectId, "project")
 
-        #check if the project already has an image file, and remove it
         if "imageFilePath" in project and project["imageFilePath"]:
             await self._FileStorage.removeFile(project["imageFilePath"])
 
-        #save the new image file
         filePath = await self._FileStorage.saveFile(file, ".png")
-
-        #update the project with the file path
         project["imageFilePath"] = filePath
         await self._StorageHandler.update(projectId, project, "project")
 
