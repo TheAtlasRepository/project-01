@@ -1,3 +1,6 @@
+"""This module contains functions for georeferencing images and generating map tiles.
+"""
+
 import os #importing os for file operations
 import warnings
 import rasterio as rio #importing rasterio for georeferencing
@@ -19,6 +22,19 @@ warnings.filterwarnings("ignore", category=rio.errors.NotGeoreferencedWarning) #
 defaultCrs = 'EPSG:4326'
 
 def createGcps(PointList : PointList):
+    """Create Rasterio GCPs from a list of points
+
+    Args:
+        PointList (PointList): The list of points
+
+    Raises:
+        Exception: Not enough points to create a transform
+        Exception: Points don't have Idproj
+
+    Returns:
+        List[rasterio.control.GroundControlPoint]: The list of GCPs
+    """
+
     if len(PointList.points) < 3:
         raise Exception("Not enough points to create a transform")
 
@@ -50,7 +66,18 @@ def createGcps(PointList : PointList):
         )
     return gcps
 
-def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defaultCrs)->str: 
+def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defaultCrs)->str:
+    """Georeference a PNG image with a list of points and a crs
+
+    Args:
+        tempFilePath(str): The path to the temporary file
+        points(PointList): The list of points
+        crs(str, optional): The crs of the image
+    
+    Returns:
+        str: The path to the georeferenced file
+    """ 
+
     gcps = createGcps(points) #creating the GCPs
 
     #create png file in the temp folder
@@ -101,6 +128,17 @@ def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defa
     return path
 
 def reGeoreferencedImageTiff(innFilePath, points: PointList, crs: str = defaultCrs)->str:
+    """Function to re-georeference a Gtiff image with a list of points and a crs
+    
+    Args:
+        innFilePath(str): The path to the image file
+        points(PointList): The list of points
+        crs(str): The crs of the image
+    
+    Returns:
+        str: The path to the georeferenced file
+    """
+
     #safety checks
     if not os.path.isfile(innFilePath):
         raise Exception("File not found")
@@ -132,6 +170,15 @@ def reGeoreferencedImageTiff(innFilePath, points: PointList, crs: str = defaultC
     return filename
 
 def getCornerCoordinates(tiff_path):
+    """Get the corner coordinates (longitude, latitude) of a georeferenced TIFF.
+
+    Args:
+        tiff_path: Path to the georeferenced TIFF file.
+
+    Returns:
+        [top left, top right, bottom right, bottom left]: A list of corner coordinates in the order.
+    """
+
     with rio.open(tiff_path) as dataset:
         # Get the bounds of the image
         bounds = dataset.bounds
@@ -144,9 +191,21 @@ def getCornerCoordinates(tiff_path):
 
         return [top_left, top_right, bottom_right, bottom_left]
 
-
-
 async def generateTile(tiff_path, x: int, y: int, z: int):
+    """Generate a tile image from a georeferenced TIFF file.
+
+    Args:
+        tiff_path (str): Path to the georeferenced TIFF file.
+        x (int): X coordinate of the tile.
+        y (int): Y coordinate of the tile.
+        z (int): Zoom level of the tile.
+
+    Raises:
+        e: Unhandled exception from rio-tiler.
+
+    Returns:
+        Respone: A FastAPI Response object containing the tile image as PNG bytes.
+    """
     blanke_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
     bytes_io = io.BytesIO()
     blanke_tile.save(bytes_io, format='PNG')
@@ -181,66 +240,3 @@ async def generateTile(tiff_path, x: int, y: int, z: int):
     except Exception as e:
         print(e)
         raise e
-
-#functions documentation
-def createGcps(PointList : PointList):
-    """Create Rasterio GCPs from a list of points
-
-    Args:
-        PointList (PointList): The list of points
-
-    Raises:
-        Exception: Not enough points to create a transform
-        Exception: Points don't have Idproj
-
-    Returns:
-        List[rasterio.control.GroundControlPoint]: The list of GCPs
-    """
-def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defaultCrs)->str: 
-    """
-    ### Georeference a PNG image with a list of points and a crs
-
-    **Arguments:**
-        tempFilePath {str} -- The path to the temporary file
-        points {PointList} -- The list of points
-        crs {str} -- The crs of the image
-    
-    **Returns:**
-        str -- The path to the georeferenced file
-    """
-def reGeoreferencedImageTiff(innFilePath, points: PointList, crs: str = defaultCrs)->str:
-    """
-    Function to re-georeference a Gtiff image with a list of points and a crs
-    Arguments:
-        innFilePath {str} -- The path to the image file
-        points {PointList} -- The list of points
-        crs {str} -- The crs of the image
-    Returns:
-        str -- The path to the georeferenced file
-    """
-def getCornerCoordinates(tiff_path):
-    """
-    Get the corner coordinates (longitude, latitude) of a georeferenced TIFF.
-
-    Parameters:
-    - tiff_path: Path to the georeferenced TIFF file.
-
-    Returns:
-    - A list of corner coordinates in the order: [top left, top right, bottom right, bottom left].
-    """
-async def generateTile(tiff_path, x: int, y: int, z: int):
-    """Generate a tile image from a georeferenced TIFF file.
-
-    Args:
-        tiff_path (str): Path to the georeferenced TIFF file.
-        x (int): X coordinate of the tile.
-        y (int): Y coordinate of the tile.
-        z (int): Zoom level of the tile.
-
-    Raises:
-        e: Unhandled exception from rio-tiler.
-
-    Returns:
-        Respone: A FastAPI Response object containing the tile image as PNG bytes.
-    """
-

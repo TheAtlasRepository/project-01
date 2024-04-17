@@ -1,3 +1,5 @@
+""" This file contains helper functions for file operations in the API server for temporary files
+"""
 import os
 import shutil
 
@@ -6,11 +8,17 @@ import shutil
 
 #checking if /tmp folder exists
 def getTmpFolderPath():
+    """Returns the path to the temp folder
+    """
+    
     if not os.path.exists('./temp'):
         os.makedirs('./temp')
     return './temp'
 
 def clearTmpFolder():
+    """Clears the temp folder
+    """
+
     print("Clearing the temp folder") #TODO: Log this properly
 
     #check if the temp folder exists
@@ -36,6 +44,19 @@ def clearTmpFolder():
             print(f"Error deleting item {item_path}: {e}")
 
 def getUniqeFileName(suffix : str, length=8):
+    """Creates a unique file name in the temp folder
+
+    Args:
+        suffix (str): The suffix of the file name
+        length (int, optional): Lenght of filename. Defaults to 8.
+
+    Raises:
+        Exception: Could not create a unique file name
+
+    Returns:
+        str: The unique file name, including the path to the temp folder
+    """
+
     #create a random file name between 8 cha, xxxx-xxxx.
     import random
     import string
@@ -61,45 +82,16 @@ def getUniqeFileName(suffix : str, length=8):
         i += 1
 
 def removeFile(filePath):
-    #remove the file if it exists
-    if os.path.isfile(filePath):
-        os.remove(filePath)
-
-def createEmptyFile(suffix):
-    #create a temporary file
-    with open(getUniqeFileName(suffix), "w") as file:
-        file.write("")
-    return file.name
-
-#Functions documentation
-def getTmpFolderPath():
-    """
-    Returns:
-        str: The path to the temp folder
-    """
-def clearTmpFolder():
-    """Clears the temp folder
-    """
-
-def getUniqeFileName(suffix : str, length=8):
-    """Creates a unique file name in the temp folder
-
-    Args:
-        suffix (str): The suffix of the file name
-        length (int, optional): Lenght of filename. Defaults to 8.
-
-    Raises:
-        Exception: Could not create a unique file name
-
-    Returns:
-        str: The unique file name, including the path to the temp folder
-    """
-def removeFile(filePath):
     """Removes a file if it exists
 
     Args:
         filePath (str): The path to the file
     """
+
+    #remove the file if it exists
+    if os.path.isfile(filePath):
+        os.remove(filePath)
+
 def createEmptyFile(suffix):
     """Creates an empty file in the temp folder
 
@@ -109,3 +101,8 @@ def createEmptyFile(suffix):
     Returns:
         str: The path to the empty file
     """
+
+    #create a temporary file
+    with open(getUniqeFileName(suffix), "w") as file:
+        file.write("")
+    return file.name
