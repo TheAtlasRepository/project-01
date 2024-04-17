@@ -10,17 +10,25 @@ services:
     build:
       context: ./frontend
       dockerfile: /docker/dev.Dockerfile
+    restart: always
+    command: yarn dev
+    #mounts the frontend folder to the container in order to allow hot-reloading
+    volumes:
+      - ./frontend:/app
     ports:
       - "80:3000"
       - "433:3000"
     environment:
       - NODE_ENV=development
+      #if you’re using Windows, you may need to uncomment the next line
+      - WATCHPACK_POLLING=true
     env_file:
       - ./frontend/.env.local
     networks:
       - img2map-network
     depends_on:
       - img2map-api
+  
   img2map-api:
     #Uvicorn server running python FastAPI
     container_name: Img2Map-API
@@ -28,6 +36,8 @@ services:
     build:
       context: ./backend
       dockerfile: /docker/dev.Dockerfile
+    volumes:
+      - ./backend:/app
     ports:
       - "8000:8000"
     networks:

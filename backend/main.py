@@ -1,6 +1,9 @@
 import uvicorn
 import dotenv
 import argparse
+import os
+
+import uvicorn.server
 # Purpose: Entry point for the backend server
 # Intended to start the backend server and run the application
 def main():
@@ -27,13 +30,26 @@ def main():
     app = Img2mapAPI.app
     #check if the mode is production
     if args.mode == 'prod':
-        print("Running in production mode")
+        print("Server running in production mode")
         uvicorn.run(app, host=host, port=port)
     else:
-        print("Running in development mode")
-        config = uvicorn.Config(app, host=host, port=port, log_level="info", reload=True, reload_dirs=["img2mapAPI"])
-        server = uvicorn.Server(config)
-        server.run()
+        print("Server running in development mode")
+        #configure the server to run in development mode with auto reload 
+        reload_dirs = []
+        #get all directories in the project under img2mapAPI
+        #add root directory to the list with perm
+        reload_dirs.append('./img2mapAPI')
+        reload_dirs = getDirs('./img2mapAPI', reload_dirs)
+        uvicorn.run(app="img2mapAPI.Img2mapAPI:app", host=host, port=port, reload=True, reload_dirs=reload_dirs)
+
+#recursive function to get all directories in a path
+def getDirs(path: str, inndirs: list):
+    #check for directories in the path, ignore the __pycache__ directory recursively for all subdirectories
+    for dir in os.listdir(path):
+        if os.path.isdir(f"{path}/{dir}") and dir != '__pycache__':
+            inndirs.append(f"{path}/{dir}")
+            getDirs(f"{path}/{dir}", inndirs)
+    return inndirs
     
 if __name__ == '__main__':
     main()

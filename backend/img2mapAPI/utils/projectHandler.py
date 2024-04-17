@@ -236,13 +236,11 @@ class ProjectHandler:
         if points is None or points == []:
             point.Idproj = 1
         else:
-            iterator = 1
             point.Idproj = 1
-            for p in points:
-                if p["Idproj"] >= point.Idproj:
-                    iterator += 1
-                    point.Idproj += 1
-
+            ids = [p["Idproj"] for p in points]  # List of IDs taken from the database
+            while point.Idproj in ids:
+                point.Idproj += 1
+        
         #save the point to storage
         dbid = await self._StorageHandler.saveInStorage(point, "point", "id")
         if dbid is None:
@@ -344,10 +342,18 @@ class ProjectHandler:
         #only accept png
         if fileType.find("png") == -1:
             raise Exception(status_code=415, description="Invalid file type")
-        #save the image file
-        filePath = await self._FileStorage.saveFile(file, ".png")
-        #update the project with the file path
+        
+        #fetch the project
         project = await self._StorageHandler.fetchOne(projectId, "project")
+
+        #check if the project already has an image file, and remove it
+        if "imageFilePath" in project and project["imageFilePath"]:
+            await self._FileStorage.removeFile(project["imageFilePath"])
+
+        #save the new image file
+        filePath = await self._FileStorage.saveFile(file, ".png")
+
+        #update the project with the file path
         project["imageFilePath"] = filePath
         await self._StorageHandler.update(projectId, project, "project")
   
@@ -379,10 +385,18 @@ class ProjectHandler:
         #only accept tiff
         if fileType.find("tiff") == -1:
             raise Exception("Invalid file type")
+        
+        #fetch the project
+        project = await self._StorageHandler.fetchOne(projectId, "project")
+
+        #check if the project already has an image file, and remove it
+        if "georeferencedFilePath" in project and project["georeferencedFilePath"]:
+            await self.removeGeoreferencedFile(projectId)
+
         #save the georeferenced file
         filePath = await self._FileStorage.saveFile(file, ".tiff")
+
         #update the project with the file path
-        project = await self._StorageHandler.fetchOne(projectId, "project")
         project["georeferencedFilePath"] = filePath
         await self._StorageHandler.update(projectId, project, "project")
 
@@ -416,7 +430,7 @@ class ProjectHandler:
         """
         #remove the georeferenced file
         project = await self._StorageHandler.fetchOne(projectId, "project")
-        await self._FileStorage.remove(project["georeferencedFilePath"])
+        await self._FileStorage.removeFile(project["georeferencedFilePath"])
         #update the project with an empty file path
         project["georeferencedFilePath"] = ""
         await self._StorageHandler.update(projectId, project, "project")
@@ -464,13 +478,16 @@ class ProjectHandler:
             georeferencedImage = georef.InitialGeoreferencePngImage(imageFilePath, points, crs) #goreference the image, return the path to the georeferenced file
         if georeferencedImage is None:
             raise Exception("Image could not be georeferenced")
-        #save the georeferenced image open to bytes
-        filePath = await self._FileStorage.saveFileFromPath(georeferencedImage, ".tiff")
-        georef.removeFile(georeferencedImage) #clean up temps from georeferencing
+        
+        # Read the georeferenced image into bytes
+        georeferencedImageBytes = await self._FileStorage.readFile(georeferencedImage)
 
-        #update the project with the file path
-        project.georeferencedFilePath = filePath
-        await self.updateProject(project.id, project)
+        # Remove the temporary file
+        await self._FileStorage.removeFile(georeferencedImage)
+
+        # Save the georeferenced image
+        await self.saveGeoreferencedFile(projectId, georeferencedImageBytes, "tiff")
+
         
     async def georefTiffImage(self, projectId: int, crs: str = None) -> None:
         """
