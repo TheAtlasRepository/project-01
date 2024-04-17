@@ -10,7 +10,8 @@ export type ViewPage = "sideBySide" | "overlay" | "crop"; // Pages in the editor
 export default function Editor() {
   const [projectId, setProjectId] = useState(0);
   const [projectName, setProjectName] = useState("Project 1");
-  const [projectNameNormalized, setProjectNameNormalized] = useState("Project_1");
+  const [projectNameNormalized, setProjectNameNormalized] =
+    useState("Project_1");
   const [projectNameMaxLength, setProjectNameMaxLength] = useState(32); // Max 32 characters for project name
   const [isAutoSaved, setIsAutoSaved] = useState(false);
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
@@ -179,9 +180,9 @@ export default function Editor() {
     setProjectName(name);
 
     let normalizedName = name
-    .replace(/\s+/g, '_') // Replace spaces with underscores
-    .replace(/[\\/]/g, '-') // Replace slashes with dashes
-    .replace(/[^a-zA-Z0-9-_]/g, ''); // Remove all characters that are not A-Z, a-z, 0-9, -, or _
+      .replace(/\s+/g, "_") // Replace spaces with underscores
+      .replace(/[\\/]/g, "-") // Replace slashes with dashes
+      .replace(/[^a-zA-Z0-9-_]/g, ""); // Remove all characters that are not A-Z, a-z, 0-9, -, or _
     setProjectNameNormalized(normalizedName);
 
     // If timer is running, reset it
@@ -194,7 +195,7 @@ export default function Editor() {
       console.log("Updating project name:", name, "=>", projectNameNormalized);
       api.updateProjectName(projectId, projectNameNormalized);
     }, 3000);
-  }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-white">

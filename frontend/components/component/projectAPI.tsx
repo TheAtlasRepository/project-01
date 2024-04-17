@@ -114,7 +114,10 @@ export const initalGeorefimage = async (projectId: number): Promise<void> => {
  * @param projectId - The ID of the project to update
  * @param name - The new name of the project
  */
-export const updateProjectName = async (projectId: number, name: string): Promise<void> => {
+export const updateProjectName = async (
+  projectId: number,
+  name: string
+): Promise<void> => {
   try {
     await axios.put(`${BASE_URL}/project/${projectId}`, { name });
   } catch (error) {
@@ -122,7 +125,7 @@ export const updateProjectName = async (projectId: number, name: string): Promis
   } finally {
     console.log("Project name updated");
   }
-}
+};
 
 /**
  * DELETE /project/{projectId}
@@ -172,7 +175,10 @@ export const deleteAllMarkers = async (projectId: number): Promise<void> => {
  * @param projectId - The ID of the project to delete the marker pair from
  * @param pointId - The ID of the marker pair to delete
  */
-export const deleteMarkerPair = async (projectId: number, pointId: number): Promise<void> => {
+export const deleteMarkerPair = async (
+  projectId: number,
+  pointId: number
+): Promise<void> => {
   try {
     await axios.delete(`${BASE_URL}/project/${projectId}/point/${pointId}`, {
       headers: {
