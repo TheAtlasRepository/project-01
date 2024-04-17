@@ -9,14 +9,14 @@ import { RotateLoader } from "react-spinners";
 
 interface MapOverlayProps {
   projectId: number;
-  georefCornerCoordinates: [number, number, number, number];
+  georefImageCoordinates: [number, number, number, number];
 }
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
 const OverlayView = ({
   projectId,
-  georefCornerCoordinates,
+  georefImageCoordinates,
 }: MapOverlayProps) => {
   const [dataUrl, setDataUrl] = useState("");
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!);
@@ -27,15 +27,13 @@ const OverlayView = ({
 
   //Used for setting the initial viewstate of the image
   // sets latitude and longitude based on the center geo coordinates of the image
-  const latitude =
-    (georefCornerCoordinates[1] + georefCornerCoordinates[3]) / 2;
-  const longitude =
-    (georefCornerCoordinates[0] + georefCornerCoordinates[2]) / 2;
+  const latitude = (georefImageCoordinates[1] + georefImageCoordinates[3]) / 2;
+  const longitude = (georefImageCoordinates[0] + georefImageCoordinates[2]) / 2;
 
   //zoom based on geo-graphical width of the image where geocornercoordinates is [west, south, east, north]
   const zoom = Math.floor(
     Math.log2(
-      360 / Math.abs(georefCornerCoordinates[2] - georefCornerCoordinates[0])
+      360 / Math.abs(georefImageCoordinates[2] - georefImageCoordinates[0])
     )
   );
 
@@ -80,8 +78,8 @@ const OverlayView = ({
       );
   }, [projectId, imageSrc]);
 
-  // if georefcornercoordinates is not set, show loading spinner
-  if (!georefCornerCoordinates) {
+  // if georefImageCoordinates is not set, show loading spinner
+  if (!georefImageCoordinates) {
     return (
       <div className="flex w-full h-full flex-col">
         <div className="flex h-full justify-center items-center">

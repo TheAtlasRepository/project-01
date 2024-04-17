@@ -16,7 +16,7 @@ export default function Editor() {
   const [lastActivePage, setLastActivePage] = useState<ViewPage>("sideBySide");
   const [isGeorefValid, setIsGeorefValid] = useState(false);
   const [markerCount, setMarkerCount] = useState(0);
-  const [georefCornerCoordinates, setGeorefCornerCoordinates] = useState<
+  const [georefImageCoordinates, setGeorefImageCoordinates] = useState<
     [number, number, number, number]
   >([0, 0, 0, 0]);
 
@@ -190,7 +190,7 @@ export default function Editor() {
               imageMarkers={imageMarkers}
               setImageMarkers={setImageMarkers}
               onDeleteMarker={handleMarkerPairDelete}
-              setGeorefCornerCoordinates={setGeorefCornerCoordinates}
+              setGeorefImageCoordinates={setGeorefImageCoordinates}
             />
           ))
         : activePage === "overlay"
@@ -198,7 +198,7 @@ export default function Editor() {
           (
             <OverlayView
               projectId={projectId}
-              georefCornerCoordinates={georefCornerCoordinates}
+              georefImageCoordinates={georefImageCoordinates}
             />
           ))
         : activePage === "crop"
@@ -230,7 +230,7 @@ export default function Editor() {
               imageMarkers={imageMarkers}
               setImageMarkers={setImageMarkers}
               onDeleteMarker={handleMarkerPairDelete}
-              setGeorefCornerCoordinates={setGeorefCornerCoordinates}
+              setGeorefImageCoordinates={setGeorefImageCoordinates}
             />
           ))}
     </div>
