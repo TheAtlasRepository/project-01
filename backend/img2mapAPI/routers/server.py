@@ -12,5 +12,6 @@ status = "running"
 
 @router.get('/')
 async def returnStatus():
-    """ **Returns server status** """
+    """ **Returns server status** 
+    """
     return {"status": status}

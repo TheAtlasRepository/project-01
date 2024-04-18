@@ -1,9 +1,13 @@
 from typing import List
 from .point import Point
 from pydantic import BaseModel
-# model for the pointList
 
 class PointList( BaseModel):
+    """PointList model
+
+    Attributes:
+        points (List[Point]): The list of points
+    """
     points: List[Point] = []
     
     def __init__(self, **data):

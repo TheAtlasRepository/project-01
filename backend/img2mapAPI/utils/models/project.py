@@ -1,10 +1,23 @@
-from typing import Optional, Union, List
+from typing import Optional, Union
 from pydantic import BaseModel
 from .pointList import PointList
-from ..core.FileHelper import createEmptyFile
 import datetime
 
 class Project(BaseModel):
+    """Project model
+
+    Attributes:
+        id (int): The id of the project
+        name (str): The name of the project
+        description (Optional[str]): The description of the project
+        points (Union[PointList, None]): The list of points
+        crs (Union[str, None]): The crs of the project
+        imageFilePath (Union[str, None]): The path to the image file
+        georeferencedFilePath (Union[str, None]): The path to the georeferenced file
+        selfdestructtime (Union[str, None]): The self destruct time of the project
+        created (Union[str, None]): The creation time of the project
+        lastModified (Union[str, None]): The last modification time of the project
+    """
     id: int = None
     name: str
     description: Optional[str] = None

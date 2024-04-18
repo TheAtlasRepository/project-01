@@ -5,6 +5,27 @@ from img2mapAPI.utils.storage.data.storageHandler import StorageHandler as sh
 from img2mapAPI.utils.core.helper.sqliteHelper import *
 
 class SQLiteStorage(sh):
+    """This class is the implementation of the StorageHandler class for sqlite3 databases
+
+    Functions:
+        settupDatabase: Settup the sqlite3 database
+        createTables: Create the tables in the database
+        convertSequenseToDict: Convert a sequence to a dictionary
+
+    Inherited abstract functions:
+        connect: Connect to the storage
+        saveInStorage: Save data to storage
+        remove: Remove data from storage
+        update: Update data in storage
+        fetchOne: Fetch one data from storage
+        fetch: Fetch data from storage
+        fetchAll: Fetch all data from storage
+    
+    Attributes:
+        dbPath: The path to the database
+        hasSettup: If the database has been settup
+    """
+
     _instance = None
     dbPath = None
     hasSettup = False
@@ -13,14 +34,21 @@ class SQLiteStorage(sh):
         self.dbPath = createNewDatabase(dbName)
     
     async def settupDatabase(self):
-        #create the database and the tables
+        """Settup the sqlite3 database
+        """
+
         if self.dbPath is None:
             self.dbPath = createNewDatabase('georefProjects.db')
         await self.createTables()
         self.hasSettup = True
     
     async def createTables(self):
-        #todo: connect to the database and make cursor
+        """Create the tables in the database
+
+        Raises:
+            Exception: Could not connect to the database
+        """
+
         conn: sql.Connection = await self.connect()
         if conn is None:
             raise Exception('Could not connect to the database')
@@ -54,17 +82,15 @@ class SQLiteStorage(sh):
                            )
                             '''
                             )
-            #commit the changes
             conn.commit()
         except Exception as e:
             print(e)
-        #close the connection
-        conn.close()
+        finally:
+            conn.close()
 
 
 
     async def connect(self, db: str ='', user: str = '', password: str='', host: str='', port: int=0)->sql.Connection:
-        #handle the connection to the database for Sqlite uses only local variables return the connection
         try:
             conn = sql.connect(self.dbPath)
             return conn
@@ -78,21 +104,20 @@ class SQLiteStorage(sh):
         if conn is not None:
             cursor = conn.cursor()
             try:
-                data: dict = dict(data) #convert the data to a dictionary
-                #TODO: remove duct tape
+                data: dict = dict(data) 
                 if 'id' in data:
                     del data['id']
-                #if the type is project remove 
                 if type == 'project':
                     if 'points' in data:
                         del data['points']
-                #create the query
+                
+                #the query
                 keys = ', '.join(data.keys())
                 placeholders = ', '.join(['?' for _ in data])
                 query = f"INSERT INTO {type} ({keys}) VALUES ({placeholders})"
 
                 cursor.execute(query, list(data.values()))
-                id = cursor.lastrowid #get the id of the saved data
+                id = cursor.lastrowid 
                 conn.commit()
                 return id
             except Exception as e:
@@ -124,17 +149,18 @@ class SQLiteStorage(sh):
         if conn is not None:
             cursor = conn.cursor()
             try:
-                data: dict = dict(data) #convert the data to a dictionary
-                #as in the save function remove the id and the points
+                data: dict = dict(data)
                 if 'id' in data:
                     del data['id']
                 if type == 'project':
                     if 'points' in data:
                         del data['points']
-                #create the query
+                
+                #query
                 keys = ', '.join(data.keys())
                 placeholders = ', '.join([f"{key} = ?" for key in data])
                 query = f"UPDATE {type} SET {placeholders} WHERE id = {id}"
+                
                 cursor.execute(query, list(data.values()))
                 conn.commit()
             except Exception as e:
@@ -211,8 +237,18 @@ class SQLiteStorage(sh):
                 conn.close()
         pass
     
-    #duct tape solution
+
     def convertSequenseToDict(self, row: tuple, type: str)->dict:
+        """Convert a sequence to a dictionary
+
+        Args:
+            row (tuple): row from the database
+            type (str): the type of the data / the table name / the model class name
+
+        Returns:
+            dict: the data as a dictionary
+        """
+
         if type == 'project':
             return {
                 'id': row[0],

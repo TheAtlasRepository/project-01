@@ -1,10 +1,11 @@
+""" Main file for the Img2Map API, this file contains the main FastAPI application and the routers for the API. 
+"""
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from img2mapAPI.routers import *
 from dotenv import load_dotenv, get_key
 import os
 
-#setting the default environment to development
 ENVIRONMENT = 'development'
 origins = [
     "http://localhost", #for local testing
@@ -15,11 +16,9 @@ origins = [
 #getting the environment variables for the application
 if load_dotenv('./.env'):
     print("Environment variables loaded")
-    #get the origins from the environment variables
     try:
         origins = get_key('./.env',key_to_get='CORS_ORIGINS')
         origins = origins.split(',')
-        #checking for osenvirons cross origins and adding to the list of origins if it exists
         if 'CORS_ORIGINS' in os.environ:
             osenvirons = os.environ['CORS_ORIGINS'].split(',')
             for origin in osenvirons:
@@ -29,9 +28,7 @@ if load_dotenv('./.env'):
     except:
         print("Error getting CORS_ORIGINS from environment variables")
         pass
-    #get the environment
     try:
-        #first try to get the environment from the environment variables, if fails try to get from os.environ
         ENVIRONMENT = get_key('./.env',key_to_get='ENVIRONMENT')
     except:
         print("failed to get from environment variables from .env file, trying os.environ")

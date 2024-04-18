@@ -2,6 +2,20 @@ from typing import Union, Optional
 from pydantic import BaseModel
 
 class Point(BaseModel):
+     """Point model
+
+     Attributes:
+           lat (float): The latitude of the point
+           lng (float): The longitude of the point
+           col (int): The column of the point
+           row (int): The row of the point
+           error (Union[None, float]): The error of the point
+           id (Union[int,None]): The id of the point in the database
+           name (Optional[str]): The name of the point
+           description (Optional[str]): The description of the point
+           projectId (Optional[int]): The id of the project
+           Idproj (Union[int,None]): The id of the point in the project
+     """
      lat: float
      lng: float
      col: int
