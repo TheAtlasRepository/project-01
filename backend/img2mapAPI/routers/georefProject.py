@@ -1,3 +1,24 @@
+""" This module contains the API Router with endpoints for the georeferencing project
+
+The module contains the following endpoints:
+    - Create a project
+    - Update a project
+    - Delete a project
+    - Get a project
+    - Add a point to a project
+    - Update a point in a project
+    - Delete all points from a project
+    - Delete a point from a project
+    - Get all points of a project
+    - Get a point in a project by id
+    - Upload an image to a project
+    - Get the image of a project by id
+    - Georeference the image of a project by id
+    - Re-georeference the image of a project by id
+    - Get the georeferenced image of a project by id
+    - Get the corner coordinates of the image of a project by id
+"""
+
 from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks, Path
 from fastapi.responses import FileResponse, Response
 from typing import List
