@@ -32,6 +32,7 @@ export default function Editor() {
       pixelCoords: [number, number];
     }[]
   >([]);
+  
   const [mapMarkers, setMapMarkers] = useState<
     { geoCoordinates: [number, number] }[]
   >([]);
@@ -116,20 +117,6 @@ export default function Editor() {
     setImageSrc(localStorage.getItem("pdfData")!);
     setViewPage(lastActivePage);
   };
-
-  // Check if there are atleast 3 markers to display the coordinates table and the values are not 0, and set the state
-  useEffect(() => {
-    const valid =
-      georefMarkerPairs.length >= 3 &&
-      georefMarkerPairs.every((pair) =>
-        pair.latLong.every((val) => val !== 0)
-      ) &&
-      georefMarkerPairs.every((pair) =>
-        pair.pixelCoords.every((val) => val !== 0)
-      );
-
-    setIsGeorefValid(valid);
-  }, [georefMarkerPairs]);
 
   // Resets all marker arrays and disables overlay view
   const resetMarkerRequest = () => {
@@ -224,6 +211,7 @@ export default function Editor() {
               setImageMarkers={setImageMarkers}
               onDeleteMarker={handleMarkerPairDelete}
               setGeorefImageCoordinates={setGeorefImageCoordinates}
+              setHasBeenGeoreferenced={setIsGeorefValid}
             />
           ))
         : activePage === "overlay"
@@ -264,6 +252,7 @@ export default function Editor() {
               setImageMarkers={setImageMarkers}
               onDeleteMarker={handleMarkerPairDelete}
               setGeorefImageCoordinates={setGeorefImageCoordinates}
+              setHasBeenGeoreferenced={setIsGeorefValid}
             />
           ))}
     </div>

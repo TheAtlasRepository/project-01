@@ -53,6 +53,8 @@ interface SplitViewProps {
   >;
 
   onDeleteMarker: (pointId: number | null, index: number) => void;
+
+  setHasBeenGeoreferenced: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function SplitView({
@@ -65,6 +67,7 @@ export default function SplitView({
   setImageMarkers,
   setGeorefImageCoordinates,
   onDeleteMarker,
+  setHasBeenGeoreferenced,
 }: SplitViewProps) {
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -327,6 +330,7 @@ export default function SplitView({
       .initalGeorefimage(projectId)
       .then((data) => {
         console.log("Success image georeferenced:", data);
+        setHasBeenGeoreferenced(true);
         api.getGeorefCoordinates(projectId).then((data) => {
           //flatten 2d array to 1d array
           const flatData = data.flat();
