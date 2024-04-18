@@ -46,7 +46,7 @@ class ProjectHandler:
         saveGeoreferencedFile(projectId: int, file: bytes, fileType: str) -> None: Save the georeferenced file of a project
         removeGeoreferencedFile(projectId: int) -> None: Remove the georeferenced file of a project
         georefPNGImage(projectId: int, crs: str = None) -> None: Georeference the image of a project
-        getCornerCoordinates(projectId: int): Get the corner coordinates of the image of a project
+        getImageCoordinates(projectId: int) -> List: Get the corner coordinates of the image of a project
     """
 
     _FileStorage: FileStorage = None
@@ -524,17 +524,20 @@ class ProjectHandler:
         georeferencedImageBytes = await self._FileStorage.readFile(georeferencedImage)
         await self._FileStorage.removeFile(georeferencedImage)
         await self.saveGeoreferencedFile(projectId, georeferencedImageBytes, "tiff")
-      
-    async def getCornerCoordinates(self, projectId: int):
+
+    async def getImageCoordinates(self, projectId: int):
         """Get the corner coordinates of the image of a project
 
-        Args:
-            projectId (int): The id of the project, which the image belongs to
+        Arguments:
+            projectId (int): The id of the project
+
+        Returns:
+            [west, north, east south]: A list of corner coordinates in the order
         """
 
         project = await self.getProject(projectId)
         imageFilePath = project.georeferencedFilePath
-        coordinates = georef.getCornerCoordinates(imageFilePath)
+        coordinates = georef.getImageCoordinates(imageFilePath)
         if coordinates is None:
             raise Exception("Coordinates not found")
         return coordinates

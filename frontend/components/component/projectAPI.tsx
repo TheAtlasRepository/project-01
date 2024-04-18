@@ -114,7 +114,10 @@ export const initalGeorefimage = async (projectId: number): Promise<void> => {
  * @param projectId - The ID of the project to update
  * @param name - The new name of the project
  */
-export const updateProjectName = async (projectId: number, name: string): Promise<void> => {
+export const updateProjectName = async (
+  projectId: number,
+  name: string
+): Promise<void> => {
   try {
     await axios.put(`${BASE_URL}/project/${projectId}`, { name });
   } catch (error) {
@@ -122,7 +125,7 @@ export const updateProjectName = async (projectId: number, name: string): Promis
   } finally {
     console.log("Project name updated");
   }
-}
+};
 
 /**
  * DELETE /project/{projectId}
@@ -172,7 +175,10 @@ export const deleteAllMarkers = async (projectId: number): Promise<void> => {
  * @param projectId - The ID of the project to delete the marker pair from
  * @param pointId - The ID of the marker pair to delete
  */
-export const deleteMarkerPair = async (projectId: number, pointId: number): Promise<void> => {
+export const deleteMarkerPair = async (
+  projectId: number,
+  pointId: number
+): Promise<void> => {
   try {
     await axios.delete(`${BASE_URL}/project/${projectId}/point/${pointId}`, {
       headers: {
@@ -198,23 +204,46 @@ export const deleteMarkerPair = async (projectId: number, pointId: number): Prom
  * @returns {Promise<void>} A Promise that resolves when the image is cropped successfully.
  * @throws {Error} Will throw an error if the request fails.
  */
-export const cropImage = async (formData: FormData, p1x: number, p1y: number, p2x: number, p2y: number): Promise<string> => {
+export const cropImage = async (
+  formData: FormData,
+  p1x: number,
+  p1y: number,
+  p2x: number,
+  p2y: number
+): Promise<string> => {
   try {
-    const response = await axios.post(`${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      responseType: 'blob'
-    });
+    const response = await axios.post(
+      `${BASE_URL}/converter/cropPng?p1x=${p1x}&p1y=${p1y}&p2x=${p2x}&p2y=${p2y}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "blob",
+      }
+    );
 
     // Convert the response data to a Blob, create a Blob URL and return the URL
-    const newBlob = new Blob([response.data], { type: 'image/png' });
+    const newBlob = new Blob([response.data], { type: "image/png" });
     const blobUrl = URL.createObjectURL(newBlob);
     return blobUrl;
-
   } catch (error) {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   } finally {
     console.log("Image cropped");
+  }
+};
+
+//get from "{base_url}/project/{projectid}/georef/coordinates" which returns [west, north, east, south]
+export const getGeorefCoordinates = async (
+  projectId: number
+): Promise<number[][]> => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/project/${projectId}/georef/coordinates`
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   }
 };

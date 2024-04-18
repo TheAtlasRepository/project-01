@@ -107,7 +107,9 @@ def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defa
     transform = from_gcps(gcps) #Affine transformation returned from the GCPs
     dataset.transform = transform 
     dataset.crs = CRS.from_string(crs) 
-    dataset.gcps = (gcps, crs)
+
+    #TODO: dataset.gcps this breaks getting the bounds of the image
+    # dataset.gcps = (gcps, crs) 
 
     overview_levels = [2, 4, 8, 16] #needed for generating the map tiles
     dataset.build_overviews(overview_levels, Resampling.nearest)
@@ -117,68 +119,37 @@ def InitialGeoreferencePngImage(tempFilePath, points: PointList, crs: str = defa
     removeFile(filename) 
     return path
 
-def reGeoreferencedImageTiff(innFilePath, points: PointList, crs: str = defaultCrs)->str:
-    """Function to re-georeference a Gtiff image with a list of points and a crs
-    
-    Args:
-        innFilePath(str): The path to the image file
-        points(PointList): The list of points
-        crs(str): The crs of the image
-    
-    Returns:
-        str: The path to the georeferenced file
+def getImageCoordinates(tiff_path):
     """
-
-    if not os.path.isfile(innFilePath):
-        raise Exception("File not found")
-    with rio.open(innFilePath, "r") as file:
-        if file.count == 0:
-            raise Exception("File has no data")
-    
-    gcps = createGcps(points) 
-    filename = getUniqeFileName('.tiff') 
-
-    with open(filename, "wb") as file:
-        file.write(open(innFilePath, "rb").read())
-
-    dataset = rio.open(filename, "r+") 
-    transform = from_gcps(gcps) #Affine transformation returned from the GCPs
-    dataset.transform = transform 
-    dataset.crs = CRS.from_string(crs) 
-
-    overview_levels = [2, 4, 8, 16] #needed for generating the map tiles
-    dataset.build_overviews(overview_levels, Resampling.nearest) 
-    dataset.update_tags(ns='rio_overview', resampling='nearest')
-    dataset.close()
-    return filename
-
-def getCornerCoordinates(tiff_path):
-    """Get the corner coordinates (longitude, latitude) of a georeferenced TIFF.
+    Get the Image coordinates (longitude, latitude) of a georeferenced TIFF.
 
     Args:
         tiff_path: Path to the georeferenced TIFF file.
 
     Returns:
-        [top left, top right, bottom right, bottom left]: A list of corner coordinates in the order.
+        [west, north, east south]: A list of corner coordinates in the order.
     """
 
     with rio.open(tiff_path) as dataset:
         bounds = dataset.bounds
 
-        top_left = (bounds.left, bounds.top)
-        top_right = (bounds.right, bounds.top)
-        bottom_right = (bounds.right, bounds.bottom)
-        bottom_left = (bounds.left, bounds.bottom)
+        # get west, south, east, north coordinates
+        west = bounds.left
+        south = bounds.bottom
+        east = bounds.right
+        north = bounds.top
 
-        return [top_left, top_right, bottom_right, bottom_left]
+        return [west, north, east, south]
+
+
 
 async def generateTile(tiff_path, x: int, y: int, z: int):
     """Generate a tile image from a georeferenced TIFF file.
 
     Args:
         tiff_path (str): Path to the georeferenced TIFF file.
-        x (int): X coordinate of the tile.
-        y (int): Y coordinate of the tile.
+        x (int): column index of the tile.
+        y (int): row index of the tile.
         z (int): Zoom level of the tile.
 
     Raises:

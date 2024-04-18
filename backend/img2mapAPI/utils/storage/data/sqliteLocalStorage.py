@@ -179,7 +179,6 @@ class SQLiteStorage(sh):
                 query = f"SELECT * FROM {type} WHERE id = {id}"
                 cursor.execute(query, ())
                 row = cursor.fetchone()
-                print(row)
                 if row is not None:
                     ret = self.convertSequenseToDict(row, type)
                     return ret
