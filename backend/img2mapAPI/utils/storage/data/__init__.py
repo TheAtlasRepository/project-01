@@ -1,3 +1,9 @@
+""" This package is used to handle the storage of the data in the local storage. 
+
+Modules:
+    - storageHandler: Contains the abstract base class for storage
+    - sqliteLocalStorage: Contains the local storage implementation for SQLite database
+"""
 from . import storageHandler
 from . import sqliteLocalStorage
 
