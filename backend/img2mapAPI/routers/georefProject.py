@@ -1,3 +1,24 @@
+""" This module contains the API Router with endpoints for the georeferencing project
+
+The module contains the following endpoints:
+    - Create a project
+    - Update a project
+    - Delete a project
+    - Get a project
+    - Add a point to a project
+    - Update a point in a project
+    - Delete all points from a project
+    - Delete a point from a project
+    - Get all points of a project
+    - Get a point in a project by id
+    - Upload an image to a project
+    - Get the image of a project by id
+    - Georeference the image of a project by id
+    - Re-georeference the image of a project by id
+    - Get the georeferenced image of a project by id
+    - Get the corner coordinates of the image of a project by id
+"""
+
 from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks, Path
 from fastapi.responses import FileResponse, Response
 from typing import List
@@ -177,11 +198,11 @@ async def getGeorefImage(projectId: int):
 
    
 @router.get("/{projectId}/georef/coordinates")
-async def getCornerCoordinates(projectId: int):
-    """ Get the corner coordinates of the image of a project by id, returns the corner coordinates if found"""
+async def getImageCoordinates(projectId: int):
+    """ Get the image coordinates of the image of a project by id, returns the image coordinates if found in format [west, north, east, south]"""
     try:
-        cornerCoordinates = await _projectHandler.getCornerCoordinates(projectId)
-        return cornerCoordinates
+        imageCoordinates = await _projectHandler.getImageCoordinates(projectId)
+        return imageCoordinates
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 

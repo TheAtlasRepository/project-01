@@ -1,24 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { Map, Source, Layer } from "react-map-gl";
+import { GeolocateControl, NavigationControl } from "react-map-gl";
 import { Slider } from "@/components/ui/slider";
 import MapStyleToggle from "./mapStyleToggle";
-import { GeolocateControl, NavigationControl } from "react-map-gl";
 import GeocoderControl from "./geocoder-control";
 import MapToolbar from "@/components/ui/MapToolbar";
+import { RotateLoader } from "react-spinners";
 
 interface MapOverlayProps {
   projectId: number;
+  georefImageCoordinates: [number, number, number, number];
 }
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
-const OverlayView = ({ projectId }: MapOverlayProps) => {
+const OverlayView = ({
+  projectId,
+  georefImageCoordinates,
+}: MapOverlayProps) => {
   const [dataUrl, setDataUrl] = useState("");
   const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!);
   const [opacity, setOpacity] = useState(100);
   const [mapStyle, setMapStyle] = useState(
     "mapbox://styles/mapbox/streets-v12"
   );
+
+  //Used for setting the initial viewstate of the image
+  // sets latitude and longitude based on the center geo coordinates of the image
+  const latitude = (georefImageCoordinates[1] + georefImageCoordinates[3]) / 2;
+  const longitude = (georefImageCoordinates[0] + georefImageCoordinates[2]) / 2;
+
+  //zoom based on geo-graphical width of the image where geocornercoordinates is [west, south, east, north]
+  const zoom = Math.floor(
+    Math.log2(
+      360 / Math.abs(georefImageCoordinates[2] - georefImageCoordinates[0])
+    )
+  );
+
+  // Passed to mapbox
+  const [viewport, setViewport] = useState({
+    latitude,
+    longitude,
+    zoom,
+  });
 
   // Used to set the opacity of the image overlay
   const handleOpacity = (values: number[]) => {
@@ -54,12 +78,21 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
       );
   }, [projectId, imageSrc]);
 
+  // if georefImageCoordinates is not set, show loading spinner
+  if (!georefImageCoordinates) {
+    return (
+      <div className="flex w-full h-full flex-col">
+        <div className="flex h-full justify-center items-center">
+          <RotateLoader color="#000000" loading={true} size={15} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-full h-full flex flex-col">
       <div className="w-full flex-1">
         <MapToolbar>
           <MapStyleToggle onStyleChange={handleStyleChange} />
-
           <div className="flex flex-col items-start min-w-52">
             <div className="flex flex-row justify-start">
               <div>Image Overlay Opacity:</div>
@@ -78,8 +111,8 @@ const OverlayView = ({ projectId }: MapOverlayProps) => {
             </div>
           </div>
         </MapToolbar>
-
         <Map
+          initialViewState={{ ...viewport }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={mapStyle}
           mapboxAccessToken={mapboxToken}

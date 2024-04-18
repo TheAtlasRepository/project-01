@@ -1,6 +1,4 @@
 import sqlite3 as sql
-import os
-import sys
 from typing import Union
 from pydantic import BaseModel
 from img2mapAPI.utils.storage.data.storageHandler import StorageHandler as sh
@@ -155,7 +153,6 @@ class SQLiteStorage(sh):
                 query = f"SELECT * FROM {type} WHERE id = {id}"
                 cursor.execute(query, ())
                 row = cursor.fetchone()
-                print(row)
                 if row is not None:
                     ret = self.convertSequenseToDict(row, type)
                     return ret

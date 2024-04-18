@@ -514,15 +514,15 @@ class ProjectHandler:
         project.georeferencedFilePath = filePath
         await self.updateProject(project.id, project)
 
-    async def getCornerCoordinates(self, projectId: int):
+    async def getImageCoordinates(self, projectId: int):
         """
-        Get the corner coordinates of the image of a project
+        Get the image coordinates of the image of a project
         """
         #get the image file path
         project = await self.getProject(projectId)
         imageFilePath = project.georeferencedFilePath
         #get the corner coordinates
-        coordinates = georef.getCornerCoordinates(imageFilePath)
+        coordinates = georef.getImageCoordinates(imageFilePath)
         if coordinates is None:
             raise Exception("Coordinates not found")
         return coordinates
