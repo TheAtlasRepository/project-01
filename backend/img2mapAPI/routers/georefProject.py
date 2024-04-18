@@ -14,9 +14,8 @@ The module contains the following endpoints:
     - Upload an image to a project
     - Get the image of a project by id
     - Georeference the image of a project by id
-    - Re-georeference the image of a project by id
     - Get the georeferenced image of a project by id
-    - Get the corner coordinates of the image of a project by id
+    - Get the bounding coordinates of the image of a project by id
 """
 
 from typing import List
