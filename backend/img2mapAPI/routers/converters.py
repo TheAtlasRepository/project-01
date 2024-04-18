@@ -1,3 +1,11 @@
+""" This module contains the API router with endpoints for file conversion. 
+
+The module contains the following endpoints:
+    - Convert a .pdf file to a .png file
+    - Convert an image to a .png file
+    - Crop a .png file
+"""
+
 from fastapi import APIRouter, BackgroundTasks, File, UploadFile, HTTPException, Query
 from fastapi.responses import FileResponse
 #internal imports
