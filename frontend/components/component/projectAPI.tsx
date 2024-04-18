@@ -31,7 +31,7 @@ function getErrorMessage(error: AxiosError<ErrorResponse>): string {
 
 export const addProject = async (name: string): Promise<ProjectResponse> => {
   if (hasMadeProjectApiCall) return Promise.reject("API call already made");
-  hasMadeProjectApiCall = true;
+  hasMadeProjectApiCall = true; 
   try {
     const response: AxiosResponse<ProjectResponse> = await axios.post(
       `${BASE_URL}/project/`,
@@ -88,14 +88,14 @@ export const uploadImage = async (
   }
 };
 
-// initalGeorefimage /project/{projectId}/georef/initial
+// initalGeorefimage /project/{projectId}/georef
 export const initalGeorefimage = async (projectId: number): Promise<void> => {
   try {
     // Add image capture logic here later
-    await axios.get(`${BASE_URL}/project/${projectId}/georef/initial`);
+    await axios.get(`${BASE_URL}/project/${projectId}/georef`);
     //response type blob
     const response = await fetch(
-      `${BASE_URL}/project/${projectId}/georef/initial`
+      `${BASE_URL}/project/${projectId}/georef`
     );
     const blob = await response.blob();
     // Directly create object URL from the blob
@@ -104,7 +104,7 @@ export const initalGeorefimage = async (projectId: number): Promise<void> => {
   } catch (error) {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
   } finally {
-    console.log("Initial georefimage done");
+    console.log("Georeferencing done");
   }
 };
 

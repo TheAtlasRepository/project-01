@@ -1,15 +1,35 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks, Path
-from fastapi.responses import FileResponse, Response
+""" This module contains the API Router with endpoints for the georeferencing project
+
+The module contains the following endpoints:
+    - Create a project
+    - Update a project
+    - Delete a project
+    - Get a project
+    - Add a point to a project
+    - Update a point in a project
+    - Delete all points from a project
+    - Delete a point from a project
+    - Get all points of a project
+    - Get a point in a project by id
+    - Upload an image to a project
+    - Get the image of a project by id
+    - Georeference the image of a project by id
+    - Get the georeferenced image of a project by id
+    - Get the bounding coordinates of the image of a project by id
+"""
+
 from typing import List
+from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse, Response
 #internal imports:
-from ..utils.models.project import Project
 from ..utils.models.point import Point
+from ..utils.models.project import Project
 from ..utils.projectHandler import ProjectHandler
+from ..utils.core.georefHelper import generateTile
 from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
 from ..utils.storage.data.storageHandler import StorageHandler
 from ..utils.storage.data.sqliteLocalStorage import SQLiteStorage
-from ..utils.core.georefHelper import generateTile
 
 router = APIRouter(
     prefix="/project",
@@ -17,26 +37,25 @@ router = APIRouter(
 )
 
 #TODO: Add a dependency class to handle errors and return the correct status code
-_StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3')
+_StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
 _Filestorage: FileStorage = LocalFileStorage()
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
 
 @router.post("/")
 async def createProject(project: Project):
-    """
-    Create a new project and return the id of the project
+    """Create a new project and return the id of the project
     - only the name is required, the rest of the attributes are optional
     """
-    #try:
-    id = await _projectHandler.createProject(project)
-    return {"id": id}
-    #except Exception as e:
-    #    raise HTTPException(status_code=400, detail=f'Project could not be created: {str(e.with_traceback(None))}, {e.args}')
+    try:
+        id = await _projectHandler.createProject(project)
+        return {"id": id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f'Project could not be created: {str(e)}')
 
 @router.put("/{projectId}")
 async def updateProject(projectId: int, project: Project):
-    """ Update the project details and return the id of the project """
+    """Update the project details and return the id of the project"""
     try:
         if await _projectHandler.updateProject(projectId, project): return {"ProjectID": projectId}
         else: raise HTTPException(status_code=404, detail="Project not found")
@@ -45,7 +64,7 @@ async def updateProject(projectId: int, project: Project):
 
 @router.delete("/{projectId}")
 async def deleteProject(projectId: int, backgroundTasks: BackgroundTasks):
-    """ Delete a project and return a message if the project was deleted"""
+    """Delete a project and return a message if the project was deleted successfully"""
     try:
         backgroundTasks.add_task(_projectHandler.deleteProject, projectId)
         backgroundTasks.is_async = True
@@ -57,7 +76,7 @@ async def deleteProject(projectId: int, backgroundTasks: BackgroundTasks):
 
 @router.get("/{projectId}")
 async def getProject(projectId: int):
-    """ Get a project by id """
+    """Get a project by id"""
     try:
         project = await _projectHandler.getProject(projectId)
         return project
@@ -66,7 +85,7 @@ async def getProject(projectId: int):
 
 @router.post("/{projectId}/point")
 async def addPoint(projectId: int, innpoint: Point):
-    """ Add a point to a project and return the id of the point"""
+    """ Add a point to a project and return the id of the project, id of the point, and id of the point in relation to the project"""
     try:
         (PointID, Dbid) = await _projectHandler.addPoint(projectId, innpoint)
         return {"Project":{"id": projectId},"Point":{"id": Dbid,"inProjectId": PointID}}
@@ -86,7 +105,7 @@ async def updatePoint(projectId: int, pointId: int, point: Point):
 
 @router.delete("/{projectId}/point")
 async def deletePoints(projectId: int, backgroundTasks: BackgroundTasks):
-    """ Delete all points from a project and return action status"""
+    """Delete all points from a project and return success message if the deletion was successful"""
     try:
         backgroundTasks.add_task(_projectHandler.removeAllProjectPoints, projectId)
         return Response(content="Deletion request of points accepted", status_code=202, media_type="text/plain", background=backgroundTasks)
@@ -95,7 +114,7 @@ async def deletePoints(projectId: int, backgroundTasks: BackgroundTasks):
 
 @router.delete("/{projectId}/point/{pointId}")
 async def deletePoint(projectId: int, pointId: int, backgroundTasks: BackgroundTasks):
-    """ Delete a point from a project returns action status"""
+    """ Delete a point from a project returns action status if the deletion was successful"""
     try:
         backgroundTasks.add_task(_projectHandler.removePoint, projectId, pointId)
         return Response(content="Deletion request of point accepted", status_code=202, media_type="text/plain", background=backgroundTasks)
@@ -104,7 +123,7 @@ async def deletePoint(projectId: int, pointId: int, backgroundTasks: BackgroundT
 
 @router.get("/{projectId}/point")
 async def getPoints(projectId: int):
-    """ Get all points of a project"""
+    """ Get all points of a project by project id"""
     try:
         points: List[Point] = await _projectHandler.getProjectPoints(projectId)
         return points
@@ -113,7 +132,7 @@ async def getPoints(projectId: int):
 
 @router.get("/{projectId}/point/{pointId}")
 async def getPoint(projectId: int, pointId: int):
-    """ Get a point in a project by id's"""
+    """ Get a point in a project by project ID and point ID related to the project, returns the point if found"""
     try:
         point = await _projectHandler.getPoint(projectId, pointId)
         return point
@@ -122,7 +141,7 @@ async def getPoint(projectId: int, pointId: int):
 
 @router.post("/{projectId}/image")
 async def uploadImage(projectId: int, file: UploadFile = File(...)):
-    """ Upload an image to a project"""
+    """ Upload an image to a project by project id, returns a message if the image was uploaded successfully"""
     try:
         tempFile = await file.read()
         await _projectHandler.saveImageFile(projectId, tempFile, file.content_type)
@@ -136,7 +155,7 @@ async def uploadImage(projectId: int, file: UploadFile = File(...)):
 
 @router.get("/{projectId}/image")
 async def getImage(projectId: int):
-    """ Get the image of a project by id, returns the image file if found"""
+    """Get the image of a project by project id, returns the image file if found"""
     try:
         imagepath = await _projectHandler.getImageFilePath(projectId)
         mediaType = "image/png"
@@ -145,22 +164,11 @@ async def getImage(projectId: int):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/{projectId}/georef/initial")
+@router.get("/{projectId}/georef")
 async def InitalgeorefImage(projectId: int, crs: str = None):
-    """ Georeference the image of a project by id, returns the georeferenced image file if found"""
-    #try:
-    await _projectHandler.georefPNGImage(projectId, crs)
-    imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
-    return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
-    #except Exception as e:
-    #    raise HTTPException(status_code=404, detail=str(e))
-
-
-@router.get("/{projectId}/georef/referenced")
-async def adjustGeoref(projectId: int):
-    """ re-georeference the image of a project by id, returns the georeferenced image file if found"""
+    """ Georeference the image of a project by project id, returns the georeferenced image file if found"""
     try:
-        await _projectHandler.georefTiffImage(projectId)
+        await _projectHandler.georefPNGImage(projectId, crs)
         imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
         return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
     except Exception as e:
@@ -168,7 +176,7 @@ async def adjustGeoref(projectId: int):
 
 @router.get("/{projectId}/image/geo")
 async def getGeorefImage(projectId: int):
-    """ Get the georeferenced image of a project by id, returns the georeferenced image file if found"""
+    """Get the georeferenced image of a project by id, returns the georeferenced image file if found"""
     try:
         imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
         return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
@@ -187,6 +195,7 @@ async def getImageCoordinates(projectId: int):
 
 @router.get("/{projectId}/tiles/{z}/{x}/{y}.png", response_class=Response)
 async def getTile(projectId: int, z: int, x: int, y: int):
+    """ Retrieve a tile from the georeferenced image of a project by project id, zoom level, x, and y coordinates, returns the tile if found"""
     try:
         tiff_path = await _projectHandler.getGeoreferencedFilePath(projectId)
         tile = await generateTile(tiff_path, x, y, z)

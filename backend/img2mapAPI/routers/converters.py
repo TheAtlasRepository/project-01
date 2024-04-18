@@ -1,3 +1,11 @@
+""" This module contains the API router with endpoints for file conversion. 
+
+The module contains the following endpoints:
+    - Convert a .pdf file to a .png file
+    - Convert an image to a .png file
+    - Crop a .png file
+"""
+
 from fastapi import APIRouter, BackgroundTasks, File, UploadFile, HTTPException, Query
 from fastapi.responses import FileResponse
 #internal imports
@@ -11,7 +19,7 @@ router = APIRouter()
 
 @router.post('/pdf2png')
 async def pdfPage2png(background_tasks: BackgroundTasks, page_number: int = 1, file: UploadFile = File(...)):
-    """ **Converts a .pdf file to a .png file of given page _default=1_.** """
+    """**Converts a .pdf file to a .png file of given page _default=1_.**"""
     #failsafe checks
     if file.content_type != 'application/pdf':
         raise HTTPException(status_code=415, detail='File must be a .pdf file')
@@ -30,7 +38,7 @@ async def pdfPage2png(background_tasks: BackgroundTasks, page_number: int = 1, f
     
 @router.post('/image2png')
 async def image2png(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
-    """ **Converts an image to a .png file.** """
+    """**Converts an image file to a .png file.**"""
     if file.content_type == 'image/png':
         raise HTTPException(status_code=400, detail='File is already a .png file')
     if isImageSupported(file) == False:
@@ -55,9 +63,7 @@ async def cropPng(
 ):
     """
     **Crops a PNG**
-
     p1x is left side of image, p1y is top side of image, combined they are top left corner
-
     p2x is right side of image, p2y is bottom side of image, combined they are bottom right corner
     """
     #failsafe checks
@@ -69,4 +75,4 @@ async def cropPng(
         background_tasks.add_task(delFile, NewImageFile)
         return FileResponse(NewImageFile, media_type='image/png', filename=image_name, background=background_tasks)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))

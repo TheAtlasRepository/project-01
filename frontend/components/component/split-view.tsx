@@ -326,9 +326,8 @@ export default function SplitView({
     api
       .initalGeorefimage(projectId)
       .then((data) => {
-        console.log("Success:", data);
+        console.log("Success image georeferenced:", data);
         api.getGeorefCoordinates(projectId).then((data) => {
-          console.log("Success:", data);
           //flatten 2d array to 1d array
           const flatData = data.flat();
           setGeorefImageCoordinates(
