@@ -2,7 +2,7 @@
 
     Run the server with the following command:
         python main.py
-    The scrip will load the environment variables from the .env file in the root directory
+    The script will load the environment variables from the .env file in the root directory
     If the environment variables are not loaded, the script will use the default values
     The script will run the server in development mode with auto reload
 
