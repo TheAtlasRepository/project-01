@@ -4,33 +4,27 @@ import Image from "next/image";
 interface ImageMapProps {
   src: string;
   children?: React.ReactNode;
-  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  addMarker?: (event: React.MouseEvent<HTMLDivElement>) => void; // function to add marker
 
   // variables for dragging and zooming
-  zoomLevel: number;
   transform: { x: number; y: number };
   setTransform: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  zoomLevel: number;
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   imageSize: { width: number; height: number };
   setImageSize: React.Dispatch<
     React.SetStateAction<{ width: number; height: number }>
   >;
-
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
-  setDragStart: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
-  dragStart: { x: number; y: number };
 }
 
 export default function ImageMap({
   src,
   children,
-  onClick,
+  addMarker,
   setIsDragging,
-  setDragStart,
-  dragStart,
   imageSize,
   setImageSize,
-
   setTransform,
   setZoomLevel,
   transform,
@@ -38,7 +32,10 @@ export default function ImageMap({
 }: ImageMapProps) {
   //local state for dragging
   const [localIsDragging, setLocalIsDragging] = useState(false);
-  // const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 }); // starting point of drag
+
+  const [delta, setDelta] = useState(1); // threshold of pixels moved for click
+  const [start, setStart] = useState({ x: 0, y: 0 }); // starting point of click
 
   const setDragState = (bool: boolean) => {
     setIsDragging(bool);
@@ -57,13 +54,29 @@ export default function ImageMap({
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
     setDragState(false);
+    // check if it is a click
+    // calculate the difference between start and end
+    const diffX = Math.abs(event.clientX - start.x);
+    const diffY = Math.abs(event.clientY - start.y);
+
+    // if diffX and diffY are less than delta (which is 1), then it is a click
+    if (diffX < delta && diffY < delta) {
+      if (addMarker) {
+        addMarker(event);
+      }
+    }
   };
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     setDragState(true);
     setDragStart({ x: event.clientX, y: event.clientY });
+    setStart({ x: event.clientX, y: event.clientY });
+  };
+
+  const handleMouseLeave = () => {
+    setDragState(false);
   };
 
   //event listener for mouse wheel
@@ -106,7 +119,7 @@ export default function ImageMap({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onClick={onClick}
+      onMouseLeave={handleMouseLeave}
       id="image-container"
     >
       <div
