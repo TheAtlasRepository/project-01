@@ -15,14 +15,12 @@ interface ImageMapProps {
   setImageSize: React.Dispatch<
     React.SetStateAction<{ width: number; height: number }>
   >;
-  setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ImageMap({
   src,
   children,
   addMarker,
-  setIsDragging,
   imageSize,
   setImageSize,
   setTransform,
@@ -31,19 +29,14 @@ export default function ImageMap({
   zoomLevel,
 }: ImageMapProps) {
   //local state for dragging
-  const [localIsDragging, setLocalIsDragging] = useState(false);
+  const [isDragging, setDragState] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 }); // starting point of drag
 
   const [delta, setDelta] = useState(1); // threshold of pixels moved for click
   const [start, setStart] = useState({ x: 0, y: 0 }); // starting point of click
 
-  const setDragState = (bool: boolean) => {
-    setIsDragging(bool);
-    setLocalIsDragging(bool);
-  };
-
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (localIsDragging) {
+    if (isDragging) {
       const deltaX = event.clientX - dragStart.x; // speed of drag
       const deltaY = event.clientY - dragStart.y; // speed of drag
       setTransform((prevTransform) => ({
