@@ -107,8 +107,6 @@ export default function SplitView({
     if (!waitingForMapMarker) return;
     //add the marker to the mapMarkers state, used to render the markers on the map
     setTempMapMarker(geoCoordinates);
-    // // reset drag start for the image, makes for better accuracy of drag distance when placing the next marker
-    // setDragStart({ x: 0, y: 0 });
     setWaitingForMapMarker(false);
     setWaitingForImageMarker(false);
   };
@@ -187,16 +185,9 @@ export default function SplitView({
   const [transform, setTransform] = useState({ x: 0, y: 0 });
   const [zoomLevel, setZoomLevel] = useState(1);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  // const [imageMarkers, setImageMarkers] = useState<ImageMarker[]>([]);
-  const [calculatedDragDistance, setCalculatedDragDistance] = useState(0);
-  const [isCoordList, setIsCoordList] = useState(false);
 
   const addImageMarker = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log(waitingForMapMarker);
     if (!waitingForImageMarker) return;
-
     //get the x and y coordinates of the click event
     const rect = (event.target as Element).getBoundingClientRect();
     let x = event.clientX - rect.left;
@@ -206,26 +197,6 @@ export default function SplitView({
     x = Math.round(x / zoomLevel);
     y = Math.round(y / zoomLevel);
 
-    //calculate the start position of the drag
-    setCalculatedDragDistance(
-      Math.sqrt(Math.pow(dragStart.x - x, 2) + Math.pow(dragStart.y - y, 2))
-    );
-
-    //calculate the distance between the start and end of the drag
-    const distance = Math.sqrt(
-      Math.pow(dragStart.x - x, 2) + Math.pow(dragStart.y - y, 2)
-    );
-
-    //difference between dragdistance and distance, shows amount of pixels dragged
-    const dragDifference = Math.abs(distance - calculatedDragDistance);
-    //if distance is greater than 0.1 pixels, consider it a drag
-    if (dragDifference > 0.1) {
-      console.log("dragging");
-      console.log("distance dragged:", dragDifference);
-      //reset the drag start
-      setDragStart({ x, y });
-      return;
-    }
     setTempImageMarker([x, y]);
     setWaitingForImageMarker(false);
     setWaitingForMapMarker(false);
@@ -546,15 +517,12 @@ export default function SplitView({
           <div className="w-full overflow-visible" onWheel={handleMouseWheel}>
             <ImageMap
               src={localStorage.getItem("pdfData")!}
-              onClick={addImageMarker}
+              addMarker={addImageMarker}
               //transforms passed to imagemap component for image manipulation
               setTransform={setTransform}
               setZoomLevel={setZoomLevel}
               transform={transform}
               zoomLevel={zoomLevel}
-              setIsDragging={setIsDragging}
-              setDragStart={setDragStart}
-              dragStart={dragStart}
               setImageSize={setImageSize}
               imageSize={imageSize}
             ></ImageMap>
