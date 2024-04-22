@@ -32,7 +32,7 @@ export default function Editor() {
       pixelCoords: [number, number];
     }[]
   >([]);
-  
+
   const [mapMarkers, setMapMarkers] = useState<
     { geoCoordinates: [number, number] }[]
   >([]);
@@ -57,6 +57,7 @@ export default function Editor() {
         setProjectId(data.id);
         console.log("Project ID:", data.id);
         uploadImage(data.id);
+        console.log("Project added");
       })
       .catch((error) => {
         // handle error
@@ -86,7 +87,6 @@ export default function Editor() {
   //call the addProject function when the component mounts
   useEffect(() => {
     addProject(projectName);
-    console.log("Project added");
   }, []);
 
   const handleSave = () => {
