@@ -54,7 +54,7 @@ export default function About() {
             </h2>
           <div className="w-100 p-6 card dark:bg-gray-800">
             <p className="text-lg text-secondary dark:text-gray-300">
-            From time to time, we may update this Privacy Policy to reflect changes in our practices or to comply with legal requirements. Any updates will be promptly reflected on this page, and we encourage you to review this Privacy Policy periodically for any updates. Last update was on 2024-04-XX.
+            From time to time, we may update this Privacy Policy to reflect changes in our practices or to comply with legal requirements. Any updates will be promptly reflected on this page, and we encourage you to review this Privacy Policy periodically for any updates. Last update was on 2024-04-22.
             </p>
           </div>
         </div>
