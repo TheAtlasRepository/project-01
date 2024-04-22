@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useRouter } from 'next/navigation'
 import SplitView from "./split-view";
 import CropImage from "./CropImage";
 import * as api from "./projectAPI";
@@ -8,6 +9,7 @@ import EditorToolbar from "@/components/ui/EditorToolbar";
 export type ViewPage = "sideBySide" | "overlay" | "crop"; // Pages in the editor, add more pages as needed
 
 export default function Editor() {
+  const router = useRouter();
   const [projectId, setProjectId] = useState(0);
   const [projectName, setProjectName] = useState("Project 1");
   const [projectNameNormalized, setProjectNameNormalized] =
@@ -32,6 +34,7 @@ export default function Editor() {
       pixelCoords: [number, number];
     }[]
   >([]);
+
   const [mapMarkers, setMapMarkers] = useState<
     { geoCoordinates: [number, number] }[]
   >([]);
@@ -45,6 +48,31 @@ export default function Editor() {
     setMarkerCount(mapMarkers.length + imageMarkers.length);
   }, [mapMarkers, imageMarkers]);
 
+  //call the addProject function when the component mounts
+  useEffect(() => {
+    // Check if the image source from local storage is valid, else redirect to home page
+    if (typeof window !== 'undefined') {
+      // If image source is null, redirect to home page
+      if (imageSrc === null) {
+          router.push('/');
+      }
+
+      // If image source is not null, create an image object to check if the image is valid
+      if (imageSrc !== null) {
+          const image = new Image();
+
+          image.onerror = () => {
+              router.push('/');
+          };
+
+          image.src = imageSrc;
+      }
+    }
+
+    // After image is loaded, add the project
+    addProject(projectName);
+  }, []);
+
   //function to add a new project
   const addProject = (name: string) => {
     //make API call to add project
@@ -56,6 +84,7 @@ export default function Editor() {
         setProjectId(data.id);
         console.log("Project ID:", data.id);
         uploadImage(data.id);
+        console.log("Project added");
       })
       .catch((error) => {
         // handle error
@@ -81,12 +110,6 @@ export default function Editor() {
       console.error("Error uploading image:", error);
     }
   };
-
-  //call the addProject function when the component mounts
-  useEffect(() => {
-    addProject(projectName);
-    console.log("Project added");
-  }, []);
 
   const handleSave = () => {
     setIsAutoSaved(true);
@@ -116,20 +139,6 @@ export default function Editor() {
     setImageSrc(localStorage.getItem("pdfData")!);
     setViewPage(lastActivePage);
   };
-
-  // Check if there are atleast 3 markers to display the coordinates table and the values are not 0, and set the state
-  useEffect(() => {
-    const valid =
-      georefMarkerPairs.length >= 3 &&
-      georefMarkerPairs.every((pair) =>
-        pair.latLong.every((val) => val !== 0)
-      ) &&
-      georefMarkerPairs.every((pair) =>
-        pair.pixelCoords.every((val) => val !== 0)
-      );
-
-    setIsGeorefValid(valid);
-  }, [georefMarkerPairs]);
 
   // Resets all marker arrays and disables overlay view
   const resetMarkerRequest = () => {
@@ -224,6 +233,7 @@ export default function Editor() {
               setImageMarkers={setImageMarkers}
               onDeleteMarker={handleMarkerPairDelete}
               setGeorefImageCoordinates={setGeorefImageCoordinates}
+              setHasBeenGeoreferenced={setIsGeorefValid}
             />
           ))
         : activePage === "overlay"
@@ -264,6 +274,7 @@ export default function Editor() {
               setImageMarkers={setImageMarkers}
               onDeleteMarker={handleMarkerPairDelete}
               setGeorefImageCoordinates={setGeorefImageCoordinates}
+              setHasBeenGeoreferenced={setIsGeorefValid}
             />
           ))}
     </div>

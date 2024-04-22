@@ -120,7 +120,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest
   }
 
   return (
-    <div className="mx-auto w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4">
+    <div className="mx-auto w-5/6 hidden sm:w-3/4 md:block md:w-1/2 lg:w-1/3 xl:w-1/4">
       {isLoading ? (
         <div className="rounded-lg border-4 border-dashed border-lb p-10 py-20 text-center transition-all dark:border-gray-800 text-primary text-xl min-h-96 h-96">
           <div className="h-full flex justify-center items-center mx-auto my-auto">
@@ -213,7 +213,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ onFileUpload, clearStateRequest
           </div>
           <div className="ml-2 flex flex-col justify-center">
             <AlertTitle>Just a heads up!</AlertTitle>
-            <AlertDescription>This application is designed for desktop devices, and may not work as intended on mobile devices or smaller screens.</AlertDescription>
+            <AlertDescription>This application is designed for desktop devices, and may not work as intended on smaller screens or mobile devices.</AlertDescription>
           </div>
         </div>
       </Alert>
