@@ -330,7 +330,6 @@ export default function SplitView({
       .initalGeorefimage(projectId)
       .then((data) => {
         console.log("Success image georeferenced:", data);
-        setHasBeenGeoreferenced(true);
         api.getGeorefCoordinates(projectId).then((data) => {
           //flatten 2d array to 1d array
           const flatData = data.flat();
@@ -338,6 +337,7 @@ export default function SplitView({
             flatData as [number, number, number, number]
           );
           console.log("Georef Corner Coordinates:", data);
+          setHasBeenGeoreferenced(true);
         });
       })
       .catch((error) => {
