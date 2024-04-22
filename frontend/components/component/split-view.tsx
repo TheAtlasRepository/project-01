@@ -53,6 +53,8 @@ interface SplitViewProps {
   >;
 
   onDeleteMarker: (pointId: number | null, index: number) => void;
+
+  setHasBeenGeoreferenced: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function SplitView({
@@ -65,6 +67,7 @@ export default function SplitView({
   setImageMarkers,
   setGeorefImageCoordinates,
   onDeleteMarker,
+  setHasBeenGeoreferenced,
 }: SplitViewProps) {
   //project states
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -334,6 +337,7 @@ export default function SplitView({
             flatData as [number, number, number, number]
           );
           console.log("Georef Corner Coordinates:", data);
+          setHasBeenGeoreferenced(true);
         });
       })
       .catch((error) => {
