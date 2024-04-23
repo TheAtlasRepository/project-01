@@ -30,17 +30,25 @@ from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
 from ..utils.storage.data.storageHandler import StorageHandler
 from ..utils.storage.data.sqliteLocalStorage import SQLiteStorage
+from ..utils.storage.data.postgresSqlHandler import PostgresSqlHandler
 
 router = APIRouter(
     prefix="/project",
     tags=["Georeferencing Project"],
 )
 
+#createing the connection url for the database based on localhost
+database_url = "postgre://img2map:password@localhost:5432/img2map"
+dnsString = "dbname=img2map user=img2map password=password host=host.docker.internal port=5432 "
+
 #TODO: Add a dependency class to handle errors and return the correct status code
-_StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
+#_StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
+_StorageHandler: StorageHandler = PostgresSqlHandler(dnsString)
 _Filestorage: FileStorage = LocalFileStorage()
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
+
+
 
 @router.post("/")
 async def createProject(project: Project):

@@ -2,6 +2,8 @@
 from typing import List, Union
 import psycopg2
 from pydantic import BaseModel
+from img2mapAPI.utils.models.point import Point
+from img2mapAPI.utils.models.project import Project
 from img2mapAPI.utils.storage.data.storageHandler import StorageHandler as sh
 from img2mapAPI.utils.core.helper.postgresSqlHelper import *
 
@@ -14,9 +16,9 @@ class PostgresSqlHandler(sh):
 
     _instance = None
     
-    doneSetup = False
+    setupDone = False
     conn = None
-    database_url = None
+    dnsString = None
 
     async def connect(self, db: str, user: str, password: str, host: str, port: int)->any:
         """Connect to the storage
@@ -31,8 +33,8 @@ class PostgresSqlHandler(sh):
         Returns:
             any: The connection object
         """
-        if self.database_url is not None:
-            conn = psycopg2.connect(self.database_url)
+        if self.dnsString is not None:
+            conn = psycopg2.connect(self.dnsString)
         else:
             conn = psycopg2.connect(dbname=db, user=user, password=password, host=host, port=port)
         return conn
@@ -49,12 +51,14 @@ class PostgresSqlHandler(sh):
             int: The id of the saved data from the storage
         """
         
-        if (self.setupDone == False): await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.database_url)
+        if (self.setupDone == False): 
+            await self.setup() #make sure the database is setup
+        conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         returnid: int = 0
         if type == 'project':
-            sql = f"INSERT INTO project
+            data 
+            sql = """INSERT INTO project
                 (
                     name,
                     description,
@@ -65,18 +69,29 @@ class PostgresSqlHandler(sh):
                     created, 
                     lastModified
                 ) VALUES (
-                    '{data.name}',
-                    '{data.description}', 
-                    '{data.crs}', 
-                    '{data.imageFilePath}', 
-                    '{data.georeferencedFilePath}', 
-                    '{data.selfdestructtime}', 
-                    '{data.created}', 
-                    '{data.lastModified}')"
+                    %s,
+                    %s, 
+                    %s, 
+                    %s, 
+                    %s, 
+                    %s, 
+                    %s, 
+                    %s
+                )"""
             try:
-                cur.execute(sql)
+                cur.execute(sql, (
+                    data.name,
+                    data.description, 
+                    data.crs, 
+                    data.imageFilePath, 
+                    data.georeferencedFilePath, 
+                    data.selfdestructtime, 
+                    data.created, 
+                    data.lastModified
+                ))
                 conn.commit()
                 returnid = cur.lastrowid
+                print(f"Inserted {type} with id {returnid}")
             except Exception as e:
                 print(e)
                 return 0
@@ -84,7 +99,7 @@ class PostgresSqlHandler(sh):
                 cur.close()
                 conn.close()
         if type == 'point':
-            sql = f"INSERT INTO point
+            sql = f"""INSERT INTO point
                 (
                     projectId,
                     Idproj,
@@ -95,23 +110,36 @@ class PostgresSqlHandler(sh):
                     error,
                     name,
                     description
-                ) VALUES (
-                    '{data.projectId}',
-                    '{data.Idproj}',
-                    '{data.lat}',
-                    '{data.lng}',
-                    '{data.row}',
-                    '{data.col}',
-                    '{data.error}',
-                    '{data.name}',
-                    '{data.description}')"
+                    ) VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s
+                    )"""
             try:
-                cur.execute(sql)
+                cur.execute(sql, (
+                    data.projectId,
+                    data.Idproj,
+                    data.lat,
+                    data.lng,
+                    data.row,
+                    data.col,
+                    data.error,
+                    data.name,
+                    data.description
+                ))
                 conn.commit()
+                #Loop through the results and get the id
                 returnid = cur.lastrowid
+                print(f"Inserted {type} with id {returnid}")
             except Exception as e:
                 print(e)
-                return 0
+                pass
             finally:
                 cur.close()
                 conn.close()
@@ -125,8 +153,9 @@ class PostgresSqlHandler(sh):
             type (str): The type of the data / the table name / the model class name
         """
 
-        if (self.setupDone == False): await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.database_url)
+        if (self.setupDone == False): 
+            await self.setup() #make sure the database is setup
+        conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         try:
             sql = f"DELETE FROM {type.lower} WHERE id = {id}"
@@ -149,11 +178,12 @@ class PostgresSqlHandler(sh):
             pkName (str, optional): the fieldname for the Primary Key in database/storage. Defaults to 'id'.
         """
 
-        if (self.setupDone == False): await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.database_url)
+        if (self.setupDone == False): 
+            await self.setup() #make sure the database is setup
+        conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         if type == 'project':
-            sql = f"UPDATE project SET
+            sql = f"""UPDATE project SET
                 name = '{data.name}',
                 description = '{data.description}',
                 crs = '{data.crs}',
@@ -161,7 +191,7 @@ class PostgresSqlHandler(sh):
                 georeferencedFilePath = '{data.georeferencedFilePath}',
                 selfdestructtime = '{data.selfdestructtime}',
                 lastModified = '{data.lastModified}'
-                WHERE id = {data.id}"
+                WHERE id = {data.id}"""
             try:
                 cur.execute(sql)
                 conn.commit()
@@ -172,7 +202,7 @@ class PostgresSqlHandler(sh):
                 cur.close()
                 conn.close()
         if type == 'point':
-            sql = f"UPDATE point SET
+            sql = f"""UPDATE point SET
                 projectId = '{data.projectId}',
                 Idproj = '{data.Idproj}',
                 lat = '{data.lat}',
@@ -182,7 +212,7 @@ class PostgresSqlHandler(sh):
                 error = '{data.error}',
                 name = '{data.name}',
                 description = '{data.description}'
-                WHERE id = {data.id}"
+                WHERE id = {data.id}"""
             try:
                 cur.execute(sql)
                 conn.commit()
@@ -204,8 +234,9 @@ class PostgresSqlHandler(sh):
             BaseModel: The fetched data
         """
 
-        if (self.setupDone == False): await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.database_url)
+        if (self.setupDone == False): 
+            await self.setup() #make sure the database is setup
+        conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         try:
             sql = f"SELECT * FROM {type} WHERE id = {id}"
@@ -230,9 +261,10 @@ class PostgresSqlHandler(sh):
             list: The fetched data
         """
 
-        if (self.setupDone == False): await self.setup()
+        if (self.setupDone == False):
+            await self.setup()
 
-        conn = psycopg2.connect(self.database_url)
+        conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         try:
             sql = f"SELECT * FROM {type}"
@@ -263,7 +295,7 @@ class PostgresSqlHandler(sh):
         """
 
         if (self.setupDone == False): await self.setup()
-        conn = psycopg2.connect(self.database_url)
+        conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
 
         try:
@@ -298,8 +330,8 @@ class PostgresSqlHandler(sh):
 
         """
         #Crating table if not exists for project model
-        project_table = """CREATE TABLE IF NOT EXISTS project(
-                    id  int PRIMARY KEY AUTOINCREMENT,
+        project_table: str = '''CREATE TABLE IF NOT EXISTS project (
+                    id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
                     name VARCHAR (80) NOT NULL,
                     description TEXT,
                     crs VARCHAR (25),
@@ -309,14 +341,14 @@ class PostgresSqlHandler(sh):
                     created TIMESTAMPTZ,
                     lastModified TIMESTAMPTZ
                 );
-            """
+            '''
         try:
-            await createTable(self.database_url, project_table)
+            await createTable(self.dnsString, project_table)
         except Exception as e:
             print(e)
             pass #Todo: handle exception
 
-        points_table = """CREATE TABLE IF NOT EXISTS point(
+        points_table = '''CREATE TABLE IF NOT EXISTS point (
                     id INTEGER PRIMARY KEY,
                     projectId INTEGER,
                     Idproj INTEGER NOT NULL,
@@ -331,9 +363,9 @@ class PostgresSqlHandler(sh):
                         FOREIGN KEY(projectId)
                             REFERENCES project(id) ON DELETE SET NULL
                 );
-            """
+            '''
         try:
-            await createTable(self.database_url, points_table)
+            await createTable(self.dnsString, points_table)
         except Exception as e:
             print(e)
             pass #Todo: handle exception
@@ -343,20 +375,21 @@ class PostgresSqlHandler(sh):
 
         """
         try:
-            await createDB(self.database_url)
+            await createDB(self.dnsString)
             await self.createModelTable()
             self.doneSetup = True
         except Exception as e:
             print(e)
             pass
     
-    def __init__(self, database_url: str):
+    def __init__(self, dnsString: str):
         """Constructor for the class
         """
-        self.database_url = database_url
+        self.dnsString = dnsString
+        self.setupDone = False
 
-    def __new__(cls):
+    def __new__(cls, dnsString: str):
         if cls._instance is None:
             cls._instance = super(PostgresSqlHandler, cls).__new__(cls)
-            cls._instance.__init__()
+            cls._instance.__init__(dnsString=dnsString)
         return cls._instance

@@ -3,6 +3,8 @@ version: 'version 1.0.1-dev'
 networks:
   img2map-network:
     driver: bridge
+  backend-network:
+    driver: bridge
 
 services:
   db:
@@ -10,9 +12,13 @@ services:
     container_name: Img2Map-postgres
     restart: always
     environment:
+      POSTGRES_USER: img2map
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: img2map
     ports:
       - "5432:5432"
+    networks:
+      - backend-network
   
   img2map-api:
     #Uvicorn server running python FastAPI
@@ -25,3 +31,8 @@ services:
       - ../:/app
     ports:
       - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - img2map-network
+      - backend-network

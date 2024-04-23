@@ -6,5 +6,6 @@ Modules:
 """
 
 from . import sqliteHelper
+from . import postgresSqlHelper
 
-__all__ = ['sqliteHelper']
+__all__ = ['sqliteHelper', 'postgresSqlHelper']

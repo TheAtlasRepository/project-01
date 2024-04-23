@@ -9,7 +9,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2.errors import DuplicateTable
 
 
-def createDB(database_url: str, datname: str = 'img2map'):
+async def createDB(dnsString: str, datname: str = 'img2map'):
     """Create a database if it does not exist
 
     Args:
@@ -17,7 +17,7 @@ def createDB(database_url: str, datname: str = 'img2map'):
         datname (str, optional): Name for the database. Defaults to 'img2map'.
     """
     #check if the database exists, if not create it
-    conn = psycopg2.connect(database_url, sslmode='require')
+    conn = psycopg2.connect(dnsString)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (datname,))
@@ -27,14 +27,15 @@ def createDB(database_url: str, datname: str = 'img2map'):
     cur.close()
     conn.close()
 
-def createTable(datbase_url: str, sql: str):
+async def createTable(dnsString: str, sql: str):
     """Create a table in the database
 
     Args:
         datbase_url (str): Connection string to the database
         sql (str): The sql query to create the table
     """
-    conn = psycopg2.connect(datbase_url, sslmode='require')
+    conn = psycopg2.connect(dnsString)
+    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     try:
         cur.execute(sql)

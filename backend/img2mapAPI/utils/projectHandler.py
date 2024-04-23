@@ -72,7 +72,7 @@ class ProjectHandler:
         project.georeferencedFilePath = ""
         project.selfdestructtime = None #TODO: add self destruct time logic
         project.created = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        project.lastModified = None
+        project.lastModified = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         project.points = None
         ID = await self._StorageHandler.saveInStorage(project, "project")
         return ID
