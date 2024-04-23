@@ -1,0 +1,25 @@
+version: 'version 1.0.1-dev'
+
+networks:
+  img2map-network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:latest
+    container_name: Img2Map-postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+  
+  img2map-api:
+    #Uvicorn server running python FastAPI
+    container_name: Img2Map-API
+
+    build:
+      context: ../
+      dockerfile: /docker/dev.Dockerfile
+    ports:
+      - "8000:8000"
