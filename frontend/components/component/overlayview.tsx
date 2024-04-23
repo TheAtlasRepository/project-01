@@ -116,7 +116,7 @@ const OverlayView = ({
           style={{ width: "100%", height: "100%" }}
           mapStyle={mapStyle}
           mapboxAccessToken={mapboxToken}
-          minZoom={5}
+          minZoom={4}
           maxZoom={19}
         >
           <GeolocateControl position="bottom-right" />
