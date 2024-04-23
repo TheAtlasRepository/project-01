@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import SplitView from "./split-view";
 import CropImage from "./CropImage";
 import * as api from "./projectAPI";
@@ -16,7 +16,7 @@ export default function Editor() {
     useState("Project_1");
   const [projectNameMaxLength, setProjectNameMaxLength] = useState(32); // Max 32 characters for project name
   const [isAutoSaved, setIsAutoSaved] = useState(false);
-  const [imageSrc, setImageSrc] = useState(localStorage.getItem("pdfData")!); // Keeps track of image URL
+  const [imageSrc, setImageSrc] = useState(""); // Keeps track of image URL
   const [activePage, setActivePage] = useState<ViewPage>("sideBySide");
   const [lastActivePage, setLastActivePage] = useState<ViewPage>("sideBySide");
   const [isGeorefValid, setIsGeorefValid] = useState(false);
@@ -51,21 +51,23 @@ export default function Editor() {
   //call the addProject function when the component mounts
   useEffect(() => {
     // Check if the image source from local storage is valid, else redirect to home page
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
+      setImageSrc(localStorage.getItem("pdfData")!);
+
       // If image source is null, redirect to home page
       if (imageSrc === null) {
-          router.push('/');
+        router.push("/");
       }
 
       // If image source is not null, create an image object to check if the image is valid
       if (imageSrc !== null) {
-          const image = new Image();
+        const image = new Image();
 
-          image.onerror = () => {
-              router.push('/');
-          };
+        image.onerror = () => {
+          router.push("/");
+        };
 
-          image.src = imageSrc;
+        image.src = imageSrc;
       }
     }
 
