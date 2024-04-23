@@ -22,12 +22,12 @@ interface ErrorResponse {
 // Base URL for the backend API from .env
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-let hasMadeProjectApiCall = false;
-
 // A helper function to extract error message
 function getErrorMessage(error: AxiosError<ErrorResponse>): string {
   return error.response?.data.detail || "Something went wrong!";
 }
+
+let hasMadeProjectApiCall = false;
 
 export const addProject = async (name: string): Promise<ProjectResponse> => {
   if (hasMadeProjectApiCall) return Promise.reject("API call already made");
@@ -37,6 +37,7 @@ export const addProject = async (name: string): Promise<ProjectResponse> => {
       `${BASE_URL}/project/`,
       { name }
     );
+    hasMadeProjectApiCall = false;
     return response.data;
   } catch (error) {
     throw new Error(getErrorMessage(error as AxiosError<ErrorResponse>));
