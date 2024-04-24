@@ -10,7 +10,7 @@ export default function Page() {
     }
     return (
         <main>
-            <Editor />
+            {typeof window !== 'undefined' ? <Editor /> : null} 
         </main>
     );
 }
