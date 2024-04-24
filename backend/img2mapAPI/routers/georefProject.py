@@ -220,14 +220,15 @@ async def getImageCoordinates(projectId: int):
         imageCoordinates = await _projectHandler.getImageCoordinates(projectId)
         return imageCoordinates
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/{projectId}/tiles/{z}/{x}/{y}.png", response_class=Response)
 async def getTile(projectId: int, z: int, x: int, y: int):
     """ Retrieve a tile from the georeferenced image of a project by project id, zoom level, x, and y coordinates, returns the tile if found"""
     try:
-        tiff_path = await _projectHandler.getGeoreferencedFilePath(projectId)
-        tile = await generateTile(tiff_path, x, y, z)
+        tiff_data = await _projectHandler.getGeoreferencedFile(projectId)
+        tile = await generateTile(tiff_data, x, y, z)
         return tile
     except Exception as e:
         # Handle unexpected errors
