@@ -19,9 +19,10 @@ The module contains the following endpoints:
 """
 
 import os
+import io
 from typing import List
 from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, StreamingResponse
 #internal imports:
 from ..utils.models.point import Point
 from ..utils.models.project import Project
@@ -54,13 +55,16 @@ else:
     print("Using SQLite database")
 #TODO: Add a dependency class to handle errors and return the correct status code
 
+_Filestorage: FileStorage = LocalFileStorage()
+
 # Decide which file storage to use based on environment variables
-if 'AWS_S3_BUCKET_NAME' and 'AWS_S3_DEFAULT_REGION' and 'AWS_S3_ACCESS_KEY_ID' and 'AWS_S3_SECRET_ACCESS_KEY' in os.environ:
+if 'AWS_BUCKET_NAME' and 'AWS_DEFAULT_REGION' and 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' in os.environ:
     _Filestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
     print("Using AWS S3 file storage")
 else:
-    _Filestorage: FileStorage = LocalFileStorage()
     print("Using local file storage")
+#_TestFilestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
+#_testProjectHandler = ProjectHandler(_TestFilestorage, _StorageHandler)
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
 
