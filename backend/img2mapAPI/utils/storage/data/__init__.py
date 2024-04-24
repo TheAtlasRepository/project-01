@@ -6,6 +6,7 @@ Modules:
 """
 from . import storageHandler
 from . import sqliteLocalStorage
+from . import postgresSqlHandler
 
-__all__ = ['storageHandler', 'sqliteLocalStorage']
+__all__ = ['storageHandler', 'sqliteLocalStorage', 'postgresSqlHandler']
 # Path: backend/Img2mapAPI/Helpers/StorageHandler/LocalStorage.py
