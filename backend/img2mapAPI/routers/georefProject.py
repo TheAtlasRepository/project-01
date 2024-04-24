@@ -197,8 +197,9 @@ async def InitalgeorefImage(projectId: int, crs: str = None):
     """ Georeference the image of a project by project id, returns the georeferenced image file if found"""
     try:
         await _projectHandler.georefPNGImage(projectId, crs)
-        imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
-        return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
+        imageBytes = await _projectHandler.getGeoreferencedFile(projectId)
+        return StreamingResponse(io.BytesIO(imageBytes), media_type="image/tiff", headers={"Content-Disposition": "attachment; filename=georeferenced.tiff"})
+        #return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 

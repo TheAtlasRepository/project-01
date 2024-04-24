@@ -452,7 +452,7 @@ class ProjectHandler:
 
         project = await self._StorageHandler.fetchOne(projectId, "project")
         filePath = project["georeferencedFilePath"]
-        file = await self._FileStorage.get(filePath)
+        file = await self._FileStorage.readFile(filePath)
         if file is None:
             raise Exception("File not found")
         return file
@@ -514,18 +514,25 @@ class ProjectHandler:
         """
 
         project = await self.getProject(projectId)
-        imageFilePath = project.imageFilePath
+
+        imageFile = await self._FileStorage.readFile(project.imageFilePath)
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(imageFile)
+            temp_path = temp.name
+
         points : PointList = project.points
         georeferencedImage = None
         if crs is None:
-            georeferencedImage = georef.InitialGeoreferencePngImage(imageFilePath, points) #goreference the image, return the path to the georeferenced file
+            georeferencedImage = georef.InitialGeoreferencePngImage(temp_path, points) #goreference the image, return the path to the georeferenced file
         else:
-            georeferencedImage = georef.InitialGeoreferencePngImage(imageFilePath, points, crs) #goreference the image, return the path to the georeferenced file
+            georeferencedImage = georef.InitialGeoreferencePngImage(temp_path, points, crs) #goreference the image, return the path to the georeferenced file
         
         if georeferencedImage is None:
             raise Exception("Image could not be georeferenced")
         
-        georeferencedImageBytes = await self._FileStorage.readFile(georeferencedImage)
+        with open(georeferencedImage, 'rb') as file:
+            georeferencedImageBytes = file.read()
+
         await self._FileStorage.removeFile(georeferencedImage)
         await self.saveGeoreferencedFile(projectId, georeferencedImageBytes, "tiff")
 
@@ -541,7 +548,14 @@ class ProjectHandler:
 
         project = await self.getProject(projectId)
         imageFilePath = project.georeferencedFilePath
-        coordinates = georef.getImageCoordinates(imageFilePath)
+        imageBytes = await self._FileStorage.readFile(imageFilePath)
+        coordinates = None
+
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(imageBytes)
+            temp_path = temp.name
+            coordinates = georef.getImageCoordinates(temp_path)
+            
         if coordinates is None:
             raise Exception("Coordinates not found")
         return coordinates

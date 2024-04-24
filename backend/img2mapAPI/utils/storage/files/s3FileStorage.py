@@ -17,7 +17,10 @@ class S3FileStorage(FileStorage):
     async def saveFile(self, data: tempfile , suffix: str) -> str:
         # Generate a unique filename
         import uuid
-        object_key = f"{uuid.uuid4()}.{suffix}"
+        if '.' in suffix:
+            object_key = f"{uuid.uuid4()}{suffix}"
+        else:
+            object_key = f"{uuid.uuid4()}.{suffix}"
 
         # Upload the file to S3 bucket
         self.bucket.put_object(
