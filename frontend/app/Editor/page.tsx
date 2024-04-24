@@ -6,6 +6,7 @@ const DynamicEditor = dynamic(
   { ssr: false }
 );
 
+// This comment is added here because GitHub is hanging at "Checking for ability to merge automatically…"
 export default function Page() {
   return (
     <main>
