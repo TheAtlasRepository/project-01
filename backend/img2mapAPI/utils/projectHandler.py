@@ -104,6 +104,7 @@ class ProjectHandler:
             raise Exception("api object did not return a project object")
         project.lastModified = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        project.selfdestructtime = None #TODO: add self destruct time logic
         innProject: dict = dict(project)
         fetchedProjectDict: dict = dict(fetchedProject)
         specialFields = ["id", "created", "lastModified", "points"]
@@ -118,7 +119,10 @@ class ProjectHandler:
                     if fetchedProjectDict[key] != innProject[key]:
                         fetchedProjectDict[key] = innProject[key]
         fetchedProject: Project = Project.model_construct(None, **fetchedProjectDict)
-        await self._StorageHandler.update(projectId, fetchedProject, "project")
+        try:
+            await self._StorageHandler.update(projectId, fetchedProject, "project")
+        except:
+            return False
         return True
  
     async def deleteProject(self, projectId: int) -> None:

@@ -100,10 +100,10 @@ class PostgresSqlHandler(sh):
         cur = conn.cursor()
         try:
             cur.execute(
-                sql.SQL("DELETE FROM {table} WHERE id = {id}").format(
-                    table=sql.Identifier(type.lower(),
-                    id=sql.Identifier(BaseModel.id))
-                )
+                sql.SQL("DELETE FROM {table} WHERE id = %s").format(
+                    table=sql.Identifier(type.lower())
+                ),
+                (id,)
             )
             conn.commit()
         except Exception as e:
@@ -114,7 +114,7 @@ class PostgresSqlHandler(sh):
             conn.close()
             print(f"Deleted {type} with id {id}") #Todo: log this
 
-    async def update(self, data: BaseModel, type: str, pkName:str = 'id')->None:
+    async def update(self, id: int, data: BaseModel, type: str)->None:
         """Update data in storage
 
         Args:
@@ -130,19 +130,10 @@ class PostgresSqlHandler(sh):
         if type == 'project':
             try:
                 cur.execute(
-                    sql.SQL("UPDATE project SET name = %s, description = %s, crs = %s, imageFilePath = %s, georeferencedFilePath = %s, selfdestructtime = %s, created = %s, lastModified = %s WHERE id = %s"),
-                    [
-                        data.name,
-                        data.description,
-                        data.crs, 
-                        data.imageFilePath, 
-                        data.georeferencedFilePath, 
-                        data.selfdestructtime, 
-                        data.created, 
-                        data.lastModified, 
-                        data.id
-                    ]
+                    sql.SQL("UPDATE project SET name = %s, description = %s, crs = %s, imageFilePath = %s, georeferencedFilePath = %s, selfdestructtime = %s, created = %s, lastModified = %s WHERE id = %s;"),
+                    (data.name, data.description, data.crs, data.imageFilePath, data.georeferencedFilePath, data.selfdestructtime, data.created, data.lastModified, id)
                 )
+                print(f"Updated project with id {data.id}") #Todo: log this
                 conn.commit()
             except Exception as e:
                 print(e)
@@ -154,7 +145,8 @@ class PostgresSqlHandler(sh):
             try:
                 cur.execute(
                     sql.SQL("UPDATE point SET projectId = %s, Idproj = %s, lat = %s, lng = %s, row = %s, col = %s, error = %s, name = %s, description = %s WHERE id = %s"),
-                    (data.projectId, data.Idproj, data.lat, data.lng, data.row, data.col, data.error, data.name, data.description, data.id))
+                    (data.projectId, data.Idproj, data.lat, data.lng, data.row, data.col, data.error, data.name, data.description, id)
+                )
                 conn.commit()
             except Exception as e:
                 print(e)
@@ -227,6 +219,8 @@ class PostgresSqlHandler(sh):
             test: str = '"select"'
             test.replace('"', ' ')
             data = cur.fetchall()
+            if data is not None:
+                return [self.convertSequenseToDict(row, type) for row in data]
             return data
         except Exception as e:
             print(e)
