@@ -9,5 +9,6 @@ rio-tiler
 python-dotenv
 poppler-utils
 psycopg2-binary
+boto3
 
 ###### Requirements with Version Specifiers ######

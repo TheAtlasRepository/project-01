@@ -29,6 +29,7 @@ from ..utils.projectHandler import ProjectHandler
 from ..utils.core.georefHelper import generateTile
 from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
+from ..utils.storage.files.s3FileStorage import S3FileStorage
 from ..utils.storage.data.storageHandler import StorageHandler
 from ..utils.storage.data.sqliteLocalStorage import SQLiteStorage
 from ..utils.storage.data.postgresSqlHandler import PostgresSqlHandler
@@ -53,7 +54,13 @@ else:
     print("Using SQLite database")
 #TODO: Add a dependency class to handle errors and return the correct status code
 
-_Filestorage: FileStorage = LocalFileStorage()
+# Decide which file storage to use based on environment variables
+if 'AWS_S3_BUCKET_NAME' and 'AWS_S3_DEFAULT_REGION' and 'AWS_S3_ACCESS_KEY_ID' and 'AWS_S3_SECRET_ACCESS_KEY' in os.environ:
+    _Filestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
+    print("Using AWS S3 file storage")
+else:
+    _Filestorage: FileStorage = LocalFileStorage()
+    print("Using local file storage")
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
 
