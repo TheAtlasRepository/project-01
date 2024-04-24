@@ -18,6 +18,7 @@ The module contains the following endpoints:
     - Get the bounding coordinates of the image of a project by id
 """
 
+import os
 from typing import List
 from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, Response
@@ -38,12 +39,20 @@ router = APIRouter(
 )
 
 #createing the connection url for the database based on localhost
-database_url = "postgre://img2map:password@localhost:5432/img2map"
-dnsString = "dbname=img2map user=img2map password=password host=host.docker.internal port=5432 "
+database_url = None
+dnsString = None
 
+_StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
+
+if 'DATABASE_URL' in os.environ:
+    database_url = os.environ['DATABASE_URL']
+    dnsString = database_url
+    _StorageHandler: StorageHandler = PostgresSqlHandler(dnsString)
+    print("Using PostgresSQL database")
+else:
+    print("Using SQLite database")
 #TODO: Add a dependency class to handle errors and return the correct status code
-#_StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
-_StorageHandler: StorageHandler = PostgresSqlHandler(dnsString)
+
 _Filestorage: FileStorage = LocalFileStorage()
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
