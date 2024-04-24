@@ -56,16 +56,18 @@ else:
     print("Using SQLite database")
 #TODO: Add a dependency class to handle errors and return the correct status code
 
+# Default to local file storage
 _Filestorage: FileStorage = LocalFileStorage()
 
-# Decide which file storage to use based on environment variables
-if 'AWS_BUCKET_NAME' and 'AWS_DEFAULT_REGION' and 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' in os.environ:
+# Decide which file storage to use based on environment variable
+if os.environ['STORAGE_TYPE'] == 'aws':
     _Filestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
     print("Using AWS S3 file storage")
-else:
+if os.environ['STORAGE_TYPE'] == 'local':
+    #This seems a bit redundant, but it is to explicitly state that local storage has been chosen
     print("Using local file storage")
-#_TestFilestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
-#_testProjectHandler = ProjectHandler(_TestFilestorage, _StorageHandler)
+else:
+    print("Defaulting to using local file storage")
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
 
