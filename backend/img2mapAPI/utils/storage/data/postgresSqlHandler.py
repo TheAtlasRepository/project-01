@@ -1,7 +1,8 @@
 """ """
 from typing import List, Union
 import psycopg2
-from pydantic import BaseModel
+from pydantic import BaseModel 
+from psycopg2 import sql
 from img2mapAPI.utils.models.point import Point
 from img2mapAPI.utils.models.project import Project
 from img2mapAPI.utils.storage.data.storageHandler import StorageHandler as sh
@@ -55,95 +56,35 @@ class PostgresSqlHandler(sh):
             await self.setup() #make sure the database is setup
         conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
-        returnid: int = 0
         if type == 'project':
-            data 
-            sql = """INSERT INTO project
-                (
-                    name,
-                    description,
-                    crs,
-                    imageFilePath,
-                    georeferencedFilePath,
-                    selfdestructtime,
-                    created, 
-                    lastModified
-                ) VALUES (
-                    %s,
-                    %s, 
-                    %s, 
-                    %s, 
-                    %s, 
-                    %s, 
-                    %s, 
-                    %s
-                )"""
             try:
-                cur.execute(sql, (
-                    data.name,
-                    data.description, 
-                    data.crs, 
-                    data.imageFilePath, 
-                    data.georeferencedFilePath, 
-                    data.selfdestructtime, 
-                    data.created, 
-                    data.lastModified
-                ))
+                cur.execute(
+                    sql.SQL("INSERT INTO project (name, description, crs, imageFilePath, georeferencedFilePath, selfdestructtime, created, lastModified) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id"),
+                    (data.name, data.description, data.crs, data.imageFilePath, data.georeferencedFilePath, data.selfdestructtime, data.created, data.lastModified))
                 conn.commit()
-                returnid = cur.lastrowid
-                print(f"Inserted {type} with id {returnid}")
-            except Exception as e:
-                print(e)
-                return 0
-            finally:
-                cur.close()
-                conn.close()
-        if type == 'point':
-            sql = f"""INSERT INTO point
-                (
-                    projectId,
-                    Idproj,
-                    lat,
-                    lng,
-                    row,
-                    col,
-                    error,
-                    name,
-                    description
-                    ) VALUES (
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s
-                    )"""
-            try:
-                cur.execute(sql, (
-                    data.projectId,
-                    data.Idproj,
-                    data.lat,
-                    data.lng,
-                    data.row,
-                    data.col,
-                    data.error,
-                    data.name,
-                    data.description
-                ))
-                conn.commit()
-                #Loop through the results and get the id
-                returnid = cur.lastrowid
-                print(f"Inserted {type} with id {returnid}")
+                id = cur.fetchone()[0]
+                return id
             except Exception as e:
                 print(e)
                 pass
             finally:
                 cur.close()
                 conn.close()
-        return returnid
+        if type == 'point':
+            try:
+                cur.execute(
+                    sql.SQL("INSERT INTO point (projectId, Idproj, lat, lng, row, col, error, name, description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id"),
+                    (data.projectId, data.Idproj, data.lat, data.lng, data.row, data.col, data.error, data.name, data.description))
+                conn.commit()
+                id = cur.fetchone()[0]
+                return id
+            except Exception as e:
+                print(e)
+                pass
+            finally:
+                cur.close()
+                conn.close()
+        return None
 
     async def remove(self, id: int, type: str)->None:
         """Remove data from storage
@@ -158,8 +99,12 @@ class PostgresSqlHandler(sh):
         conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         try:
-            sql = f"DELETE FROM {type.lower} WHERE id = {id}"
-            cur.execute(sql)
+            cur.execute(
+                sql.SQL("DELETE FROM {table} WHERE id = {id}").format(
+                    table=sql.Identifier(type.lower(),
+                    id=sql.Identifier(BaseModel.id))
+                )
+            )
             conn.commit()
         except Exception as e:
             print(e)
@@ -183,17 +128,21 @@ class PostgresSqlHandler(sh):
         conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         if type == 'project':
-            sql = f"""UPDATE project SET
-                name = '{data.name}',
-                description = '{data.description}',
-                crs = '{data.crs}',
-                imageFilePath = '{data.imageFilePath}',
-                georeferencedFilePath = '{data.georeferencedFilePath}',
-                selfdestructtime = '{data.selfdestructtime}',
-                lastModified = '{data.lastModified}'
-                WHERE id = {data.id}"""
             try:
-                cur.execute(sql)
+                cur.execute(
+                    sql.SQL("UPDATE project SET name = %s, description = %s, crs = %s, imageFilePath = %s, georeferencedFilePath = %s, selfdestructtime = %s, created = %s, lastModified = %s WHERE id = %s"),
+                    [
+                        data.name,
+                        data.description,
+                        data.crs, 
+                        data.imageFilePath, 
+                        data.georeferencedFilePath, 
+                        data.selfdestructtime, 
+                        data.created, 
+                        data.lastModified, 
+                        data.id
+                    ]
+                )
                 conn.commit()
             except Exception as e:
                 print(e)
@@ -202,19 +151,10 @@ class PostgresSqlHandler(sh):
                 cur.close()
                 conn.close()
         if type == 'point':
-            sql = f"""UPDATE point SET
-                projectId = '{data.projectId}',
-                Idproj = '{data.Idproj}',
-                lat = '{data.lat}',
-                lng = '{data.lng}',
-                row = '{data.row}',
-                col = '{data.col}',
-                error = '{data.error}',
-                name = '{data.name}',
-                description = '{data.description}'
-                WHERE id = {data.id}"""
             try:
-                cur.execute(sql)
+                cur.execute(
+                    sql.SQL("UPDATE point SET projectId = %s, Idproj = %s, lat = %s, lng = %s, row = %s, col = %s, error = %s, name = %s, description = %s WHERE id = %s"),
+                    (data.projectId, data.Idproj, data.lat, data.lng, data.row, data.col, data.error, data.name, data.description, data.id))
                 conn.commit()
             except Exception as e:
                 print(e)
@@ -239,16 +179,21 @@ class PostgresSqlHandler(sh):
         conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         try:
-            sql = f"SELECT * FROM {type} WHERE id = {id}"
-            cur.execute(sql)
+            cur.execute(
+                sql.SQL("SELECT * FROM {type} WHERE {pk} = %s").format(
+                    type=sql.Identifier(type.lower()),
+                    pk=sql.Identifier("id")
+                ),
+                (id,)
+            )
             data = cur.fetchone()
-            return data._asdict()
+            #convert the data to a dictionary
+            if data is not None:
+                return self.convertSequenseToDict(data, type)
+            return data
         except Exception as e:
-            print(e)
-            pass
-        finally:
-            cur.close()
-            conn.close()
+            print(f"Fetch one produced: {e}") #Todo: log this
+            raise e
     
     async def fetch(self, type: str, params: dict = {})->Union[None ,list, dict]:
         """Fetch data from storage
@@ -267,22 +212,25 @@ class PostgresSqlHandler(sh):
         conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
         try:
-            sql = f"SELECT * FROM {type}"
-            if len(params) > 0:
-                sql += " WHERE "
-                for key, value in params.items():
-                    sql += f"{key} = {value} AND "
-                sql = sql[:-4] #remove the last AND
-            cur.execute(sql)
+            cur.execute(
+                sql.SQL("SELECT * FROM {type} WHERE {params}").format(
+                    type=sql.Identifier(type.lower()),
+                    params=sql.SQL(' AND ').join(
+                        sql.SQL("{key} = {value}").format(
+                            key=sql.Identifier(k.lower()),
+                            value=sql.Literal(v)
+                        ) for k, v in params.items()
+                    )
+                ),
+                params
+            )
+            test: str = '"select"'
+            test.replace('"', ' ')
             data = cur.fetchall()
             return data
         except Exception as e:
             print(e)
-            pass
-        finally:
-            cur.close()
-            conn.close()
-        return None
+            raise e
     
     async def fetchAll(self, type: str) ->Union[None, list]:
         """Fetch all data from storage
@@ -294,22 +242,21 @@ class PostgresSqlHandler(sh):
             None | List[dict]: The fetched data
         """
 
-        if (self.setupDone == False): await self.setup()
+        if (self.setupDone == False): 
+            await self.setup()
         conn = psycopg2.connect(self.dnsString)
         cur = conn.cursor()
-
         try:
-            sql = f"SELECT * FROM {type}"
-            cur.execute(sql)
+            cur.execute(
+                sql.SQL("SELECT * FROM {type}"),
+                (type.lower())
+                )
             data = cur.fetchall()
             return data
         except Exception as e:
             print(e)
-            pass
-        finally:
-            cur.close()
-            conn.close()
-        return None
+            raise e
+        
     
 
     @staticmethod
@@ -331,7 +278,7 @@ class PostgresSqlHandler(sh):
         """
         #Crating table if not exists for project model
         project_table: str = '''CREATE TABLE IF NOT EXISTS project (
-                    id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+                    id SERIAL PRIMARY KEY,
                     name VARCHAR (80) NOT NULL,
                     description TEXT,
                     crs VARCHAR (25),
@@ -349,7 +296,7 @@ class PostgresSqlHandler(sh):
             pass #Todo: handle exception
 
         points_table = '''CREATE TABLE IF NOT EXISTS point (
-                    id INTEGER PRIMARY KEY,
+                    id SERIAL PRIMARY KEY,
                     projectId INTEGER,
                     Idproj INTEGER NOT NULL,
                     lat REAL NOT NULL,
@@ -369,6 +316,44 @@ class PostgresSqlHandler(sh):
         except Exception as e:
             print(e)
             pass #Todo: handle exception
+    
+    def convertSequenseToDict(self, row: tuple, type: str)->dict:
+        """Convert a sequence to a dictionary
+
+        Args:
+            row (tuple): row from the database
+            type (str): the type of the data / the table name / the model class name
+
+        Returns:
+            dict: the data as a dictionary
+        """
+
+        if type == 'project':
+            return {
+                'id': row[0],
+                'name': row[1],
+                'description': row[2],
+                'points': [], #TODO: fix this, this is a duct tape solution
+                'crs': row[3],
+                'imageFilePath': row[4],
+                'georeferencedFilePath': row[5],
+                'selfdestructtime': row[6],
+                'created': row[7],
+                'lastModified': row[8]
+            }
+        if type == 'point':
+            return {
+                'id': row[0],
+                'projectId': row[1],
+                'Idproj': row[2],
+                'lat': row[3],
+                'lng': row[4],
+                'row': row[5],
+                'col': row[6],
+                'error': row[7],
+                'name': row[8],
+                'description': row[9]
+            }
 
     async def setup(self):
         """Setup the database
