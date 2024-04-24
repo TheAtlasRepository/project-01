@@ -157,7 +157,7 @@ async def generateTile(tiff_bytes: bytes, x: int, y: int, z: int):
         e: Unhandled exception from rio-tiler.
 
     Returns:
-        Respone: A FastAPI Response object containing the tile image as PNG bytes.
+        bytes: the tile image as bytes.
     """
 
     blank_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
@@ -165,9 +165,11 @@ async def generateTile(tiff_bytes: bytes, x: int, y: int, z: int):
     blank_tile.save(bytes_io, format='PNG')
     blank_tile_bytes = bytes_io.getvalue()
 
+    temp_path = None
+
     MAX_ZOOM = 5
     if z < MAX_ZOOM:
-        return Response(content=blank_tile_bytes, media_type="image/png")
+        return (blank_tile_bytes, temp_path)
     try:
         with tempfile.NamedTemporaryFile(delete=False) as temp:
             temp.write(tiff_bytes)
@@ -182,9 +184,10 @@ async def generateTile(tiff_bytes: bytes, x: int, y: int, z: int):
                 img_byte_arr = io.BytesIO()
                 img.save(img_byte_arr, format='PNG')
                 img_byte_arr.seek(0)
-        return Response(content=img_byte_arr.getvalue(), media_type="image/png")
+
+        return (img_byte_arr.getvalue(), temp_path)
     except TileOutsideBounds:
-        return Response(content=blank_tile_bytes, media_type="image/png")
+        return (blank_tile_bytes, temp_path)
     except Exception as e:
         print(e)
         raise e

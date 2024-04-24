@@ -28,6 +28,7 @@ from ..utils.models.point import Point
 from ..utils.models.project import Project
 from ..utils.projectHandler import ProjectHandler
 from ..utils.core.georefHelper import generateTile
+from ..utils.core.FileHelper import removeFile
 from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
 from ..utils.storage.files.s3FileStorage import S3FileStorage
@@ -223,13 +224,14 @@ async def getImageCoordinates(projectId: int):
         print(e)
         raise HTTPException(status_code=404, detail=str(e))
 
-@router.get("/{projectId}/tiles/{z}/{x}/{y}.png", response_class=Response)
-async def getTile(projectId: int, z: int, x: int, y: int):
+@router.get("/{projectId}/tiles/{z}/{x}/{y}.png")
+async def getTile(projectId: int, z: int, x: int, y: int, backgroundTasks: BackgroundTasks):
     """ Retrieve a tile from the georeferenced image of a project by project id, zoom level, x, and y coordinates, returns the tile if found"""
     try:
         tiff_data = await _projectHandler.getGeoreferencedFile(projectId)
-        tile = await generateTile(tiff_data, x, y, z)
-        return tile
+        (tile_bytes, temp_path) = await generateTile(tiff_data, x, y, z)
+        backgroundTasks.add_task(removeFile, temp_path)
+        return Response(content=tile_bytes, media_type="image/png")
     except Exception as e:
         # Handle unexpected errors
         return Response(status_code=500, content=f"An unexpected error occurred: {str(e)}")
