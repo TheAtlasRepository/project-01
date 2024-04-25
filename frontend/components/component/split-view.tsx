@@ -99,8 +99,12 @@ export default function SplitView({
   // Marker states
   const [waitingForImageMarker, setWaitingForImageMarker] = useState(true);
   const [waitingForMapMarker, setWaitingForMapMarker] = useState(true);
-  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(null);
-  const [tempImageMarker, setTempImageMarker] = useState<[number, number] | null>(null);
+  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(
+    null
+  );
+  const [tempImageMarker, setTempImageMarker] = useState<
+    [number, number] | null
+  >(null);
 
   // Function to add a marker on the map, on lat long coordinates
   const addMapMarker = (geoCoordinates: GeoCoordinates) => {
@@ -287,11 +291,9 @@ export default function SplitView({
           if (hasEnoughEntries) {
             // On first georef, set help message to indicate georeferencing is in progress
             if (isFirstRef === true) {
-              setHelpMessage(
-                "Enough pairs added! Georeferencing..."
-              );
+              setHelpMessage("Enough pairs added! Georeferencing...");
             }
-            
+
             handleGeoref();
           }
         });
@@ -316,11 +318,15 @@ export default function SplitView({
 
           if (isFirstRef === true) {
             // On first completed georef, set help message to indicate completion
-            setHelpMessage("Enough pairs added! The map has been georeferenced, go to Overlay to see your map!");
+            setHelpMessage(
+              "Enough pairs added! The map has been georeferenced, go to Overlay to see your map!"
+            );
             setFirstRef(false);
           } else {
             // If it's not the initial georef, set help message to indicate update
-            setHelpMessage("Georeferenced map has been updated with the extra points.");
+            setHelpMessage(
+              "Georeferenced map has been updated with the extra points."
+            );
           }
         });
       })
@@ -417,7 +423,6 @@ export default function SplitView({
     <div className="h-screen">
       <MapToolbar>
         <MapStyleToggle onStyleChange={handleStyleChange} />
-
         <div>
           <Button
             className={`${
@@ -430,7 +435,6 @@ export default function SplitView({
             <SewingPinFilledIcon /> Coordinates
           </Button>
         </div>
-
         {helpMessage && (
           <div
             className="max-w-sm flex flex-row cursor-pointer"
@@ -448,7 +452,6 @@ export default function SplitView({
           </div>
         )}
       </MapToolbar>
-
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">

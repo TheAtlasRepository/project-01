@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import Image from "next/image";
 
 interface ImageMapProps {
@@ -34,6 +34,8 @@ export default function ImageMap({
 
   const [delta, setDelta] = useState(1); // threshold of pixels moved for click
   const [start, setStart] = useState({ x: 0, y: 0 }); // starting point of click
+  const [scaleFactor, setScaleFactor] = useState(1); // initial scale factor of image used to fit image to screen
+  const [translate, setTranslate] = useState({ x: 0, y: 0 }); // inital translation of image to fit to screen
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging) {
@@ -101,7 +103,7 @@ export default function ImageMap({
   }, [setZoomLevel]);
 
   return (
-    // <div style={{ width: imgSize.width / 2, height: imgSize.height / 2 }}>
+    // image container fit to screen
     <div
       className="flex h-full"
       style={{
@@ -118,7 +120,9 @@ export default function ImageMap({
       <div
         style={{
           position: "absolute",
-          transform: `translate(${transform.x}px, ${transform.y}px) scale(${zoomLevel})`,
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${
+            zoomLevel * scaleFactor
+          })`,
           overflow: "auto",
         }}
       >
@@ -129,6 +133,21 @@ export default function ImageMap({
           height={imageSize.height}
           onLoadingComplete={({ naturalWidth, naturalHeight }) => {
             setImageSize({ width: naturalWidth, height: naturalHeight });
+
+            const scaleFactorX = window.innerWidth / naturalWidth;
+            const scaleFactorY = window.innerHeight / naturalHeight;
+            let scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+
+            scaleFactor = Math.round(scaleFactor * 10) / 10;
+
+            // setScaleFactor(scaleFactor);
+
+            // // center the image
+            // const translateX =
+            //   (window.innerWidth - naturalWidth * scaleFactor) / 2;
+            // const translateY =
+            //   (window.innerHeight - naturalHeight * scaleFactor) / 2;
+            // setTransform({ x: translateX, y: translateY });
           }}
           //prevent default drag event
           onDragStart={(e) => {
