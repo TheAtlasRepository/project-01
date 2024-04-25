@@ -12,6 +12,7 @@ from img2mapAPI.utils.models.pointList import PointList
 from .storage.files.fileStorage import FileStorage
 from .storage.data.storageHandler import StorageHandler
 from .core import georefHelper as georef
+from .core.FileHelper import removeFile
 import datetime
 
 class ProjectHandler:
@@ -452,7 +453,7 @@ class ProjectHandler:
 
         project = await self._StorageHandler.fetchOne(projectId, "project")
         filePath = project["georeferencedFilePath"]
-        file = await self._FileStorage.get(filePath)
+        file = await self._FileStorage.readFile(filePath)
         if file is None:
             raise Exception("File not found")
         return file
@@ -513,21 +514,35 @@ class ProjectHandler:
             crs (str, optional): Cordinate refrence system. Defaults to None.
         """
 
+        #get the project and read the image file
         project = await self.getProject(projectId)
-        imageFilePath = project.imageFilePath
+        imageBytes = await self._FileStorage.readFile(project.imageFilePath)
+
+        #write the image bytes to a temporary image file
+        with tempfile.NamedTemporaryFile(delete=False) as temp_image:
+            temp_image.write(imageBytes)
+            temp_image_path = temp_image.name
+
+        #get the points of the project and georeference the image
         points : PointList = project.points
-        georeferencedImage = None
+        temp_georeferenced_image = None
         if crs is None:
-            georeferencedImage = georef.InitialGeoreferencePngImage(imageFilePath, points) #goreference the image, return the path to the georeferenced file
+            temp_georeferenced_image = georef.InitialGeoreferencePngImage(temp_image_path, points) #goreference the image, return the path to the georeferenced file
         else:
-            georeferencedImage = georef.InitialGeoreferencePngImage(imageFilePath, points, crs) #goreference the image, return the path to the georeferenced file
-        
-        if georeferencedImage is None:
+            temp_georeferenced_image = georef.InitialGeoreferencePngImage(temp_image_path, points, crs) #goreference the image, return the path to the georeferenced file
+
+        #we are done with the temporary image file, remove it
+        removeFile(temp_image_path)
+
+        # if for some reason the image could not be georeferenced, raise an exception
+        if temp_georeferenced_image is None:
             raise Exception("Image could not be georeferenced")
         
-        georeferencedImageBytes = await self._FileStorage.readFile(georeferencedImage)
-        await self._FileStorage.removeFile(georeferencedImage)
-        await self.saveGeoreferencedFile(projectId, georeferencedImageBytes, "tiff")
+        #get the bytes of the georeferenced image, remove the temporary file and save the bytes to storage
+        with open(temp_georeferenced_image, 'rb') as file:
+            georeferenced_image_bytes = file.read()
+        removeFile(temp_georeferenced_image)
+        await self.saveGeoreferencedFile(projectId, georeferenced_image_bytes, "tiff")
 
     async def getImageCoordinates(self, projectId: int):
         """Get the corner coordinates of the image of a project
@@ -539,9 +554,21 @@ class ProjectHandler:
             [west, north, east south]: A list of corner coordinates in the order
         """
 
+        # get the project and read the image file
         project = await self.getProject(projectId)
-        imageFilePath = project.georeferencedFilePath
-        coordinates = georef.getImageCoordinates(imageFilePath)
+        image = project.georeferencedFilePath
+        image_bytes = await self._FileStorage.readFile(image)
+        coordinates = None
+
+        # create a temporary file and get the image coordinates, then remove the temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(image_bytes)
+            temp_path = temp.name
+            temp.close()
+            coordinates = georef.getImageCoordinates(temp_path)
+            removeFile(temp_path)
+
+        # if the coordinates could not be found, raise an exception, otherwise return the coordinates
         if coordinates is None:
             raise Exception("Coordinates not found")
         return coordinates

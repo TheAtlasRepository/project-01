@@ -19,16 +19,19 @@ The module contains the following endpoints:
 """
 
 import os
+import io
 from typing import List
 from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, StreamingResponse
 #internal imports:
 from ..utils.models.point import Point
 from ..utils.models.project import Project
 from ..utils.projectHandler import ProjectHandler
 from ..utils.core.georefHelper import generateTile
+from ..utils.core.FileHelper import removeFile
 from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
+from ..utils.storage.files.s3FileStorage import S3FileStorage
 from ..utils.storage.data.storageHandler import StorageHandler
 from ..utils.storage.data.sqliteLocalStorage import SQLiteStorage
 from ..utils.storage.data.postgresSqlHandler import PostgresSqlHandler
@@ -54,7 +57,18 @@ else:
     print("Using SQLite database")
 #TODO: Add a dependency class to handle errors and return the correct status code
 
+# Default to local file storage
 _Filestorage: FileStorage = LocalFileStorage()
+
+# Decide which file storage to use based on environment variable
+if os.environ['STORAGE_TYPE'] == 'aws':
+    _Filestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
+    print("Using AWS S3 file storage")
+if os.environ['STORAGE_TYPE'] == 'local':
+    #This seems a bit redundant, but it is to explicitly state that local storage has been chosen
+    print("Using local file storage")
+else:
+    print("Defaulting to using local file storage")
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
 
@@ -187,8 +201,9 @@ async def InitalgeorefImage(projectId: int, crs: str = None):
     """ Georeference the image of a project by project id, returns the georeferenced image file if found"""
     try:
         await _projectHandler.georefPNGImage(projectId, crs)
-        imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
-        return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
+        imageBytes = await _projectHandler.getGeoreferencedFile(projectId)
+        return StreamingResponse(io.BytesIO(imageBytes), media_type="image/tiff", headers={"Content-Disposition": "attachment; filename=georeferenced.tiff"})
+        #return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -209,15 +224,17 @@ async def getImageCoordinates(projectId: int):
         imageCoordinates = await _projectHandler.getImageCoordinates(projectId)
         return imageCoordinates
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=404, detail=str(e))
 
-@router.get("/{projectId}/tiles/{z}/{x}/{y}.png", response_class=Response)
-async def getTile(projectId: int, z: int, x: int, y: int):
+@router.get("/{projectId}/tiles/{z}/{x}/{y}.png")
+async def getTile(projectId: int, z: int, x: int, y: int, backgroundTasks: BackgroundTasks):
     """ Retrieve a tile from the georeferenced image of a project by project id, zoom level, x, and y coordinates, returns the tile if found"""
     try:
-        tiff_path = await _projectHandler.getGeoreferencedFilePath(projectId)
-        tile = await generateTile(tiff_path, x, y, z)
-        return tile
+        tiff_data = await _projectHandler.getGeoreferencedFile(projectId)
+        (tile_bytes, temp_path) = await generateTile(tiff_data, x, y, z)
+        backgroundTasks.add_task(removeFile, temp_path)
+        return Response(content=tile_bytes, media_type="image/png")
     except Exception as e:
         # Handle unexpected errors
         return Response(status_code=500, content=f"An unexpected error occurred: {str(e)}")
