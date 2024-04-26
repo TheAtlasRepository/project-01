@@ -65,7 +65,7 @@ class PostgresSqlHandler(sh):
                 id = cur.fetchone()[0]
                 return id
             except Exception as e:
-                print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+                print(f"Error Accured in: Save :: Error {e}")
                 pass
             finally:
                 cur.close()
@@ -79,7 +79,7 @@ class PostgresSqlHandler(sh):
                 id = cur.fetchone()[0]
                 return id
             except Exception as e:
-                print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+                print(f"Error Accured in: Save :: Error {e}")
                 pass
             finally:
                 cur.close()
@@ -107,7 +107,7 @@ class PostgresSqlHandler(sh):
             )
             conn.commit()
         except Exception as e:
-            print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+            print(f"Error Accured in: Remove :: Error {e}")
             pass
         finally:
             cur.close()
@@ -136,7 +136,7 @@ class PostgresSqlHandler(sh):
                 print(f"Updated project with id {data.id}") #Todo: log this
                 conn.commit()
             except Exception as e:
-                print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+                print(f"Error Accured in: Update :: Error {e}")
                 pass
             finally:
                 cur.close()
@@ -149,7 +149,7 @@ class PostgresSqlHandler(sh):
                 )
                 conn.commit()
             except Exception as e:
-                print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+                print(f"Error Accured in: Update :: Error {e}")
                 pass
             finally:
                 cur.close()
@@ -184,7 +184,7 @@ class PostgresSqlHandler(sh):
                 return self.convertSequenseToDict(data, type)
             return data
         except Exception as e:
-            print(f"Fetch one produced: {e}") #Todo: log this
+            print(f"Error Accured in: Fetch One :: Error: {e}") #Todo: log this
             raise e
     
     async def fetch(self, type: str, params: dict = {})->Union[None ,list, dict]:
@@ -223,7 +223,7 @@ class PostgresSqlHandler(sh):
                 return [self.convertSequenseToDict(row, type) for row in data]
             return data
         except Exception as e:
-            print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+            print(f"Error Accured in: Fetch :: Error {e}")
             raise e
     
     async def fetchAll(self, type: str) ->Union[None, list]:
@@ -248,7 +248,7 @@ class PostgresSqlHandler(sh):
             data = cur.fetchall()
             return data
         except Exception as e:
-            print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+            print(f"Error Accured in: Fetch All :: Error {e}")
             raise e
         
     
@@ -286,7 +286,7 @@ class PostgresSqlHandler(sh):
         try:
             await createTable(self.dnsString, project_table)
         except Exception as e:
-            print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+            print(f"Error Accured in: Creating Table for Project :: Error {e}")
             pass #Todo: handle exception
 
         points_table = '''CREATE TABLE IF NOT EXISTS point (
@@ -308,7 +308,7 @@ class PostgresSqlHandler(sh):
         try:
             await createTable(self.dnsString, points_table)
         except Exception as e:
-            print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+            print(f"Error Accured in: Creating Table for Points :: Error {e}")
             pass #Todo: handle exception
     
     def convertSequenseToDict(self, row: tuple, type: str)->dict:
@@ -358,7 +358,7 @@ class PostgresSqlHandler(sh):
             await self.createModelTable()
             self.doneSetup = True
         except Exception as e:
-            print(f"Error Accured in:{str(self.__name__)} :: Error {e}")
+            print(f"Error Accured in: Setup :: Error {e}")
             pass
     
     def __init__(self, dnsString: str):
