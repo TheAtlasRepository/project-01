@@ -354,7 +354,7 @@ class PostgresSqlHandler(sh):
 
         """
         try:
-            await createDB(self.dnsString)
+            # await createDB(self.dnsString)
             await self.createModelTable()
             self.doneSetup = True
         except Exception as e:
