@@ -44,6 +44,7 @@ dnsString = None
 
 _StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
 
+# DATABASE_URL is the default environment variable for Heroku Postgres
 if 'DATABASE_URL' in os.environ:
     database_url = os.environ['DATABASE_URL']
     dnsString = database_url
