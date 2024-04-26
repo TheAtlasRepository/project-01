@@ -60,16 +60,19 @@ else:
 # Default to local file storage
 _Filestorage: FileStorage = LocalFileStorage()
 
-# Decide which file storage to use based on environment variable
-if os.environ['STORAGE_TYPE'] == 'aws':
-    _Filestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
-    print("Using AWS S3 file storage")
-elif os.environ['STORAGE_TYPE'] == 'bucketeer-s3':
-    _Filestorage: FileStorage = S3FileStorage(os.environ['BUCKETEER_BUCKET_NAME'],os.environ['BUCKETEER_AWS_REGION'],os.environ['BUCKETEER_AWS_ACCESS_KEY_ID'],os.environ['BUCKETEER_AWS_SECRET_ACCESS_KEY'])
-    print("Using AWS S3 file storage through Bucketeer")
-elif os.environ['STORAGE_TYPE'] == 'local':
-    #This seems a bit redundant, but it is to explicitly state that local storage has been chosen
-    print("Using local file storage")
+if 'STORAGE_TYPE' in os.environ:
+    # Decide which file storage to use based on environment variable
+    if os.environ['STORAGE_TYPE'] == 'aws':
+        _Filestorage: FileStorage = S3FileStorage(os.environ['AWS_BUCKET_NAME'], os.environ['AWS_REGION_NAME'], os.environ['AWS_ACCESS_KEY_ID'], os.environ['AWS_SECRET_ACCESS_KEY'])
+        print("Using AWS S3 file storage")
+    elif os.environ['STORAGE_TYPE'] == 'bucketeer-s3':
+        _Filestorage: FileStorage = S3FileStorage(os.environ['BUCKETEER_BUCKET_NAME'],os.environ['BUCKETEER_AWS_REGION'],os.environ['BUCKETEER_AWS_ACCESS_KEY_ID'],os.environ['BUCKETEER_AWS_SECRET_ACCESS_KEY'])
+        print("Using AWS S3 file storage through Bucketeer")
+    elif os.environ['STORAGE_TYPE'] == 'local':
+        #This seems a bit redundant, but it is to explicitly state that local storage has been chosen
+        print("Using local file storage")
+    else:
+        print("Defaulting to using local file storage")
 else:
     print("Defaulting to using local file storage")
 
