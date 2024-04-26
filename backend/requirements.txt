@@ -8,5 +8,6 @@ setuptools
 rio-tiler
 python-dotenv
 poppler-utils
+psycopg2-binary
 
 ###### Requirements with Version Specifiers ######

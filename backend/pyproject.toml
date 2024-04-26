@@ -15,6 +15,7 @@ dependencies = [
     "rio-tiler",
     "python-dotenv",
     "poppler-utils",
+    "psycopg2-binary",
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",

@@ -18,6 +18,7 @@ The module contains the following endpoints:
     - Get the bounding coordinates of the image of a project by id
 """
 
+import os
 from typing import List
 from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, Response
@@ -30,17 +31,34 @@ from ..utils.storage.files.fileStorage import FileStorage
 from ..utils.storage.files.localFileStorage import LocalFileStorage
 from ..utils.storage.data.storageHandler import StorageHandler
 from ..utils.storage.data.sqliteLocalStorage import SQLiteStorage
+from ..utils.storage.data.postgresSqlHandler import PostgresSqlHandler
 
 router = APIRouter(
     prefix="/project",
     tags=["Georeferencing Project"],
 )
 
-#TODO: Add a dependency class to handle errors and return the correct status code
+#createing the connection url for the database based on localhost
+database_url = None
+dnsString = None
+
 _StorageHandler: StorageHandler = SQLiteStorage('georefProjects.sqlite3') #need to be a .sqlite3 file
+
+# DATABASE_URL is the default environment variable for Heroku Postgres
+if 'DATABASE_URL' in os.environ:
+    database_url = os.environ['DATABASE_URL']
+    dnsString = database_url
+    _StorageHandler: StorageHandler = PostgresSqlHandler(dnsString)
+    print("Using PostgresSQL database")
+else:
+    print("Using SQLite database")
+#TODO: Add a dependency class to handle errors and return the correct status code
+
 _Filestorage: FileStorage = LocalFileStorage()
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
+
+
 
 @router.post("/")
 async def createProject(project: Project):
