@@ -11,7 +11,6 @@ import MapStyleToggle from "./mapStyleToggle";
 import Image from "next/image";
 import mapboxgl from "mapbox-gl";
 import * as api from "./projectAPI";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
@@ -24,6 +23,7 @@ import {
 
 interface SplitViewProps {
   projectId: number;
+
   georefMarkerPairs: {
     pointId: number | null;
     latLong: [number, number];
@@ -38,6 +38,7 @@ interface SplitViewProps {
       }[]
     >
   >;
+
   mapMarkers: { geoCoordinates: [number, number] }[];
   setMapMarkers: React.Dispatch<
     React.SetStateAction<{ geoCoordinates: [number, number] }[]>
@@ -69,13 +70,13 @@ export default function SplitView({
   onDeleteMarker,
   setHasBeenGeoreferenced,
 }: SplitViewProps) {
-  //project states
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  //Misc states
   const [helpMessage, setHelpMessage] = useState<string | null>(
     "<b>Welcome to the georeferencing tool!</b><br>To dismiss this message, click on it or place a marker on the map or image to get started. <br><i>The marker pair created should reflect the same point on the map and image.</i>"
-  );
+  ); //Note: this is printed using dangerouslySetInnerHTML, so be careful with the content
+  const [isFirstRef, setFirstRef] = useState(true);
 
-  //mapbox states
+  //mapbox states and style toggle
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
   const mapRef = useRef<MapRef>(null);
   const [mapStyle, setMapStyle] = useState(
@@ -95,27 +96,22 @@ export default function SplitView({
   //georeferencing types
   type GeoCoordinates = [number, number];
 
+  // Marker states
   const [waitingForImageMarker, setWaitingForImageMarker] = useState(true);
   const [waitingForMapMarker, setWaitingForMapMarker] = useState(true);
+  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(null);
+  const [tempImageMarker, setTempImageMarker] = useState<[number, number] | null>(null);
 
-  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
-  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(
-    null
-  );
-  const [tempImageMarker, setTempImageMarker] = useState<
-    [number, number] | null
-  >(null);
-
+  // Function to add a marker on the map, on lat long coordinates
   const addMapMarker = (geoCoordinates: GeoCoordinates) => {
     if (!waitingForMapMarker) return;
     //add the marker to the mapMarkers state, used to render the markers on the map
     setTempMapMarker(geoCoordinates);
-    // // reset drag start for the image, makes for better accuracy of drag distance when placing the next marker
-    // setDragStart({ x: 0, y: 0 });
     setWaitingForMapMarker(false);
     setWaitingForImageMarker(false);
   };
 
+  // Function to update the list of map markers and georefMarkerPairs
   const updateMapMarkerList = (geoCoordinates: GeoCoordinates) => {
     setMapMarkers([...mapMarkers, { geoCoordinates }]);
 
@@ -146,6 +142,7 @@ export default function SplitView({
     });
   };
 
+  // Function to update the list of image markers and georefMarkerPairs
   const updateImageMarkerList = (pixelCoordinates: [number, number]) => {
     //add the marker to the imageMarkers state
     setImageMarkers((imageMarkers) => [...imageMarkers, { pixelCoordinates }]);
@@ -190,16 +187,10 @@ export default function SplitView({
   const [transform, setTransform] = useState({ x: 0, y: 0 });
   const [zoomLevel, setZoomLevel] = useState(1);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  // const [imageMarkers, setImageMarkers] = useState<ImageMarker[]>([]);
-  const [calculatedDragDistance, setCalculatedDragDistance] = useState(0);
-  const [isCoordList, setIsCoordList] = useState(false);
 
+  //function to add a marker on the image based on where the user clicks
   const addImageMarker = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log(waitingForMapMarker);
     if (!waitingForImageMarker) return;
-
     //get the x and y coordinates of the click event
     const rect = (event.target as Element).getBoundingClientRect();
     let x = event.clientX - rect.left;
@@ -209,26 +200,6 @@ export default function SplitView({
     x = Math.round(x / zoomLevel);
     y = Math.round(y / zoomLevel);
 
-    //calculate the start position of the drag
-    setCalculatedDragDistance(
-      Math.sqrt(Math.pow(dragStart.x - x, 2) + Math.pow(dragStart.y - y, 2))
-    );
-
-    //calculate the distance between the start and end of the drag
-    const distance = Math.sqrt(
-      Math.pow(dragStart.x - x, 2) + Math.pow(dragStart.y - y, 2)
-    );
-
-    //difference between dragdistance and distance, shows amount of pixels dragged
-    const dragDifference = Math.abs(distance - calculatedDragDistance);
-    //if distance is greater than 0.1 pixels, consider it a drag
-    if (dragDifference > 0.1) {
-      console.log("dragging");
-      console.log("distance dragged:", dragDifference);
-      //reset the drag start
-      setDragStart({ x, y });
-      return;
-    }
     setTempImageMarker([x, y]);
     setWaitingForImageMarker(false);
     setWaitingForMapMarker(false);
@@ -314,9 +285,13 @@ export default function SplitView({
           setWaitingForMapMarker(true);
 
           if (hasEnoughEntries) {
-            setHelpMessage(
-              "Enough pairs added! The map has been georeferenced, go to Overlay to see your map!"
-            );
+            // On first georef, set help message to indicate georeferencing is in progress
+            if (isFirstRef === true) {
+              setHelpMessage(
+                "Enough pairs added! Georeferencing..."
+              );
+            }
+            
             handleGeoref();
           }
         });
@@ -338,6 +313,15 @@ export default function SplitView({
           );
           console.log("Georef Corner Coordinates:", data);
           setHasBeenGeoreferenced(true);
+
+          if (isFirstRef === true) {
+            // On first completed georef, set help message to indicate completion
+            setHelpMessage("Enough pairs added! The map has been georeferenced, go to Overlay to see your map!");
+            setFirstRef(false);
+          } else {
+            // If it's not the initial georef, set help message to indicate update
+            setHelpMessage("Georeferenced map has been updated with the extra points.");
+          }
         });
       })
       .catch((error) => {
@@ -345,6 +329,7 @@ export default function SplitView({
       });
   };
 
+  // Function to confirm image or map marker placement
   const confirmPlacement = () => {
     if (tempMapMarker) {
       setMapMarkers([...mapMarkers, { geoCoordinates: tempMapMarker }]);
@@ -362,6 +347,7 @@ export default function SplitView({
     }
   };
 
+  // Function to cancel image or map marker placement
   const cancelPlacement = () => {
     if (tempMapMarker) {
       setTempMapMarker(null);
@@ -398,6 +384,7 @@ export default function SplitView({
     setTempImageMarker([x, y]);
   };
 
+  // useEffect to check if the tempImageMarker is outside the bounds of the image
   useEffect(() => {
     // if sniperscope position is outside bounds of image, reset to closest edge
     if (tempImageMarker) {
@@ -418,6 +405,7 @@ export default function SplitView({
     }
   }, [tempImageMarker, imageSize]);
 
+  // function to handle mouse wheel event for zooming in and out
   const handleMouseWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault();
     const zoomDelta = event.deltaY > 0 ? -0.1 : 0.1;
@@ -470,23 +458,6 @@ export default function SplitView({
             richColors
             closeButton
           />
-
-          {errorMessage && (
-            <Alert
-              variant="destructive"
-              className="m-2 bg-white bg-opacity-75 p-2"
-            >
-              <AlertDescription>{errorMessage}</AlertDescription>
-              <Button
-                className="absolute top-1 right-1 m-0 p-0 w-5 h-5"
-                size={"icon"}
-                variant={"destructive"}
-                onClick={() => setErrorMessage(null)}
-              >
-                X
-              </Button>
-            </Alert>
-          )}
         </div>
       </div>
       <Allotment onDragEnd={() => mapRef.current?.resize()}>
@@ -550,15 +521,12 @@ export default function SplitView({
           <div className="w-full overflow-visible" onWheel={handleMouseWheel}>
             <ImageMap
               src={localStorage.getItem("pdfData")!}
-              onClick={addImageMarker}
+              addMarker={addImageMarker}
               //transforms passed to imagemap component for image manipulation
               setTransform={setTransform}
               setZoomLevel={setZoomLevel}
               transform={transform}
               zoomLevel={zoomLevel}
-              setIsDragging={setIsDragging}
-              setDragStart={setDragStart}
-              dragStart={dragStart}
               setImageSize={setImageSize}
               imageSize={imageSize}
             ></ImageMap>
