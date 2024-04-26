@@ -16,6 +16,7 @@ dependencies = [
     "python-dotenv",
     "poppler-utils",
     "psycopg2-binary",
+    "boto3",
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
