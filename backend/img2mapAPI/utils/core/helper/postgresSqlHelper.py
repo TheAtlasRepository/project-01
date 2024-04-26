@@ -34,7 +34,7 @@ async def createTable(dnsString: str, sql: str):
         datbase_url (str): Connection string to the database
         sql (str): The sql query to create the table
     """
-    conn = psycopg2.connect(dnsString)
+    conn = psycopg2.connect(dnsString, sslmode='require')
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     try:

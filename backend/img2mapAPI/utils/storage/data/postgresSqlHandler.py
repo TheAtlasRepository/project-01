@@ -35,7 +35,7 @@ class PostgresSqlHandler(sh):
             any: The connection object
         """
         if self.dnsString is not None:
-            conn = psycopg2.connect(self.dnsString)
+            conn = psycopg2.connect(self.dnsString, sslmode='require')
         else:
             conn = psycopg2.connect(dbname=db, user=user, password=password, host=host, port=port)
         return conn
@@ -54,7 +54,7 @@ class PostgresSqlHandler(sh):
         
         if (self.setupDone == False): 
             await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.dnsString)
+        conn = psycopg2.connect(self.dnsString, sslmode='require')
         cur = conn.cursor()
         if type == 'project':
             try:
@@ -96,7 +96,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.dnsString)
+        conn = psycopg2.connect(self.dnsString, sslmode='require')
         cur = conn.cursor()
         try:
             cur.execute(
@@ -125,7 +125,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.dnsString)
+        conn = psycopg2.connect(self.dnsString, sslmode='require')
         cur = conn.cursor()
         if type == 'project':
             try:
@@ -168,7 +168,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.dnsString)
+        conn = psycopg2.connect(self.dnsString, sslmode='require')
         cur = conn.cursor()
         try:
             cur.execute(
@@ -201,7 +201,7 @@ class PostgresSqlHandler(sh):
         if (self.setupDone == False):
             await self.setup()
 
-        conn = psycopg2.connect(self.dnsString)
+        conn = psycopg2.connect(self.dnsString, sslmode='require')
         cur = conn.cursor()
         try:
             cur.execute(
@@ -238,7 +238,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup()
-        conn = psycopg2.connect(self.dnsString)
+        conn = psycopg2.connect(self.dnsString, sslmode='require')
         cur = conn.cursor()
         try:
             cur.execute(
