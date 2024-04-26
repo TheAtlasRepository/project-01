@@ -8,6 +8,7 @@ import os
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2.errors import DuplicateTable
 
+_LocalSSLMODE = 'require'
 
 async def createDB(dnsString: str, datname: str = 'img2map'):
     """Create a database if it does not exist
@@ -34,7 +35,7 @@ async def createTable(dnsString: str, sql: str):
         datbase_url (str): Connection string to the database
         sql (str): The sql query to create the table
     """
-    conn = psycopg2.connect(dnsString, sslmode='require')
+    conn = psycopg2.connect(dnsString, sslmode=_LocalSSLMODE)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     try:

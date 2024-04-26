@@ -427,7 +427,8 @@ class ProjectHandler:
 
         filePath = await self._FileStorage.saveFile(file, ".png")
         project["imageFilePath"] = filePath
-        await self._StorageHandler.update(projectId, project, "project")
+        project = Project.model_construct(None, **project)
+        await self.updateProject(projectId, project)
 
     async def removeImageFile(self, projectId: int) -> None:
         """Remove the image file of a project
@@ -439,7 +440,8 @@ class ProjectHandler:
         project = await self._StorageHandler.fetchOne(projectId, "project")
         await self._FileStorage.remove(project["imageFilePath"])
         project["imageFilePath"] = ""
-        await self._StorageHandler.update(projectId, project, "project")
+        project = Project.model_construct(None, **project)
+        await self.updateProject(projectId, project)
     
     async def getGeoreferencedFile(self, projectId: int) -> bytes:
         """Get the georeferenced file of a project
@@ -491,7 +493,8 @@ class ProjectHandler:
         filePath = await self._FileStorage.saveFile(file, ".tiff")
 
         project["georeferencedFilePath"] = filePath
-        await self._StorageHandler.update(projectId, project, "project")
+        project = Project.model_construct(None, **project)
+        await self.updateProject(projectId, project)
 
     async def removeGeoreferencedFile(self, projectId: int) -> None:
         """Remove the georeferenced file of a project
@@ -503,7 +506,8 @@ class ProjectHandler:
         project = await self._StorageHandler.fetchOne(projectId, "project")
         await self._FileStorage.removeFile(project["georeferencedFilePath"])
         project["georeferencedFilePath"] = ""
-        await self._StorageHandler.update(projectId, project, "project")
+        project = Project.model_construct(None, **project)
+        await self.updateProject(projectId, project)
     
     ### Georeferencing
     async def georefPNGImage(self, projectId: int, crs: str = None) -> None:
