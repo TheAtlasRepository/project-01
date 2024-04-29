@@ -426,11 +426,16 @@ class ProjectHandler:
             try:
                 await self._FileStorage.removeFile(project["imageFilePath"])
             except Exception as e:
-                path = project.get("imageFilePath", "no path")
-                print(f"Failed to remove old file with path: {path} :: Exception: {e}, assuming file does not exist, continuing...")
+                try:
+                    path = project.get("imageFilePath", "no path")
+                    print(f"Failed to remove old file with path: {path} :: Exception: {e}, assuming file does not exist, continuing...")
+                except Exception as e2:
+                    print(f"Failed to remove old file with path: no path :: Exception: {e2} & {e}, assuming file does not exist, continuing...")
                 pass
-
-        filePath = await self._FileStorage.saveFile(file, ".png")
+        try:
+            filePath = await self._FileStorage.saveFile(file, ".png")
+        except Exception as e:
+            raise Exception(f"Failed to save file: {e}")
         project["imageFilePath"] = filePath
         project = Project.model_construct(None, **project)
         await self.updateProject(projectId, project)
