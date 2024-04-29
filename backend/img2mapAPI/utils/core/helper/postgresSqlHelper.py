@@ -18,7 +18,7 @@ async def createDB(dnsString: str, datname: str = 'img2map'):
         datname (str, optional): Name for the database. Defaults to 'img2map'.
     """
     #check if the database exists, if not create it
-    conn = psycopg2.connect(dnsString)
+    conn = psycopg2.connect(dnsString, sslmode=_LocalSSLMODE)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
     cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (datname,))
