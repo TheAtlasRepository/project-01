@@ -127,7 +127,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.dnsString, self.localsslmode)
+        conn = psycopg2.connect(self.dnsString, sslmode=self.localsslmode)
         cur = conn.cursor()
         if type == 'project':
             try:
@@ -170,7 +170,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup() #make sure the database is setup
-        conn = psycopg2.connect(self.dnsString, self.localsslmode)
+        conn = psycopg2.connect(self.dnsString, sslmode=self.localsslmode)
         cur = conn.cursor()
         try:
             cur.execute(
@@ -203,7 +203,7 @@ class PostgresSqlHandler(sh):
         if (self.setupDone == False):
             await self.setup()
 
-        conn = psycopg2.connect(self.dnsString, self.localsslmode)
+        conn = psycopg2.connect(self.dnsString, sslmode=self.localsslmode)
         cur = conn.cursor()
         try:
             cur.execute(
@@ -240,7 +240,7 @@ class PostgresSqlHandler(sh):
 
         if (self.setupDone == False): 
             await self.setup()
-        conn = psycopg2.connect(self.dnsString, self.localsslmode)
+        conn = psycopg2.connect(self.dnsString, sslmode=self.localsslmode)
         cur = conn.cursor()
         try:
             cur.execute(
