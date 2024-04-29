@@ -197,9 +197,9 @@ async def uploadImage(projectId: int, file: UploadFile = File(...)):
 async def getImage(projectId: int):
     """Get the image of a project by project id, returns the image file if found"""
     try:
-        imagepath = await _projectHandler.getImageFilePath(projectId)
+        FileBytes = await _projectHandler.getImageFile(projectId)
         mediaType = "image/png"
-        return FileResponse(imagepath, media_type=mediaType)
+        return StreamingResponse(io.BytesIO(FileBytes), media_type=mediaType, headers={"Content-Disposition": "attachment; filename=image.png"})
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 

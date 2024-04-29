@@ -388,7 +388,7 @@ class ProjectHandler:
         
         project = await self._StorageHandler.fetchOne(projectId, "project")
         filePath = project["imageFilePath"]
-        file = await self._FileStorage.get(filePath)
+        file = await self._FileStorage.readFile(filePath)
         if file is None:
             raise Exception("File not found")
         return file
@@ -423,7 +423,12 @@ class ProjectHandler:
         project = await self._StorageHandler.fetchOne(projectId, "project")
 
         if "imageFilePath" in project and project["imageFilePath"]:
-            await self._FileStorage.removeFile(project["imageFilePath"])
+            try:
+                await self._FileStorage.removeFile(project["imageFilePath"])
+            except Exception as e:
+                path = project.get("imageFilePath")
+                print(f"Failed to remove old file with path: {path} :: Expetion: {e}, assuming file does not exist, continuing...")
+                pass
 
         filePath = await self._FileStorage.saveFile(file, ".png")
         project["imageFilePath"] = filePath
