@@ -80,6 +80,14 @@ else:
 
 _projectHandler = ProjectHandler(_Filestorage, _StorageHandler)
 
+#simple exeption logger
+def log_exception(e: Exception, message: str = None, where: str = None):
+    #format the message to be logged
+    #time : where : message : exception
+    log_message = f"{message} : {str(e)}"
+    if where:
+        log_message = f"{where} : {log_message}"
+    print(log_message)
 
 
 @router.post("/")
@@ -91,6 +99,7 @@ async def createProject(project: Project):
         id = await _projectHandler.createProject(project)
         return {"id": id}
     except Exception as e:
+        log_exception(e, "Project could not be created", "createProject")
         raise HTTPException(status_code=400, detail=f'Project could not be created: {str(e)}')
 
 @router.put("/{projectId}")
@@ -100,6 +109,7 @@ async def updateProject(projectId: int, project: Project):
         if await _projectHandler.updateProject(projectId, project): return {"ProjectID": projectId}
         else: raise HTTPException(status_code=404, detail="Project not found")
     except Exception as e:
+        log_exception(e, "Project could not be updated", "updateProject")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.delete("/{projectId}")
@@ -112,6 +122,8 @@ async def deleteProject(projectId: int, backgroundTasks: BackgroundTasks):
     except Exception as e:
         if e.status_code == 500:
             raise HTTPException(status_code=500, detail=str(e))
+        else:
+            log_exception(e, "Project could not be deleted", "deleteProject")
         pass
 
 @router.get("/{projectId}")
@@ -121,6 +133,7 @@ async def getProject(projectId: int):
         project = await _projectHandler.getProject(projectId)
         return project
     except Exception as e:
+        log_exception(e, "Project could not be retrieved", "getProject")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.post("/{projectId}/point")
@@ -130,6 +143,7 @@ async def addPoint(projectId: int, innpoint: Point):
         (PointID, Dbid) = await _projectHandler.addPoint(projectId, innpoint)
         return {"Project":{"id": projectId},"Point":{"id": Dbid,"inProjectId": PointID}}
     except Exception as e:
+        log_exception(e, "Point could not be added", "addPoint")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.put("/{projectId}/point/{pointId}")
@@ -141,6 +155,7 @@ async def updatePoint(projectId: int, pointId: int, point: Point):
         else:
             raise HTTPException(status_code=404, detail="Point not found")
     except Exception as e:
+        log_exception(e, "Point could not be updated", "updatePoint")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.delete("/{projectId}/point")
@@ -150,6 +165,7 @@ async def deletePoints(projectId: int, backgroundTasks: BackgroundTasks):
         backgroundTasks.add_task(_projectHandler.removeAllProjectPoints, projectId)
         return Response(content="Deletion request of points accepted", status_code=202, media_type="text/plain", background=backgroundTasks)
     except Exception as e:
+        log_exception(e, "Points could not be deleted", "deletePoints")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.delete("/{projectId}/point/{pointId}")
@@ -159,6 +175,7 @@ async def deletePoint(projectId: int, pointId: int, backgroundTasks: BackgroundT
         backgroundTasks.add_task(_projectHandler.removePoint, projectId, pointId)
         return Response(content="Deletion request of point accepted", status_code=202, media_type="text/plain", background=backgroundTasks)
     except Exception as e:
+        log_exception(e, "Point could not be deleted", "deletePoint")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/{projectId}/point")
@@ -168,6 +185,7 @@ async def getPoints(projectId: int):
         points: List[Point] = await _projectHandler.getProjectPoints(projectId)
         return points
     except Exception as e:
+        log_exception(e, "Points could not be retrieved", "getPoints")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/{projectId}/point/{pointId}")
@@ -177,6 +195,7 @@ async def getPoint(projectId: int, pointId: int):
         point = await _projectHandler.getPoint(projectId, pointId)
         return point
     except Exception as e:
+        log_exception(e, "Point could not be retrieved", "getPoint")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.post("/{projectId}/image")
@@ -188,6 +207,7 @@ async def uploadImage(projectId: int, file: UploadFile = File(...)):
         return {"status": "Image uploaded"}
     except Exception as e:
         #check if e has a status code attribute
+        log_exception(e, "Image could not be uploaded", "uploadImage")
         if hasattr(e, "status_code"):
             raise HTTPException(status_code=e.status_code, detail=str(e))
         else:
@@ -201,6 +221,7 @@ async def getImage(projectId: int):
         mediaType = "image/png"
         return StreamingResponse(io.BytesIO(FileBytes), media_type=mediaType, headers={"Content-Disposition": "attachment; filename=image.png"})
     except Exception as e:
+        log_exception(e, "Image could not be retrieved", "getImage")
         raise HTTPException(status_code=404, detail=str(e))
 
 
@@ -213,6 +234,7 @@ async def InitalgeorefImage(projectId: int, crs: str = None):
         return StreamingResponse(io.BytesIO(imageBytes), media_type="image/tiff", headers={"Content-Disposition": "attachment; filename=georeferenced.tiff"})
         #return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
     except Exception as e:
+        log_exception(e, "Image could not be georeferenced", "InitalgeorefImage")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/{projectId}/image/geo")
@@ -222,6 +244,7 @@ async def getGeorefImage(projectId: int):
         imagepath = await _projectHandler.getGeoreferencedFilePath(projectId)
         return FileResponse(imagepath, media_type="image/tiff", filename="georeferenced.tiff")
     except Exception as e:
+        log_exception(e, "Georeferenced image could not be retrieved", "getGeorefImage")
         raise HTTPException(status_code=404, detail=str(e))
 
    
@@ -232,7 +255,7 @@ async def getImageCoordinates(projectId: int):
         imageCoordinates = await _projectHandler.getImageCoordinates(projectId)
         return imageCoordinates
     except Exception as e:
-        print(e)
+        log_exception(e, "Image coordinates could not be retrieved", "getImageCoordinates")
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/{projectId}/tiles/{z}/{x}/{y}.png")
@@ -245,4 +268,5 @@ async def getTile(projectId: int, z: int, x: int, y: int, backgroundTasks: Backg
         return Response(content=tile_bytes, media_type="image/png")
     except Exception as e:
         # Handle unexpected errors
+        log_exception(e, "Tile could not be retrieved", "getTile")
         return Response(status_code=500, content=f"An unexpected error occurred: {str(e)}")
