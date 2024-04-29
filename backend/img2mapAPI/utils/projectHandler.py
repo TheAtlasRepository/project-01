@@ -426,7 +426,7 @@ class ProjectHandler:
             try:
                 await self._FileStorage.removeFile(project["imageFilePath"])
             except Exception as e:
-                path = project.get("imageFilePath")
+                path = project.get("imageFilePath", "no path")
                 print(f"Failed to remove old file with path: {path} :: Exception: {e}, assuming file does not exist, continuing...")
                 pass
 
