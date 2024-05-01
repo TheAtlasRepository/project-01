@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import FormModal from "@/components/ui/FormModal";
 import WarningExitModal from '@/components/ui/WarningExitModal';
@@ -32,6 +32,21 @@ const EditorToolbar = (props: EditorToolbarProps) => {
     const handleFeedbackClick = () => {
         setFormModalOpen(true);
     };
+
+    // Warning popup when closing browser/tab
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+          event.preventDefault();
+          event.returnValue = ''; // Supposedly chrome requires returnvalue to be set
+        };
+      
+        window.addEventListener('beforeunload', handleBeforeUnload);
+      
+        // Cleanup when component unmounts
+        return () => {
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
 
     // When the user clicks the Exit Editor button
     const handleExitEditor = () => {
