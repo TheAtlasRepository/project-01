@@ -63,13 +63,13 @@ SniperScopeProps) {
               </div>
               <div className="absolute bottom-2 transform translate-y-2/3 flex items-center justify-center">
                 <div
-                  className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800"
+                  className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800 cursor-pointer"
                   onClick={onConfirm}
                 >
                   <CheckIcon className="text-white" />
                 </div>
                 <div
-                  className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800"
+                  className="w-12 h-12 bg-black rounded-xl flex items-center justify-center hover:bg-gray-800 cursor-pointer"
                   onClick={onCancel}
                 >
                   <XIcon className="text-white" />
