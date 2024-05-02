@@ -3,6 +3,7 @@
 
 import os 
 import io 
+import tempfile
 import warnings
 import numpy as np
 import rasterio as rio 
@@ -143,11 +144,11 @@ def getImageCoordinates(tiff_path):
 
 
 
-async def generateTile(tiff_path, x: int, y: int, z: int):
+async def generateTile(tiff_bytes: bytes, x: int, y: int, z: int):
     """Generate a tile image from a georeferenced TIFF file.
 
     Args:
-        tiff_path (str): Path to the georeferenced TIFF file.
+        tiff_bytes (bytes): TIFF file as bytes.
         x (int): column index of the tile.
         y (int): row index of the tile.
         z (int): Zoom level of the tile.
@@ -156,19 +157,24 @@ async def generateTile(tiff_path, x: int, y: int, z: int):
         e: Unhandled exception from rio-tiler.
 
     Returns:
-        Respone: A FastAPI Response object containing the tile image as PNG bytes.
+        bytes: the tile image as bytes.
     """
 
-    blanke_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
+    blank_tile = Image.new('RGBA', (256, 256), (255, 255, 255, 0))
     bytes_io = io.BytesIO()
-    blanke_tile.save(bytes_io, format='PNG')
+    blank_tile.save(bytes_io, format='PNG')
     blank_tile_bytes = bytes_io.getvalue()
+
+    temp_path = None
 
     MAX_ZOOM = 5
     if z < MAX_ZOOM:
-        return Response(content=blank_tile_bytes, media_type="image/png")
+        return (blank_tile_bytes, temp_path)
     try:
-        with Reader(tiff_path) as src:
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(tiff_bytes)
+            temp_path = temp.name
+        with Reader(temp_path) as src:
                 tile, mask = src.tile(x, y, z) 
                 tile = np.moveaxis(tile, 0, -1)  
                 mask = np.expand_dims(mask, axis=-1)  
@@ -178,9 +184,10 @@ async def generateTile(tiff_path, x: int, y: int, z: int):
                 img_byte_arr = io.BytesIO()
                 img.save(img_byte_arr, format='PNG')
                 img_byte_arr.seek(0)
-        return Response(content=img_byte_arr.getvalue(), media_type="image/png")
+
+        return (img_byte_arr.getvalue(), temp_path)
     except TileOutsideBounds:
-        return Response(content=blank_tile_bytes, media_type="image/png")
+        return (blank_tile_bytes, temp_path)
     except Exception as e:
         print(e)
         raise e
