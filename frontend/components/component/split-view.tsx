@@ -16,6 +16,7 @@ import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
 import { Toaster, toast } from "sonner";
 import MapToolbar from "@/components/ui/MapToolbar";
+import ZoomButtons from "@/components/ui/ZoomButtons";
 import {
   QuestionMarkCircledIcon,
   SewingPinFilledIcon,
@@ -541,6 +542,7 @@ export default function SplitView({
               scaleFactor={scaleFactor}
               setScaleFactor={setScaleFactor}
             ></ImageMap>
+            <ZoomButtons setZoomLevel={setZoomLevel}></ZoomButtons>
             {imageMarkers.map((marker, index) => (
               <div
                 key={index}
