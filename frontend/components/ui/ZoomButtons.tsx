@@ -1,9 +1,11 @@
+import { Button } from "@/components/ui/button";
+
 interface ZoomButtonsProps {
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function ZoomButtons({ setZoomLevel }: ZoomButtonsProps) {
-  const zoomDelta = 0.4;
+  const zoomDelta = 0.2;
   const maxZoom = 0.1;
 
   //function to zoom in
@@ -24,25 +26,26 @@ export default function ZoomButtons({ setZoomLevel }: ZoomButtonsProps) {
     "
     >
       <div className="flex flex-col gap-1">
-        <button
-          onClick={zoomIn}
-          className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
-        >
+        <Button onClick={zoomIn} variant={"zoom"} size={"zoom"}>
           +
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={zoomOut}
-          className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
+          variant={"zoom"}
+          size={"zoom"}
+          //   className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
         >
           -
-        </button>
+        </Button>
       </div>
-      <button
+      <Button
         onClick={() => setZoomLevel(1)}
-        className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
+        variant={"zoom"}
+        size={"zoom"}
+        // className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
       >
         ↻
-      </button>
+      </Button>
     </div>
   );
 }
