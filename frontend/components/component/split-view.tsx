@@ -257,6 +257,7 @@ export default function SplitView({
           pair.latLong.every((val) => val !== 0) &&
           pair.pixelCoords.every((val) => val !== 0)
       );
+
     // Only proceed if the last pair is valid and an API call has not been made for the current set
     if (isValidPair && !apiCallMade.current) {
       apiCallMade.current = true; // Block further API calls for the current set of marker pairs
@@ -272,6 +273,10 @@ export default function SplitView({
             "Pair added successfully! Place another marker to add another pair."
           );
           replaceLastMarkerId(data.Point.inProjectId);
+
+          if (!hasEnoughEntries) {
+            setHelpMessage(`Pair added! ${3 - georefMarkerPairs.length} more pairs needed to georeference the map.`);
+          }
         })
         .catch((error) => {
           // Handle API call error
