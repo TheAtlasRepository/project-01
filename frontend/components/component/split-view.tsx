@@ -16,7 +16,9 @@ import CoordinateList from "./coordinateList";
 import SniperScope from "../ui/sniperScope";
 import { Toaster, toast } from "sonner";
 import MapToolbar from "@/components/ui/MapToolbar";
+import ZoomButtons from "@/components/ui/ZoomButtons";
 import {
+  InfoCircledIcon,
   QuestionMarkCircledIcon,
   SewingPinFilledIcon,
 } from "@radix-ui/react-icons";
@@ -99,8 +101,12 @@ export default function SplitView({
   // Marker states
   const [waitingForImageMarker, setWaitingForImageMarker] = useState(true);
   const [waitingForMapMarker, setWaitingForMapMarker] = useState(true);
-  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(null);
-  const [tempImageMarker, setTempImageMarker] = useState<[number, number] | null>(null);
+  const [tempMapMarker, setTempMapMarker] = useState<GeoCoordinates | null>(
+    null
+  );
+  const [tempImageMarker, setTempImageMarker] = useState<
+    [number, number] | null
+  >(null);
 
   // Function to add a marker on the map, on lat long coordinates
   const addMapMarker = (geoCoordinates: GeoCoordinates) => {
@@ -197,20 +203,22 @@ export default function SplitView({
     let y = event.clientY - rect.top;
 
     //adjust the x and y coordinates based on the transform and zoom level
-    x = Math.round(x / zoomLevel);
-    y = Math.round(y / zoomLevel);
+    x = Math.round(x / zoomLevel / scaleFactor);
+    y = Math.round(y / zoomLevel / scaleFactor);
 
     setTempImageMarker([x, y]);
     setWaitingForImageMarker(false);
     setWaitingForMapMarker(false);
   };
 
+  const [scaleFactor, setScaleFactor] = useState(1); // initial scale factor of image used to fit image to screen
   //adjust marker positions based on image manipulation
   const adjustMarkerPositions = (
     pixelCoordinates: [number, number],
     transform: { x: number; y: number },
     zoomLevel: number,
-    imageSize: { width: number; height: number }
+    imageSize: { width: number; height: number },
+    scaleFactor: number
   ): { left: string; top: string } => {
     //defines the center of the image
     const centerX = imageSize.width / 2;
@@ -218,9 +226,13 @@ export default function SplitView({
 
     //adjusts the marker position based on the transform and zoom level
     const adjustedX =
-      centerX + (pixelCoordinates[0] - centerX) * zoomLevel + transform.x;
+      centerX +
+      (pixelCoordinates[0] - centerX) * zoomLevel * scaleFactor +
+      transform.x;
     const adjustedY =
-      centerY + (pixelCoordinates[1] - centerY) * zoomLevel + transform.y;
+      centerY +
+      (pixelCoordinates[1] - centerY) * zoomLevel * scaleFactor +
+      transform.y;
 
     return {
       left: `${adjustedX}px`,
@@ -257,6 +269,7 @@ export default function SplitView({
           pair.latLong.every((val) => val !== 0) &&
           pair.pixelCoords.every((val) => val !== 0)
       );
+
     // Only proceed if the last pair is valid and an API call has not been made for the current set
     if (isValidPair && !apiCallMade.current) {
       apiCallMade.current = true; // Block further API calls for the current set of marker pairs
@@ -272,6 +285,10 @@ export default function SplitView({
             "Pair added successfully! Place another marker to add another pair."
           );
           replaceLastMarkerId(data.Point.inProjectId);
+
+          if (!hasEnoughEntries) {
+            setHelpMessage(`Pair added! ${3 - georefMarkerPairs.length} more pairs needed to georeference the map.`);
+          }
         })
         .catch((error) => {
           // Handle API call error
@@ -287,11 +304,9 @@ export default function SplitView({
           if (hasEnoughEntries) {
             // On first georef, set help message to indicate georeferencing is in progress
             if (isFirstRef === true) {
-              setHelpMessage(
-                "Enough pairs added! Georeferencing..."
-              );
+              setHelpMessage("Enough pairs added! Georeferencing...");
             }
-            
+
             handleGeoref();
           }
         });
@@ -316,11 +331,15 @@ export default function SplitView({
 
           if (isFirstRef === true) {
             // On first completed georef, set help message to indicate completion
-            setHelpMessage("Enough pairs added! The map has been georeferenced, go to Overlay to see your map!");
+            setHelpMessage(
+              "Enough pairs added! The map has been georeferenced, go to Overlay to see your map!"
+            );
             setFirstRef(false);
           } else {
             // If it's not the initial georef, set help message to indicate update
-            setHelpMessage("Georeferenced map has been updated with the extra points.");
+            setHelpMessage(
+              "Georeferenced map has been updated with the extra points."
+            );
           }
         });
       })
@@ -371,8 +390,8 @@ export default function SplitView({
     if (!tempImageMarker) return;
     // add the dragged distance to the original tempImageMarker position
     // to get the new position of the marker
-    let x = position.x / zoomLevel + tempImageMarker[0];
-    let y = position.y / zoomLevel + tempImageMarker[1];
+    let x = position.x / zoomLevel / scaleFactor + tempImageMarker[0];
+    let y = position.y / zoomLevel / scaleFactor + tempImageMarker[1];
 
     // round to nearest whole pixel
     x = Math.round(x);
@@ -417,7 +436,6 @@ export default function SplitView({
     <div className="h-screen">
       <MapToolbar>
         <MapStyleToggle onStyleChange={handleStyleChange} />
-
         <div>
           <Button
             className={`${
@@ -430,14 +448,13 @@ export default function SplitView({
             <SewingPinFilledIcon /> Coordinates
           </Button>
         </div>
-
         {helpMessage && (
           <div
             className="max-w-sm flex flex-row cursor-pointer"
             onClick={() => setHelpMessage(null)}
           >
             <div className="text-2xl mr-3">
-              <QuestionMarkCircledIcon
+              <InfoCircledIcon
                 height={48}
                 width={48}
                 color=""
@@ -448,7 +465,6 @@ export default function SplitView({
           </div>
         )}
       </MapToolbar>
-
       <div className=""></div>
       <div className="flex justify-center">
         <div className="fixed w-2/5 z-50 m-4 text-center">
@@ -529,7 +545,10 @@ export default function SplitView({
               zoomLevel={zoomLevel}
               setImageSize={setImageSize}
               imageSize={imageSize}
+              scaleFactor={scaleFactor}
+              setScaleFactor={setScaleFactor}
             ></ImageMap>
+            <ZoomButtons setZoomLevel={setZoomLevel}></ZoomButtons>
             {imageMarkers.map((marker, index) => (
               <div
                 key={index}
@@ -542,7 +561,8 @@ export default function SplitView({
                     marker.pixelCoordinates,
                     transform,
                     zoomLevel,
-                    imageSize
+                    imageSize,
+                    scaleFactor
                   ),
                 }}
                 className="pointer-events-auto"
@@ -565,7 +585,8 @@ export default function SplitView({
                     tempImageMarker,
                     transform,
                     zoomLevel,
-                    imageSize
+                    imageSize,
+                    scaleFactor
                   ),
                 }}
                 className="pointer-events-auto"

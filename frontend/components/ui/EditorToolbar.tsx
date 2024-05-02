@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import FormModal from "@/components/ui/FormModal";
+import HelpModal from '@/components/ui/HelpModal';
 import WarningExitModal from '@/components/ui/WarningExitModal';
-import { ViewVerticalIcon, StackIcon, CropIcon, FileTextIcon, DownloadIcon, ExitIcon } from '@radix-ui/react-icons'
+import { InfoCircledIcon, ViewVerticalIcon, StackIcon, CropIcon, FileTextIcon, DownloadIcon, ExitIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons'
 import * as api from "@/components/component/projectAPI";
 import { ViewPage } from "@/components/component/editor";
 
@@ -21,7 +22,9 @@ interface EditorToolbarProps {
 
 const EditorToolbar = (props: EditorToolbarProps) => {
     const [isFormModalOpen, setFormModalOpen] = useState(false); // State to control the visibility of the feedback form modal
+    const [isHelpModalOpen, setHelpModalOpen] = useState(false); // State to control the visibility of the help modal
     const [isWarningExitModalOpen, setIsWarningExitModalOpen] = useState(false);
+    const [currentHelpPage, setCurrentHelpPage] = useState(0);
 
     // Handle button click to change the view page
     const handleButtonClick = (page: ViewPage) => {
@@ -32,6 +35,11 @@ const EditorToolbar = (props: EditorToolbarProps) => {
     const handleFeedbackClick = () => {
         setFormModalOpen(true);
     };
+
+    // Handle help button click and show the help modal
+    const handleHelpClick = () => {
+        setHelpModalOpen(true);
+    }
 
     // Warning popup when closing browser/tab
     useEffect(() => {
@@ -120,6 +128,12 @@ const EditorToolbar = (props: EditorToolbarProps) => {
 
             {/* Right Group */}
             <div className="flex items-center gap-4">
+                <Button className="bg-gray-700 dark:bg-gray-700 dark:text-white hover:bg-blue-800 dark:hover:bg-blue-800" onClick={handleHelpClick}>
+                    <QuestionMarkCircledIcon className='text-white mr-2' width={20} height={20}/>
+                    Help
+                </Button>
+                {isHelpModalOpen && <HelpModal onClose={() => setHelpModalOpen(false)} currentPage={currentHelpPage} setCurrentPage={setCurrentHelpPage} />}
+
                 <Button className="bg-gray-700 dark:bg-gray-700 dark:text-white hover:bg-blue-800 dark:hover:bg-blue-800" onClick={handleFeedbackClick}>
                     <FileTextIcon className='text-white mr-2' width={20} height={20}/>
                     Feedback
