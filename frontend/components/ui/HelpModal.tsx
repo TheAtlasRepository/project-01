@@ -10,7 +10,7 @@ interface HelpModalProps {
 
 const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentPage }) => {
     const pages = [
-        <div>
+        <div className='dark:text-white'>
             <h1 className='text-3xl font-bold'>Welcome!</h1>
             <hr className='my-3' />
             <p>
@@ -163,8 +163,8 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
                     </div>
                     <div className="flex justify-end">
                         <Button onClick={prevPage} disabled={currentPage === 0} variant={"default"} className='mr-3 border border-gray-300 bg-gray-100 dark:bg-gray-700 text-black dark:text-white dark:hover:bg-black w-1/6 hover:bg-gray-300'>Previous</Button>
-                        <Button onClick={onClose} variant={"default"} className='mr-3 border border-gray-300 bg-red-100 dark:bg-gray-700 text-black dark:text-white dark:hover:bg-black w-1/6 hover:bg-red-300'>Close</Button>
-                        <Button onClick={nextPage} disabled={currentPage === pages.length - 1} variant={"default"} className='dark:bg-gray-700 dark:text-white dark:hover:bg-black w-1/6'>Next</Button>
+                        <Button onClick={onClose} variant={"default"} className='mr-3 border border-gray-300 bg-red-100 dark:bg-gray-700 text-black dark:text-white dark:hover:bg-red-900 w-1/6 hover:bg-red-300'>Close</Button>
+                        <Button onClick={nextPage} disabled={currentPage === pages.length - 1} variant={"default"} className='border border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-black w-1/6'>Next</Button>
                     </div>
                 </div>
             </div>
