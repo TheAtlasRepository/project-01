@@ -1,4 +1,4 @@
-# Filestruck
+# Filestructure
 
 [Back to README](../README.md)
 

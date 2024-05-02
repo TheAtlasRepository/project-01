@@ -67,9 +67,20 @@ Improvments
 >
 > A relational suggestion is to have the new georefrencing handler know of the project handler, which in turn uses point handler. The router will use all three.
 
-**Point Error, Fullstack:**
+**Point error calculation, Fullstack:**
 
 > * `Difficulity: High`
 > * `Research: Medium`
 >
-> **Description**: what, why & possibly a theoretical suggested solution.
+> **Description**: Calculates how far off your original points where from their real positions. This is supposed to be done when users adds more then the minimum amounts of points to a map for the goerefrence. This will then improved accuracy, and they would be able to see how far off their original marker placements where compared to the re-referenced points on the map.
+>
+> & possibly a theoretical suggested solution.
+
+ **Suggested points, Fullstack:**
+>
+> * `Difficulity: High`
+> * `Research: Medium`
+>
+> **Description**: With the inital georefrence, the software would suggest points on the map to be placed. This would greatly improve the user experience and the learning curve for new users of this kind of software. But this might be quite a difficult task as it would probably have to include some kind of artificial Intelligence to or advanced algorithm to achieve this at the level we want.
+>
+> In terms of an algorithm this would then most likely depend on different reworks like the error point calculations.
