@@ -3,7 +3,9 @@
 [Back to README](../README.md)
 
 ---
-## Current structur (with tree cmd)
+This file contains something?
+
+## Current structure (with tree cmd)
 
 Command: `PS <path> tree /f /a`
 
@@ -85,7 +87,15 @@ c://frontend
         vercel.svg
 ```
 
-## Directory's
+## Directories
+* **app:** Contains . Sub-folders are used for Next-routing, and each contain 
+* **app/[subfolder]:** 
+* **components:**
+* **components/component:**
+* **components/ui:**
+* **docker:**
+* **lib:**
+* **public:**
 
 ## Files
 
