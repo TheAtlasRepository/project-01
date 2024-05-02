@@ -1,7 +1,9 @@
 # DOCS :D
+
 asdjhasdhjasd
 
 ## General
+
 [Architecture](Architecture.md)
 
 [Setting Up Pipelines](PipelinesSetup.md)

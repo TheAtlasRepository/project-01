@@ -1,6 +1,8 @@
-[Back to README](README.md)
 # Application Architecture
 
+[Back to README](README.md)
+
+---
 img here.
 
 Describing the img.
