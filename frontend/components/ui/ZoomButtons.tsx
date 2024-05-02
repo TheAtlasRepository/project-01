@@ -20,26 +20,26 @@ export default function ZoomButtons({ setZoomLevel }: ZoomButtonsProps) {
 
   return (
     <div
-      className="absolute bottom-2 right-0 m-4 gap-2 flex flex-col z-10 dark:text-white
+      className="absolute bottom-2 right-0 m-4 gap-2 flex flex-col z-10 text-black dark:text-white
     "
     >
       <div className="flex flex-col gap-1">
         <button
           onClick={zoomIn}
-          className="w-8 h-8 bg-white rounded-md hover:bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700"
+          className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
         >
           +
         </button>
         <button
           onClick={zoomOut}
-          className="w-8 h-8 bg-white rounded-md hover:bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700"
+          className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
         >
           -
         </button>
       </div>
       <button
         onClick={() => setZoomLevel(1)}
-        className="w-8 h-8 bg-white rounded-md hover:bg-gray-50 dark:bg-gray-600 dark:hover:bg-gray-700"
+        className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
       >
         ↻
       </button>
