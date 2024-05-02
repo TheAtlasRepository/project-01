@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { ResetIcon } from "@radix-ui/react-icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PlusIcon, MinusIcon, ResetIcon } from '@radix-ui/react-icons'
 
 interface ZoomButtonsProps {
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
@@ -28,26 +28,26 @@ export default function ZoomButtons({ setZoomLevel }: ZoomButtonsProps) {
   };
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <div className="absolute bottom-2 right-0 m-4 gap-2 flex flex-col z-10 text-black dark:text-white">
         <div className="flex flex-col gap-1">
           <Tooltip>
             <TooltipTrigger>
               <Button onClick={zoomIn} variant={"zoom"} size={"zoom"}>
-                +
+                <PlusIcon />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent side="left">
               <p>Zoom In</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger>
               <Button onClick={zoomOut} variant={"zoom"} size={"zoom"}>
-                -
+                <MinusIcon />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent side="left">
               <p>Zoom Out</p>
             </TooltipContent>
           </Tooltip>
@@ -62,7 +62,7 @@ export default function ZoomButtons({ setZoomLevel }: ZoomButtonsProps) {
               <ResetIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent side="left">
             <p>Reset Zoom</p>
           </TooltipContent>
         </Tooltip>
