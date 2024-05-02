@@ -57,6 +57,7 @@ export default function ImageMap({
     }
   };
 
+  // Handler for ending drag
   const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
     setDragState(false);
     // check if it is a click
@@ -88,7 +89,8 @@ export default function ImageMap({
   useEffect(() => {
     const handleMouseWheel = (event: React.WheelEvent<HTMLDivElement>) => {
       event.preventDefault();
-      const zoomDelta = event.deltaY > 0 ? -0.1 : 0.1;
+      const zoomFactor = 0.1;
+      const zoomDelta = event.deltaY > 0 ? -zoomFactor : zoomFactor;
       const minZoom = 0.1;
       setZoomLevel((prevZoomLevel) =>
         Math.max(prevZoomLevel + zoomDelta, minZoom)
@@ -112,28 +114,23 @@ export default function ImageMap({
     };
   }, [setZoomLevel, scaleFactor]);
 
+  //update scale when zoomLevel or scaleFactor changes
   useEffect(() => {
-    //update scale when zoomLevel or scaleFactor changes
-    let scale = zoomLevel * scaleFactor;
-    scale = Math.max(scale, 0.1);
-    // 0.01 interval
-    scale = Math.round(scale * 100) / 100;
-
-    setScale(scale);
+    setScale(zoomLevel * scaleFactor);
   }, [zoomLevel, scaleFactor]);
 
   // function to scale image to fit screen
   const scaleImage = (naturalWidth: number, naturalHeight: number) => {
-    // calculate scale factor to fit image to screen
-
+    // get container size
     const containerWidth = containerSize.width;
     const containerHeight = containerSize.height;
 
+    // calculate scale factor to fit image to screen
     const scaleFactorX = containerWidth / naturalWidth;
     const scaleFactorY = containerHeight / naturalHeight;
     let scaleFactor = Math.min(scaleFactorX, scaleFactorY); //uses the smaller scale factor to fit image to screen to ensure that the whole image is visible
 
-    //round to 1 decimal place
+    // //round to 1 decimal place
     scaleFactor = Math.round(scaleFactor * 10) / 10;
     //prevent scalefactor from being less than 0.1
     scaleFactor = Math.max(scaleFactor, 0.1);
@@ -143,9 +140,6 @@ export default function ImageMap({
     setScale(zoomLevel * scaleFactor);
     console.log("scale", scale);
 
-    //TODO: fix this
-    // currently big images are moved out of screen
-    // centers image
     let translateX = 0;
     let translateY = 0;
     // transform x to center image coordinates
