@@ -201,20 +201,22 @@ export default function SplitView({
     let y = event.clientY - rect.top;
 
     //adjust the x and y coordinates based on the transform and zoom level
-    x = Math.round(x / zoomLevel);
-    y = Math.round(y / zoomLevel);
+    x = Math.round(x / zoomLevel / scaleFactor);
+    y = Math.round(y / zoomLevel / scaleFactor);
 
     setTempImageMarker([x, y]);
     setWaitingForImageMarker(false);
     setWaitingForMapMarker(false);
   };
 
+  const [scaleFactor, setScaleFactor] = useState(1); // initial scale factor of image used to fit image to screen
   //adjust marker positions based on image manipulation
   const adjustMarkerPositions = (
     pixelCoordinates: [number, number],
     transform: { x: number; y: number },
     zoomLevel: number,
-    imageSize: { width: number; height: number }
+    imageSize: { width: number; height: number },
+    scaleFactor: number
   ): { left: string; top: string } => {
     //defines the center of the image
     const centerX = imageSize.width / 2;
@@ -222,9 +224,13 @@ export default function SplitView({
 
     //adjusts the marker position based on the transform and zoom level
     const adjustedX =
-      centerX + (pixelCoordinates[0] - centerX) * zoomLevel + transform.x;
+      centerX +
+      (pixelCoordinates[0] - centerX) * zoomLevel * scaleFactor +
+      transform.x;
     const adjustedY =
-      centerY + (pixelCoordinates[1] - centerY) * zoomLevel + transform.y;
+      centerY +
+      (pixelCoordinates[1] - centerY) * zoomLevel * scaleFactor +
+      transform.y;
 
     return {
       left: `${adjustedX}px`,
@@ -377,8 +383,8 @@ export default function SplitView({
     if (!tempImageMarker) return;
     // add the dragged distance to the original tempImageMarker position
     // to get the new position of the marker
-    let x = position.x / zoomLevel + tempImageMarker[0];
-    let y = position.y / zoomLevel + tempImageMarker[1];
+    let x = position.x / zoomLevel / scaleFactor + tempImageMarker[0];
+    let y = position.y / zoomLevel / scaleFactor + tempImageMarker[1];
 
     // round to nearest whole pixel
     x = Math.round(x);
@@ -532,6 +538,8 @@ export default function SplitView({
               zoomLevel={zoomLevel}
               setImageSize={setImageSize}
               imageSize={imageSize}
+              scaleFactor={scaleFactor}
+              setScaleFactor={setScaleFactor}
             ></ImageMap>
             {imageMarkers.map((marker, index) => (
               <div
@@ -545,7 +553,8 @@ export default function SplitView({
                     marker.pixelCoordinates,
                     transform,
                     zoomLevel,
-                    imageSize
+                    imageSize,
+                    scaleFactor
                   ),
                 }}
                 className="pointer-events-auto"
@@ -568,7 +577,8 @@ export default function SplitView({
                     tempImageMarker,
                     transform,
                     zoomLevel,
-                    imageSize
+                    imageSize,
+                    scaleFactor
                   ),
                 }}
                 className="pointer-events-auto"
