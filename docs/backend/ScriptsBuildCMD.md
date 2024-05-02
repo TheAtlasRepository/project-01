@@ -19,8 +19,8 @@ The Main.py when run as a script, produces a uvicorn server configured by the sc
 
 **Note:** If a .env file is present in the backend directory it will attempt to retrive `HOST_PORT` if no port argument is given.
 
-## Other
+## Other related notes
 
 At some point in the development lifetime it was possible to run the application directly in the console with uvicorn, but with the new structure and needed imports this is currently not possible without some rework.
 
-If changing the work with uvicorn the workes option is not properly supported by the application if no external storage is spesified for files or Data, and.
+If changing the work with uvicorn the workes option is not properly supported by the application if no external storage is spesified for files or Data. Another challange with workers is the distribution of task is not done by the application.
