@@ -14,7 +14,7 @@ Main command `npm run dev` or `yarn dev`
 > - `-p` or `--port` : Defines the port on which the server runs. Default is 3000.
 > - -H or --hostname : Sets the hostname where the server will run. Default is localhost.
 
-When `yarn dev` is run, it starts the Next.js development server. By default, the server will be hosted at http://localhost:3000/.
+When `yarn dev` is run, it starts the Next.js development server. By default, the server will be hosted at <http://localhost:3000/>.
 
 **Note:** If a .env.local file is present in the frontend directory, the application will attempt to retrieve NEXT_PUBLIC_BACKEND_URL and NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to configure the server if no corresponding command line arguments are provided.
 
