@@ -1,3 +1,4 @@
+[Back to README](README.md)
 # Pipelines setup
 
 This doc will outline in further detail how the pipeline[s] (Github Actions) are working, the external setup of repository secrets and variables, and the general purpose the pipelines.
