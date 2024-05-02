@@ -33,12 +33,12 @@ Defining the general structure of the suggestion, The topp line will consist of 
 
 ---
 
-> **Example, Front-End**
+ **Example, Front-End:**
 >
 > * `Difficulity: Medium`
 > * `Research: Medium`
 >
-> **Description**: what, why & possibly how
+> **Description**: what, why & possibly a theoretical suggested solution.
 
 ## High priority
 
@@ -53,3 +53,23 @@ Improvments
 ### Good starters
 
 ## Low priority
+
+## Unsorted
+
+**Refactor ProjectHanlder, Back-End:**
+
+> * `Difficulity: Medium`
+> * `Research: low`
+>
+> **Description**: Seprate projecthandler into smaller classes. The Reasone for this is the current readablility of codebase and that currently the projecthandlerclass have to much resposebility.
+>
+> A Suggestion on our part would be to split out general point handeling to one class and handeling of georefenicing to another.
+>
+> A relational suggestion is to have the new georefrencing handler know of the project handler, which in turn uses point handler. The router will use all three.
+
+**Point Error, Fullstack:**
+
+> * `Difficulity: High`
+> * `Research: Medium`
+>
+> **Description**: what, why & possibly a theoretical suggested solution.
