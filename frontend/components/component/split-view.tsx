@@ -17,6 +17,7 @@ import SniperScope from "../ui/sniperScope";
 import { Toaster, toast } from "sonner";
 import MapToolbar from "@/components/ui/MapToolbar";
 import {
+  InfoCircledIcon,
   QuestionMarkCircledIcon,
   SewingPinFilledIcon,
 } from "@radix-ui/react-icons";
@@ -442,7 +443,7 @@ export default function SplitView({
             onClick={() => setHelpMessage(null)}
           >
             <div className="text-2xl mr-3">
-              <QuestionMarkCircledIcon
+              <InfoCircledIcon
                 height={48}
                 width={48}
                 color=""
