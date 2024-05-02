@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ResetIcon } from "@radix-ui/react-icons";
 
 interface ZoomButtonsProps {
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
@@ -44,7 +45,7 @@ export default function ZoomButtons({ setZoomLevel }: ZoomButtonsProps) {
         size={"zoom"}
         // className="w-8 h-8 bg-white rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700"
       >
-        ↻
+        <ResetIcon />
       </Button>
     </div>
   );
