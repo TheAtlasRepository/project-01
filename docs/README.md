@@ -12,4 +12,8 @@ asdjhasdhjasd
 
 ## Backend
 
+[Backend File Struckture](./backend/FileStructure.md)
+
+[Backend Scripts, cmd & build](./backend/ScriptsBuildCMD.md)
+
 ## Frontend
