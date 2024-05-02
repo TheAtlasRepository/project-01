@@ -88,6 +88,9 @@ c://frontend
 ```
 
 ## Directories
+
+Mosltly following a commen next.js app layout, but we are going to mention the folders in short and any deviations
+
 * **app:** Contains . Sub-folders are used for Next-routing, and each contain 
 * **app/[subfolder]:** 
 * **components:**
