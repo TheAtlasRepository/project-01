@@ -15,6 +15,8 @@ interface ImageMapProps {
   setImageSize: React.Dispatch<
     React.SetStateAction<{ width: number; height: number }>
   >;
+  scaleFactor: number;
+  setScaleFactor: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function ImageMap({
@@ -27,6 +29,8 @@ export default function ImageMap({
   setZoomLevel,
   transform,
   zoomLevel,
+  scaleFactor,
+  setScaleFactor,
 }: ImageMapProps) {
   //local state for dragging
   const [isDragging, setDragState] = useState(false);
@@ -34,9 +38,13 @@ export default function ImageMap({
 
   const [delta, setDelta] = useState(1); // threshold of pixels moved for click
   const [start, setStart] = useState({ x: 0, y: 0 }); // starting point of click
-  const [scaleFactor, setScaleFactor] = useState(1); // initial scale factor of image used to fit image to screen
-  const [translate, setTranslate] = useState({ x: 0, y: 0 }); // inital translation of image to fit to screen
+  const [containerSize, setContainerSize] = useState({
+    width: window.innerWidth / 2,
+    height: window.innerHeight,
+  }); // size of container of top level div of image
+  const [scale, setScale] = useState(zoomLevel * scaleFactor); //scale which is zoomlevel * scaleFactor
 
+  // Handler for moving image when dragging
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging) {
       const deltaX = event.clientX - dragStart.x; // speed of drag
@@ -64,12 +72,14 @@ export default function ImageMap({
     }
   };
 
+  // Handler for starting drag
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     setDragState(true);
-    setDragStart({ x: event.clientX, y: event.clientY });
-    setStart({ x: event.clientX, y: event.clientY });
+    setDragStart({ x: event.clientX, y: event.clientY }); // set start point of drag used for calculating speed of drag
+    setStart({ x: event.clientX, y: event.clientY }); // set start point of click used for checking if it is a click
   };
 
+  // Handler for if mouse leaves the image
   const handleMouseLeave = () => {
     setDragState(false);
   };
@@ -100,7 +110,49 @@ export default function ImageMap({
         );
       }
     };
-  }, [setZoomLevel]);
+  }, [setZoomLevel, scaleFactor]);
+
+  useEffect(() => {
+    //update scale when zoomLevel or scaleFactor changes
+    let scale = zoomLevel * scaleFactor;
+    scale = Math.max(scale, 0.1);
+    // 0.01 interval
+    scale = Math.round(scale * 100) / 100;
+
+    setScale(scale);
+  }, [zoomLevel, scaleFactor]);
+
+  // function to scale image to fit screen
+  const scaleImage = (naturalWidth: number, naturalHeight: number) => {
+    // calculate scale factor to fit image to screen
+
+    const containerWidth = containerSize.width;
+    const containerHeight = containerSize.height;
+
+    const scaleFactorX = containerWidth / naturalWidth;
+    const scaleFactorY = containerHeight / naturalHeight;
+    let scaleFactor = Math.min(scaleFactorX, scaleFactorY); //uses the smaller scale factor to fit image to screen to ensure that the whole image is visible
+
+    //round to 1 decimal place
+    scaleFactor = Math.round(scaleFactor * 10) / 10;
+    //prevent scalefactor from being less than 0.1
+    scaleFactor = Math.max(scaleFactor, 0.1);
+    setScaleFactor(scaleFactor);
+
+    // set initial scale
+    setScale(zoomLevel * scaleFactor);
+    console.log("scale", scale);
+
+    //TODO: fix this
+    // currently big images are moved out of screen
+    // centers image
+    let translateX = 0;
+    let translateY = 0;
+    // transform x to center image coordinates
+    translateX = (containerWidth - naturalWidth * scale) / 2;
+    translateY = (containerHeight - naturalHeight * scale) / 2;
+    setTransform({ x: translateX, y: translateY });
+  };
 
   return (
     // image container fit to screen
@@ -120,9 +172,7 @@ export default function ImageMap({
       <div
         style={{
           position: "absolute",
-          transform: `translate(${transform.x}px, ${transform.y}px) scale(${
-            zoomLevel * scaleFactor
-          })`,
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${scale})`,
           overflow: "auto",
         }}
       >
@@ -134,20 +184,13 @@ export default function ImageMap({
           onLoadingComplete={({ naturalWidth, naturalHeight }) => {
             setImageSize({ width: naturalWidth, height: naturalHeight });
 
-            const scaleFactorX = window.innerWidth / naturalWidth;
-            const scaleFactorY = window.innerHeight / naturalHeight;
-            let scaleFactor = Math.min(scaleFactorX, scaleFactorY);
-
-            scaleFactor = Math.round(scaleFactor * 10) / 10;
-
-            // setScaleFactor(scaleFactor);
-
-            // // center the image
-            // const translateX =
-            //   (window.innerWidth - naturalWidth * scaleFactor) / 2;
-            // const translateY =
-            //   (window.innerHeight - naturalHeight * scaleFactor) / 2;
-            // setTransform({ x: translateX, y: translateY });
+            // if image size is available, scale image to fit screen
+            scaleImage(
+              naturalWidth,
+              naturalHeight
+              // window.innerWidth,
+              // window.innerHeight
+            );
           }}
           //prevent default drag event
           onDragStart={(e) => {
