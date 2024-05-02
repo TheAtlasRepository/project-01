@@ -10,7 +10,7 @@ interface HelpModalProps {
 
 const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentPage }) => {
     const pages = [
-        <div className='dark:text-white'>
+        <div className='dark:text-white' key={'Welcome'}>
             <h1 className='text-3xl font-bold'>Welcome!</h1>
             <hr className='my-3' />
             <p>
@@ -35,7 +35,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             </p>
         </div>,
 
-        <HelpModalPage title="Introduction" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Introduction" key={"Introduction"} setCurrentPage={setCurrentPage}>
             Welcome to the georeferencing tool! Let's get started with a quick introduction: <br />
             <br />
             <b>What is georeferencing?</b><br />
@@ -44,7 +44,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             This allows the image to be viewed and analyzed in relation to other geographical data.
         </HelpModalPage>,
 
-        <HelpModalPage title="Navigating around - Navbar" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Navigating around - Navbar" key={"Navigating around - Navbar"} setCurrentPage={setCurrentPage}>
             Understanding how to navigate the interface will help you make the most of our nifty features. <br></br>
             <br />
             <img className='border border-gray-300 rounded-md shadow-sm' src="/helpgifs/navbar.gif" alt="Gif showing how to use the navbar" />
@@ -57,7 +57,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             Download is also enabled once you have completed your initial georeference.<br />
         </HelpModalPage>,
 
-        <HelpModalPage title="Navigating around - Split View" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Navigating around - Split View" key={"Navigating around - Split View"} setCurrentPage={setCurrentPage}>
             When the application is loaded, you will see a split-screen layout with a globe-map on the left and your uploaded image or pdf page on the right. 
             You will be able to move your uploaded file around the canvas as well as zoom in and out. You can move around the globe by using the naviagtion buttons located bottom right,
             or by dragging and zooming. Alternatively you can also use the search box in the bottom left
@@ -65,7 +65,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             <img className='border border-gray-300 my-5 rounded-md shadow-sm' src="/helpgifs/splitview.gif" alt="Gif showing how to use the split view" />
         </HelpModalPage>,
 
-        <HelpModalPage title="Navigating around - Overlay" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Navigating around - Overlay" key={"Navigating around - Overlay"} setCurrentPage={setCurrentPage}>
             When you have georeferenced your file you can switch to the Overlay mode where the image is superimposed directly over the map. 
             This mode is helpful for comparing your alignment and to ensure the accuracy of your georeferencing, 
             and it also acts as a preview of the file you can download.
@@ -73,12 +73,12 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             <img className='border border-gray-300 my-5 rounded-md shadow-sm' src="/helpgifs/overlay.gif" alt="Gif showing how to use the overlay" />
         </HelpModalPage>,
 
-        <HelpModalPage title="Navigating around - Crop Mode" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Navigating around - Crop Mode" key={"Navigating around - Crop Mode"} setCurrentPage={setCurrentPage}>
             Use the borders to crop your image to the desired size, and press Apply Crop to save the changes. If you wish to cancel, you can either press the Cancel Crop button or click a view on the navbar. Leaving the crop mode will discard any changes made, unless you have applied a crop.
             <img className='border border-gray-300 my-5 rounded-md shadow-sm' src="/helpgifs/crop.gif" alt="Gif showing how to use the crop mode" />
         </HelpModalPage>,
 
-        <HelpModalPage title="Adding Points" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Adding Points" key={"Adding Points"} setCurrentPage={setCurrentPage}>
             <b>Adding Points in order to georeference:</b>
             Accurate georeferencing depends significantly on correctly placing enough points on both the map and the corresponding image. Here's how you can effectively add points to ensure precise alignment.
             <br /> <br />
@@ -94,7 +94,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             <img className='border border-gray-300 my-5 rounded-md shadow-sm' src="/helpgifs/addpoint.gif" alt="Gif showing how to add points" />
         </HelpModalPage>,
 
-        <HelpModalPage title="The Split View Toolbar" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="The Split View Toolbar" key={"The Split View Toolbar"} setCurrentPage={setCurrentPage}>
             <b>The toolbar on the top left during split view, beneath the navbar, contains the following tools:</b> <br />
             <i>Map Style Switch</i> - Switch between Streets and Satellite view using the radio buttons. <br />
             <i>Coordinate table</i> - Open a table showing the coordinates of the points you have placed. <br />
@@ -102,13 +102,13 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             and if the application is currently referencing your project. <br />
         </HelpModalPage>,
 
-        <HelpModalPage title="The Overlay Toolbar" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="The Overlay Toolbar" key={"The Overlay Toolbar"} setCurrentPage={setCurrentPage}>
             <b>The toolbar on the top left during overlay view, beneath the navbar, contains the following tools:</b> <br />
             <i>Map Style Switch</i> - Switch between Streets and Satellite view using the radio buttons. <br />
             <i>Image Overlay Opacity slider</i> - Change the opacity of the overlayed image to see how it fits over the map terrain. <br />
         </HelpModalPage>,
 
-        <HelpModalPage title="The Coordinate Table" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="The Coordinate Table" key={"The Coordinate Table"} setCurrentPage={setCurrentPage}>
             <b>The coordinate table is a useful tool for managing your points.</b> 
             It displays the coordinates of the points you have placed on the map and the corresponding pixel coordinates on your image.
             You can also delete points from this table by clicking the delete button next to each point.
@@ -116,26 +116,26 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose, currentPage, setCurrentP
             <img className='border border-gray-300 my-5 rounded-md shadow-sm' src="/helpgifs/coordtable.gif" alt="Gif showing how to use the coordinate table" />
         </HelpModalPage>,
 
-        <HelpModalPage title="Help Modal" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Help Modal" key={"Help Modal"} setCurrentPage={setCurrentPage}>
         <b>This is where you are now!</b><br />
         The help modal is a quick guide to help you navigate the georeferencing tool. 
         You can use the buttons at the bottom of the modal to navigate between pages, or close the modal to return to the editor
         (but you probably already knew all of this).
         </HelpModalPage>,
 
-        <HelpModalPage title="Feedback Form" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Feedback Form" key={"Feedback Form"} setCurrentPage={setCurrentPage}>
             We would love to hear from you! If you have any feedback, suggestions, or bug reports, please fill out the feedback form. 
             We appreciate your input and will use it to improve the georeferencing tool.
         </HelpModalPage>,
 
-        <HelpModalPage title="Download File" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Download File" key={"Download File"} setCurrentPage={setCurrentPage}>
             Once you have placed at least 3 points, the download button will become active. 
             Clicking the download button will download the georeferenced image.
             The file you receive is in TIFF format and contains metadata about where it exists in the world, 
             which allows it to be opened in GIS software.
         </HelpModalPage>,
 
-        <HelpModalPage title="Exiting The Editor" setCurrentPage={setCurrentPage}>
+        <HelpModalPage title="Exiting The Editor" key={"Download File"} setCurrentPage={setCurrentPage}>
             When you are finished georeferencing, you can exit the editor by clicking the "Exit Editor" button in the top right corner of the navbar.
             <b>This is the preferred way to finish up a project,</b> as it makes sure that any remnants of your project is properly cleaned up.
             This will return you to the homepage of the georeferencing tool.
