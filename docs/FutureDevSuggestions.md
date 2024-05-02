@@ -7,6 +7,7 @@
 > **Date:** 02.05.2024
 
 This document is intended to provide our insight on further devolpment after our handover. As a helping guide we will provide the suggestions on genral improvments, new features and expansions.
+> **Note:** There is also enhancments in Issues which are not mentioned here.
 
 Defining the general structure of the suggestion, The topp line will consist of a title and a Type Category. Next will have two fields/keywords describing how difficult and our amount of reasearch & testing done. Below is a list of the categories and a short note on what we mean, further down is an example.
 
