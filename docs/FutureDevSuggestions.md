@@ -4,11 +4,41 @@
 
 ---
 > **Authors:** *Tom A. S. Myre, Markus Nilsen, Marius Evensen, Sebastian Midtskogen & Lukas A. Andersen*
-> **Date:** 01.05.2024
+> **Date:** 02.05.2024
 
 This document is intended to provide our insight on further devolpment after our handover. As a helping guide we will provide the suggestions on genral improvments, new features and expansions.
 
-Defining the general strukture of a suggestion ...
+Defining the general structure of the suggestion, The topp line will consist of a title and a Type Category. Next will have two fields/keywords describing how difficult and our amount of reasearch & testing done. Below is a list of the categories and a short note on what we mean, further down is an example.
+
+1. Type:
+
+    * **Front-end** *(The Next.js application / website)*
+    * **Back-end** *(The FastApi / processing / backend connected Services)*
+    * **Fullstack** *(Encompassing both)*
+    * **unknown** *(Unsure of where to place or the current types are not descriptive)*
+
+2. Difficulity:
+
+    * **Low** *(Reletivly easy, considering context)*
+    * **Medium** *(Some difficulity expected/ time)*
+    * **High** *(Expected high difficulity / high timeconsumption)*
+    * **unknown** *(We can not place it/ we are unsure)*
+
+3. Researched:
+
+    * **None** *(Only based on our intuition, given our work with the project)*
+    * **Low** *(Some testing and/or Reading some source)*
+    * **Medium** *(Decent amount of testing and/or Reading Sources)*
+    * **High** *(Good amount of testing and/or Good source reading)*
+
+---
+
+> **Example, Front-End**
+>
+> * `Difficulity: Medium`
+> * `Research: Medium`
+>
+> **Description**: what, why & possibly how
 
 ## High priority
 
