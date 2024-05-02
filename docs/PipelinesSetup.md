@@ -14,9 +14,11 @@ Following are the names of the GitHub action secrets and variables, and explaini
 
 > **Secrets:**
 
-* **BACKEND_API_URL :** The URL to the hosted instance of the Img2map-Backend. Needed environment variable for the frontend to communicate with the backend API. Needed for app function.<br>
-`Note: If the URL has a trailing '/', remove it`<br>
-`Note: This could possibly have been in vars`
+* **BACKEND_API_URL :** The URL to the hosted instance of the Img2map-Backend. Needed environment variable for the frontend to communicate with the backend API. Needed for app function.
+
+    `Note: If the URL has a trailing '/', remove it`
+
+    `Note: This could possibly have been in vars`
 
 * **MAPBOX_ACCESS_TOKEN :** This gives the frontend access to Mapbox's API-resources, used to render digital maps and access other features provided by Mapbox. Needed for app function.
 * **HEROKU_API_KEY :** Heroku account- or team-specific key. Needed for deployment authorization.
@@ -26,8 +28,11 @@ Following are the names of the GitHub action secrets and variables, and explaini
 
 > **Variables:**
 
-* **CORS_ORIGINS :** List of which URLs that are allowed to talk to the hosted backend.<br>
-Example: `http://example.com,http//example2.com`<br>
-`Note: If the URL has a trailing '/', remove it`
-* **NEXT_PUBLIC_PDF_URLS :** A list of domains that will display "PDF2Map" rather than "Image2Map".<br>
-Example: `example.com,example2.com`, where example3.com will show Image2Map and example2.com will show PDF2Map.
+* **CORS_ORIGINS :** List of which URLs that are allowed to talk to the hosted backend.
+
+    Example: `http://example.com,http://example2.com`
+
+    `Note: If the URL has a trailing '/', remove it`
+* **NEXT_PUBLIC_PDF_URLS :** A list of domains that will display "PDF2Map" rather than "Image2Map".
+
+    Example: `example.com,example2.com`, where example3.com will show Image2Map and example2.com will show PDF2Map.
