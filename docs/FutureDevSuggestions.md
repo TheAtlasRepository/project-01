@@ -5,153 +5,163 @@
 ---
 > **Authors:** *Tom A. S. Myre, Markus Nilsen, Marius Evensen, Sebastian Midtskogen & Lukas A. Andersen*
 > **Date:** 02.05.2024
+> **Updated**: 06.05.2024
 
-This document is intended to provide our insight on further devolpment after our handover. As a helping guide we will provide the suggestions on genral improvments, new features and expansions.
-> **Note:** There is also enhancments in Issues which are not mentioned here.
+This document is intended to provide information on the further suggested development after our handover. As a guide, we will provide suggestions for general improvements, new features, and expansions.
+> **Note:** There are also enhancements listed in the GitHub-repo Issues, which are not mentioned here.
 
-Defining the general structure of the suggestion, The topp line will consist of a title and a Type Category. Next will have two fields/keywords describing how difficult and our amount of reasearch & testing done. Below is a list of the categories and a short note on what we mean, further down is an example.
+Defining the general structure of the suggestion, the top line will consist of a Title and a Type Category. The next line will have two fields/keywords that describe the estimated difficulty and our amount of already completed research \& testing. Below is a list of the different categories and a short note on what
+these encompass, as well as an example.
 
 1. Type:
 
     * **Front-end** *(The Next.js application / website)*
-    * **Back-end** *(The FastApi / processing / backend connected Services)*
+    * **Back-end** *(The FastAPI / processing / backend
+    connected Services)*
     * **Fullstack** *(Encompassing both)*
-    * **unknown** *(Unsure of where to place or the current types are not descriptive)*
+    * **unknown** *(Unsure of where to place, or the current types are not descriptive)*
 
-2. Difficulity:
+2. Difficulty:
 
-    * **Low** *(Reletivly easy, considering context)*
-    * **Medium** *(Some difficulity expected/ time)*
-    * **High** *(Expected high difficulity / high timeconsumption)*
-    * **unknown** *(We can not place it/ we are unsure)*
+    * **Low** *(Relatively easy, considering context)*
+    * **Medium** *(Some time/difficulty expected)*
+    * **High** *(Expected high difficulty and high time consumption)*
+    * **unknown** *(We are not sure, and can not estimate time & difficulty)*
 
 3. Researched:
 
-    * **None** *(Only based on our intuition, given our work with the project)*
-    * **Low** *(Some testing and/or Reading some source)*
-    * **Medium** *(Decent amount of testing and/or Reading Sources)*
-    * **High** *(Good amount of testing and/or Good source reading)*
+    * **None** *(Only based on intuition, given our work with the project)*
+    * **Low** *(Some testing done, and/or started researching)*
+    * **Medium** *(Decent amount of testing done, and/or researched somewhat)*
+    * **High** *(Good amount of testing done, and/or researched a lot)*
 
 ---
 
  **Example, Front-End:**
 >
-> * `Difficulity: Medium`
+> * `Difficulty: Medium`
 > * `Research: Medium`
 >
-> **Description**: what, why & possibly a theoretical suggested solution.
+> **Description**: What we suggest to implement, why we suggest this implementation, & possibly a theoretical suggested solution.
 
 ## High priority
 
 **Point error calculation, Fullstack:**
 
-> * `Difficulity: High`
+> * `Difficulty: High`
 > * `Research: Medium`
 >
-> **Description**: Calculates how far off your original points where from their real positions. This is supposed to be done when users adds more then the minimum amounts of points to a map for the goerefrence. This will then improved accuracy, and they would be able to see how far off their original marker placements where compared to the re-referenced points on the map.
+> **Description**:  Calculate the amount of deviation from their real positions that the user's original points are. This is supposed to be done when users add more than the minimum amount of points to a map for georeferencing.
+This will then improve accuracy, and they would be able to see how far off their original marker placements were compared to the re-georeferenced points on the map.
 >
-> A suggestion on this is to create an algorithm that crates a [affine transformation](https://se.mathworks.com/discovery/affine-transformation.html) matrix, to have more control of calculation parameters. In this case it needs to be [accepted](https://rasterio.readthedocs.io/en/stable/topics/transforms.html#using-affine-transformation-matrix) by rasterio.
+> A suggestion on this is to create an algorithm that creates an [affine transformation matrix](https://se.mathworks.com/discovery/affine-transformation.html) , to have more control of the calculation parameters.
+In this case, it must [be accepted by Rasterio](https://rasterio.readthedocs.io/en/stable/topics/transforms.html#using-affine-transformation-matrix).
 >
-> Another possible solution is to convert to the base use of gdal for tranformation, that option has not been as thoroughly explored.
+> Another possible solution is to convert to the base use of GDAL for transformation, but this option has not been explored as thoroughly.
 
 ### Good Starter
 
  **Logging Middleware, Front-End:**
 >
-> * `Difficulity: Medium`
-> * `Research: low`
+> * `Difficulty: Medium`
+> * `Research: Low`
 >
-> **Description**: Implement a standarized logging middleware to log crucial information during runtime, and generate better metrics. This would also be beneficial to have different loglevels in the code to differentiate good devolopment information and staged runtime logs. This is also good for getting to know the codebase.
+> **Description**: Implement a standardized logging middleware to log crucial information during runtime, and generate better metrics. It would also be beneficial to have different log levels in the code to differentiate good development information and staged runtime logs. This is also a good way to get familiar with the codebase.
 
 ## Medium priority
 
- **Rotation of Image or PDF With map, Fullstack:**
+ **Rotation of Image with map, Fullstack:**
 >
-> * `Difficulity: Low`
+> * `Difficulty: Low`
 > * `Research: Low`
 >
-> **Description**: Simply put, to be able to synchronously rotate the image side along with the map (split view) when it has been georefrenced. This is for ease of use, for the user, to be able to align the side by side and recognition of features.
+> **Description**: This suggestion includes being able to synchronously rotate the image in split-view, along with the map after it has been georeferenced. This is to make the image behave more like the map, and keep the image and map in a similar state while working.
 >
-> What we know is that it theoreticaly can be done after georefrencing, by getting the corner bounds of the image to calculate the line to north from center, then adjust the start by rotating to north with getting the degrees between the north line and center to top. From this point it is to extract the rotatation from mapbox and mimic.
+> Theoretically, this can be done by calculating the deviation from the real positions, after georeferencing, by determining the image's corner bounds. Then, it is possible to calculate the line towards the north from the center and adjust the starting point by rotating it to align with the north. Lastly, extract the rotation from MapBox and replicate it in the image view.
 >
-> **Subfeature:** To be able to lock the image upright after triggering min requriments for the feature above.
+> **Subfeature:** To be able to lock the image upright after triggering the minimum requirements for the feature above.
 
-**Refactor ProjectHanlder, Back-End:**
+**Refactor ProjectHandler, Back-End:**
 
-> * `Difficulity: Medium`
-> * `Research: low`
+> * `Difficulty: Medium`
+> * `Research: Low`
 >
-> **Description**: Seprate projecthandler into smaller classes. The Reasone for this is the current readablility of codebase and that currently the projecthandlerclass have to much resposebility.
+> **Description**: Separate the ProjectHandler into smaller classes. The reason for this is to improve the current readability of the codebase, and that the ProjectHandler-class currently has too much responsibility.
 >
-> A Suggestion on our part would be to split out general point handeling to one class and handeling of georefenicing to another.
+> A suggestion on our part would be to split the handling of points to one class and the handling of georeferencing to another.
 >
-> A sub suggestion to the privious is to have the new georefrencing handler know of the project handler, which in turn uses point handler. The router will use all three.
+> A subsuggestion to the previous is to have the new GeoreferencingHandler know of the ProjectHandler, which in turn uses the PointHandler.
+>The API-router will use all three
 >
 
  **Suggested points, Fullstack:**
 >
-> * `Difficulity: High`
+> * `Difficulty: High`
 > * `Research: Medium`
 >
-> **Description**: With the inital georefrence, the software would suggest points on the map to be placed. This would greatly improve the user experience and the learning curve for new users of this kind of software. But this might be quite a difficult task as it would probably have to include some kind of artificial Intelligence to or advanced algorithm to achieve this at the level we want.
+> **Description**: After the inital georeference, the software could suggest points on the map to be placed. This could greatly improve the user experience and the learning curve for new users of this kind of software. However, this might be a quite difficult task, as it would probably have to include some kind of Artificial Intelligence or advanced algorithm to achieve this at a good level.
 >
-> In terms of an algorithm this would then most likely depend on different reworks like the error point calculations.
+> In terms of an algorithm, this would then most likely depend on different code-changes and improvements, such as the error point calculations.
 
 ### Good starters
 
- **A General HttexceptionHandler, Back-End:**
+ **A General HTTPExceptionHandler, Back-End:**
 >
-> * `Difficulity: Low`
+> * `Difficulty: Low`
 > * `Research: Medium`
 >
-> **Description**: Create a common exeption class to respond with the apropriate Http Exeptions in response, this is to consolidate the error response for the routers (Easier readability). A possible way to do this is with python decorators, a fastapi dependecy injection or a combination of both.
+> **Description**: Create a common exception class to respond with the appropriate HTTP-exceptions. This is to consolidate the error response for the routers, which would improve readability. A possible way to do this is with Python decorators, a FastAPI dependency injection, or a combination of both.
 
  **Rotate Image, Front-End:**
 >
-> * `Difficulity: Low`
+> * `Difficulty: Low`
 > * `Research: Medium`
 >
-> **Description**: Simply to rotate the uploaded image, this is usefull when a user have a pdf where the Image is rotated sideways. This is not a feature we have previously prioritized but is more prevelent now, Should be relativly easy to implement.
+> **Description**:  Giving the user the possibility of rotating the uploaded image. This can be useful in cases such as when a user has a PDF where the image is rotated sideways, or when in general when images are not facing the classic north used in maps we are familiar with. This is not a feature we have previously prioritized, but is more prevalent now, and it should be relatively easy to implement.
 
  **Automated Testing, Back-end:**
 >
-> * `Difficulity: Medium`
+> * `Difficulty: Medium`
 > * `Research: Low`
 >
-> **Description**: Create unit test for the core logic classes in the Back-end API, This is a bit of work but good for familiarization with the code. This also have the added benefit of a more thoroughly checking of the code which gives more cofidence to making changes and ensuring that the application works as intended.
+> **Description**: The project currently lacks tests, so code-breaking changes are hard to identify. What would help mitigate this is to create unit tests for the core logic classes in the back-end API. This is a bit of work, but will make you familiar with the existing code. This also has the added benefit of a more thoroughly checked code, which can give more confidence to making changes and ensuring that the application works as intended.
 
 ## Low priority
 
- **Clock to run on heroku, Back-End:**
+ **Clock to run on Heroku, Back-End:**
 >
-> * `Difficulity: Medium`
+> * `Difficulty: Medium`
 > * `Research: Medium`
 >
-> **Description**: The clock scrpits intention is to run perioadic tasks on the database,this is to clean the stroages of stale project.
+> **Description**: The clock script's intention is to run periodic tasks on the database, specifically cleaning the storage of stale projects and files.
 >
-> This would be an full implementation of the projectSelf destruct where the clock would fetch from the database the projects which are over the limit, say once every 10 mins, and delete the ones that are over. We would also recommend to set new selfdestruct time each time a project is updated, to prevent active projects from being deleted. A source on [heroku clock setup](https://devcenter.heroku.com/articles/scheduled-jobs-custom-clock-processes)
+> This would be a full implementation of projectSelfDestruct, where the clock would fetch from the database the projects that are over the time limit. For example, the clock can fetch every 10 minutes and delete projects that are above the limit. We also recommend setting a new self-destruct time each time a project is updated to prevent active projects from being deleted. [Here is a source on Heroku clock setup](https://devcenter.heroku.com/articles/scheduled-jobs-custom-clock-processes).
 
  **Workers, Back-End:**
 >
-> * `Difficulity: High`
+> * `Difficulty: High`
 > * `Research: High`
 >
-> **Description**: Creation of a worker to offload the more processing heavy task from the FastAPI, This is to better the application for scalability and making it more redundant. A worker should handle all the file saving, manipulation and creation. For communication between it is recommended to use a Message Broaker.
+> **Description**: Creation of a worker to offload more processing-heavy tasks from FastAPI. This is to prepare the application for more scalability and making it more redundant. A worker should handle all of the file saving, and creation and manipulation of projects. For communication between the worker and the API it is recommended to use a Message Broker.
 >
-> A suggestion from is to use a combination of [RabbitMQ](https://www.rabbitmq.com/) (Message Broaker) and [Celary](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to implement this. Why RabbitMQ, it might be more time consuming and complex to setupp, but it got innbuilt redundancy in the queues and more features, hence the complexity. But the on of the alternatives Redis queue is more bare bones and is possible to setup with features like Rabbit but is wary manual, and another good thing heroku has a addon for a [RabbitMq server](https://elements.heroku.com/addons/cloudamqp), it has built in metrics.
+> A suggestion is to use a combination of [RabbitMQ](https://www.rabbitmq.com/) (Message Broker) and [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) to implement this. RabbitMQ might be time-consuming and complex to setup, but it includes built-in redundancy in the queues and several other features, hence the complexity. Additionally, there exists a Heroku Addon for a [RabbitMq server](https://elements.heroku.com/addons/cloudamqp), which has built-in metrics.
+>
+> If Rabbit is too complex, one of the alternatives, Redis Queue, is more bare-bones and easier to setup. It has fewer features, but it is possible to set up with the features Rabbit has, but it is a very manual process to do this; this in turn could make the implementation of RQ more complex than implementing Rabbit.
 
- **Edition of placed Marker Pairs(Points), Front-End:**
+ **Editing placed Marker Pairs (Points), Front-End:**
 >
-> * `Difficulity: Low`
+> * `Difficulty: Low`
 > * `Research: Medium`
 >
-> **Description**: To be able to select a marker pair from the cordinates table, adjust them and have them updated. Better usability, user might have confirmed a pair before properly checking and might want to adjust either the cordinates (Map) or pixel placement (image). This is low becouse the exsitance of deletion.
+> **Description**: It could be beneficial for the user to be able to select a marker pair from the coordinates table, adjust them, and have them updated. This could increase usability, as the user might have confirmed a pair before properly checking the location, and might want to adjust either the coordinates (map), or the pixel placement (image). This is prioritized as low due since the user has the possibility to delete points.
 >
-> The backend endpoint for updating a point pair already exsist and the data to do so is in the front-end, but the user interaction and flow is missing.
+> The back-end endpoint for updating a Marker Pair already exists, and the data to do so is in the front-end, but the user interaction and flow are missing.
 
- **Multiple Image Georefrencing, Fullstack:**
+ **Multiple Image Georeferencing, Fullstack:**
 >
-> * `Difficulity: High`
+> * `Difficulty: High`
 > * `Research: None`
 >
-> **Description**: In theory it would have users be able to upload multiple images at once and georefrence them together, and see them on overlay. Another is bunch upload and sepratly have a work lits to georefrence trough each one then be able to see them all on overlay. This would require a more substantial change of the backeds way of storing project filepaths, and how it handels them, but also on how to manage and view them on the frontend would reqire substantial rework.
+> **Description**: A suggestion that might be beneficial for the user is to have the possibility of uploading multiple images at once and georeference them together, and see them on the Overlay together. Another suggestion is for the user to upload multiple images at once and then work through them separately, like a backlog, before showing them all on the Overlay. This is to improve the workflow in case the user has multiple files they need to work with - rather than going back, uploading, georeferencing, checking, then downloading, the user could instead get a more seamless user-experience, starting and ending the process only once.
+>
+> Georeferencing multiple images would require a more substantial change in the way the back-end stores file paths and how it handles file paths. Additionally, the front-end would also require substantial rework in how it manages and displays images.  
