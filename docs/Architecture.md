@@ -5,7 +5,7 @@
 ---
 ![Arcitecture Image](./img/Img2map%20Architecture.svg)
 
-> **TLDR**: The front-end (NextJS) has several pages, and contacts the back-end using Axios. The back-end has various routers, utilities, etc. for handling projects. The backend can store data and files either locally, or through an Amazon S3 bucket and PostgreSQL, or a combination.
+> **TLDR**: The front-end (NextJS) has several pages, and contacts the back-end using Axios and FastAPI. The back-end has various routers, utilities, etc. for handling projects. The backend can store data and files either locally, or through an Amazon S3 bucket and PostgreSQL, or a combination.
 
 In the architecture diagram  (last updated May 2nd, 2024), the system flow is illustrated starting from the client's connection to the Heroku server, where page retrieval occurs. Navigation between pages is showed by the section and arrows on the left in the Next App section, while interactions with components are to the right, highlighted to showcase their usage within the system.
 
