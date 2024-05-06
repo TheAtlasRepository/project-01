@@ -1,6 +1,6 @@
-# ImageTopMap Documentation
+# ImageToMap Documentation
 
-Welcome to the docs, below you will find verious links to different topics, such as a general overview of the application and the work done, and more technical explanations of the layout of the system.
+Welcome to the docs for the ImageToMap project! Below you will find verious links to different topics, such as a general overview of the application and the work done, and more technical explanations of the layout of the system.
 
 ## General
 
